@@ -50,26 +50,8 @@ export default async function HomePage() {
           ],
         }}
       />
-      <section className="relative border-b border-line bg-white">
-        {/* Bản đồ Việt Nam dạng chấm (có Hoàng Sa, Trường Sa) — chỉ trang trí, chỉ hiện ở màn hình rộng
-            (≥ 1280px) để không đè ô tìm. Tạo bằng scripts/gen-vn-dots.py. Kích thước cố định → không giật.
-            Chỉ lớp bọc bản đồ có overflow-hidden — đặt lên section sẽ cắt mất danh sách gợi ý của ô tìm. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 hidden overflow-hidden xl:block"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/vn-dots.svg"
-            alt=""
-            width={263}
-            height={312}
-            decoding="async"
-            fetchPriority="low"
-            className="pointer-events-none absolute top-1/2 right-[max(24px,calc(50%-600px))] h-[232px] w-auto -translate-y-1/2 select-none"
-          />
-        </div>
-        <div className="relative mx-auto flex max-w-[808px] flex-col items-center gap-2 px-4 pt-6 pb-6 text-center md:gap-3 md:px-6 md:pt-14 md:pb-[52px]">
+      <section className="border-b border-line bg-white">
+        <div className="mx-auto flex max-w-[808px] flex-col items-center gap-2 px-4 pt-6 pb-6 text-center md:gap-3 md:px-6 md:pt-14 md:pb-[52px]">
           <h1
             id="home-title"
             className="text-[22px] leading-7 font-semibold text-navy md:text-[30px] md:leading-[38px]"
@@ -83,9 +65,47 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Nền phân lớp: hero trắng · khối DN mới nền xám · khối tỉnh/thành dải xanh rất nhạt · footer trắng. */}
+      {/* Thứ tự theo yêu cầu: tỉnh/thành (dải xanh nhạt) → ô quảng cáo → DN mới thành lập. Spec 3.1 liệt kê
+          DN mới (mục 4) trước tỉnh/thành (mục 5); ô quảng cáo vẫn nằm giữa hai khối (mục 6). */}
       <main className="flex w-full flex-col">
+        <section aria-labelledby="prov-title" className="border-b border-line bg-brand-50/70">
+          <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-4 py-8 md:px-6 md:py-12">
+            <div className="flex flex-col gap-0.5">
+              <h2
+                id="prov-title"
+                className="min-w-0 text-[17px] leading-7 font-semibold text-navy md:text-2xl md:leading-8"
+              >
+                {M.home.provincesTitle}
+              </h2>
+            </div>
+            {/* Dạng mục lục: tên tỉnh bên trái, số DN bên phải, chia cột theo chiều dọc. */}
+            {/* Bản đồ (≥ 1024px): rê chuột / focus tên tỉnh → chấm tỉnh đó sáng lên (CSS .prov-map-scope, không JS). */}
+            <div className="prov-map-scope grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-center">
+              <VnDotMap showAll className="hidden w-[240px] lg:block" />
+              <ul className="columns-2 gap-x-6 rounded-xl border border-line bg-white p-2 md:columns-3 md:p-3">
+                {byCount.map((p) => (
+                  <li key={p.code} className="break-inside-avoid">
+                    <Link
+                      href={`/tinh/${p.slug}`}
+                      data-prov={p.code}
+                      className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-md px-2.5 text-ink no-underline hover:bg-page hover:text-brand md:px-3"
+                    >
+                      <span className="truncate text-[15px]">{p.name}</span>
+                      <span className="flex-none text-sm text-muted tabular-nums">
+                        {formatNumber(p.company_count)}
+                        <span className="sr-only"> doanh nghiệp</span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
         <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-10 px-4 pt-8 pb-12 md:gap-12 md:px-6 md:pt-10 md:pb-14">
+          <AdSlot slotId="home-mid" />
+
           <section aria-labelledby="new-title" className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex flex-col gap-0.5">
@@ -123,44 +143,7 @@ export default async function HomePage() {
               </ul>
             </div>
           </section>
-
-          <AdSlot slotId="home-mid" />
         </div>
-
-        <section aria-labelledby="prov-title" className="border-t border-line bg-brand-50/70">
-          <div className="reveal mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-4 py-10 md:px-6 md:py-14">
-            <div className="flex flex-col gap-0.5">
-              <h2
-                id="prov-title"
-                className="min-w-0 text-[17px] leading-7 font-semibold text-navy md:text-2xl md:leading-8"
-              >
-                {M.home.provincesTitle}
-              </h2>
-            </div>
-            {/* Dạng mục lục: tên tỉnh bên trái, số DN bên phải, chia cột theo chiều dọc. */}
-            {/* Bản đồ (≥ 1024px): rê chuột / focus tên tỉnh → chấm tỉnh đó sáng lên (CSS .prov-map-scope, không JS). */}
-            <div className="prov-map-scope grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-center">
-              <VnDotMap showAll className="hidden w-[240px] lg:block" />
-              <ul className="columns-2 gap-x-6 rounded-xl border border-line bg-white p-2 md:columns-3 md:p-3">
-                {byCount.map((p) => (
-                  <li key={p.code} className="break-inside-avoid">
-                    <Link
-                      href={`/tinh/${p.slug}`}
-                      data-prov={p.code}
-                      className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-md px-2.5 text-ink no-underline hover:bg-page hover:text-brand md:px-3"
-                    >
-                      <span className="truncate text-[15px]">{p.name}</span>
-                      <span className="flex-none text-sm text-muted tabular-nums">
-                        {formatNumber(p.company_count)}
-                        <span className="sr-only"> doanh nghiệp</span>
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
       </main>
     </>
   );

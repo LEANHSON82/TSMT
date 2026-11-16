@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Tạo public/vn-dots.svg: bản đồ Việt Nam dạng chấm (trang trí hero trang chủ).
+"""Tạo public/vn-dots-plain.svg (bản đồ Việt Nam dạng chấm) và lib/vn-map-points.js (vị trí 34 tỉnh/thành)
+cho components/VnDotMap.jsx.
 
 Nguồn đường viền: Natural Earth 1:50m (public domain) qua gói world-atlas:
   curl -L -o countries-50m.json https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json
@@ -65,50 +66,21 @@ ISLANDS = [
 ]
 dots += ISLANDS
 
-# Thành phố lớn — tô màu nhấn
-CITIES = [(105.85, 21.03), (106.70, 10.78), (108.22, 16.07)]
-
 def proj(lon, lat):
     return ((lon - 102.0) * k * PX, (23.6 - lat) * PX)
 
 xs = [proj(*d)[0] for d in dots]; ys = [proj(*d)[1] for d in dots]
 W = math.ceil(max(xs) + R + 2); H = math.ceil(max(ys) + R + 2)
 d_main = ''.join(f'M{x:.1f} {y:.1f}h0' for x, y in (proj(*p) for p in dots))
-d_city = ''.join(f'M{x:.1f} {y:.1f}h0' for x, y in (proj(*p) for p in CITIES))
-# Vòng sóng lan ra từ mỗi thành phố (CSS trong SVG — chạy được cả khi nhúng bằng <img>), lệch pha nhau.
-# Tắt khi người dùng chọn giảm chuyển động.
-STYLE = (
-    '<style>'
-    '.r{fill:none;stroke:#c2410c;stroke-width:1.4;transform-box:fill-box;transform-origin:center;'
-    'opacity:0;animation:p 3.6s ease-out infinite}'
-    '@keyframes p{0%{transform:scale(1);opacity:.75}70%,100%{transform:scale(5);opacity:0}}'
-    '@media (prefers-reduced-motion:reduce){.r{animation:none}}'
-    '</style>'
-)
-rings = ''.join(
-    f'<circle class="r" cx="{x:.1f}" cy="{y:.1f}" r="{R*1.7:.1f}" style="animation-delay:{i*1.2:.1f}s"/>'
-    for i, (x, y) in enumerate(proj(*p) for p in CITIES)
-)
-svg = (
-    f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">'
-    + STYLE
-    + f'<path d="{d_main}" stroke="#1446a0" stroke-width="{R*2}" stroke-linecap="round" opacity=".34"/>'
-    + rings
-    + f'<path d="{d_city}" stroke="#c2410c" stroke-width="{R*3.4}" stroke-linecap="round" opacity=".8"/>'
-    + '</svg>\n'
-)
 root = pathlib.Path(__file__).resolve().parent.parent
-out = root / 'public' / 'vn-dots.svg'
-out.write_text(svg)
-print(f'{len(dots)} chấm, {W}x{H}, {len(svg)} byte → {out}')
-
-# Bản không có chấm thành phố — nền cho bản đồ đánh dấu tỉnh (components/VnDotMap.jsx).
+# Nền cho bản đồ đánh dấu tỉnh (components/VnDotMap.jsx).
 plain = (
     f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">'
     + f'<path d="{d_main}" stroke="#1446a0" stroke-width="{R*2}" stroke-linecap="round" opacity=".3"/>'
     + '</svg>\n'
 )
 (root / 'public' / 'vn-dots-plain.svg').write_text(plain)
+print(f'{len(dots)} chấm, {W}x{H}, {len(plain)} byte → public/vn-dots-plain.svg')
 
 # Trung tâm hành chính 34 tỉnh/thành (đơn vị hành chính từ 7/2025) — (kinh độ, vĩ độ), mã theo danh mục.
 PROVINCES = {

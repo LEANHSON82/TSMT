@@ -124,14 +124,13 @@ Yêu cầu với API Go (xem `scripts/mock-api-server.mjs`):
   - Nhãn mã ngành tô màu theo nhóm ngành VSIC cấp 1 (`lib/vsic.js`, 21 cặp màu đạt tương phản AA).
   - Thẻ DN ghi địa chỉ rút gọn: phường/xã, tỉnh/thành (trang theo tỉnh chỉ ghi phường/xã) — `areaAddress` trong `lib/format.js`.
   - Nhãn «Mới» cho DN thành lập trong 7 ngày (tắt ở khối/trang DN mới thành lập).
-  - Trang chủ: bản đồ Việt Nam dạng chấm ở hero (≥ 1280px; có Hoàng Sa, Trường Sa), dải nền xanh nhạt cho khối tỉnh/thành. Sinh lại bản đồ: `python3 scripts/gen-vn-dots.py countries-50m.json` (dữ liệu Natural Earth, xem đầu script).
+  - Trang chủ: khối tỉnh/thành đặt trước khối DN mới, trên dải nền xanh nhạt. Bản đồ chấm Việt Nam (có Hoàng Sa, Trường Sa) sinh lại bằng `python3 scripts/gen-vn-dots.py countries-50m.json` (dữ liệu Natural Earth, xem đầu script).
   - Hình minh hoạ SVG cho không có kết quả, trang 404, gửi yêu cầu thành công (`components/Illustrations.jsx`).
   - Bản đồ chấm đánh dấu tỉnh (`components/VnDotMap.jsx`, toạ độ trung tâm hành chính 34 tỉnh/thành trong `lib/vn-map-points.js`, sinh cùng script bản đồ): trang tỉnh đánh dấu tỉnh đang xem; khối tỉnh/thành trang chủ (≥ 1024px) rê chuột tên tỉnh thì chấm tỉnh sáng lên (CSS `:has`, không JS).
   - Minh hoạ đầu trang: DN mới, ngành nghề (tô theo màu nhóm ngành), giới thiệu, liên hệ, điều khoản, chính sách, form yêu cầu. Ẩn trên điện thoại.
 - **Chuyển động** (CSS thuần, không thư viện; chỉ transform/opacity nên CLS 0; tắt hết khi máy bật «giảm chuyển động»):
   - Khối/thẻ nằm dưới màn hình đầu trượt lên khi cuộn tới (`.reveal`, CSS scroll-driven animation — trình duyệt chưa hỗ trợ thì hiện bình thường). Không làm mờ để chữ luôn đủ tương phản.
   - Thẻ DN trong danh sách nhấc nhẹ khi rê chuột; mũi tên «Xem tất cả» trượt; gợi ý tìm kiếm hiện lần lượt.
-  - Bản đồ hero: vòng sóng lan ra ở Hà Nội, Đà Nẵng, TP HCM (CSS trong SVG).
   - Số điện thoại «chạy số» rồi dừng ở số thật sau khi xem quảng cáo (`components/RollingNumber.jsx`); khôi phục từ sessionStorage thì không chạy.
   - Chuyển trang: nội dung trang mới hiện mờ dần + trượt lên 6px (0,22 s; không chạy ở lần tải đầu). Trang DN chưa có trong bộ đệm hiện khung chờ (`app/[mstSlug]/loading.js`); gợi ý tìm kiếm đang chọn được tải trước.
   - Header có bóng đổ khi cuộn khỏi đầu trang (scroll-driven); viền focus khép vào nút; ô form báo lỗi rung nhẹ khi bấm gửi.
@@ -192,7 +191,8 @@ Các lệch trước đây (308 thay 301, trang danh sách không ISR, `?page=99
    sẽ được thay bằng bản owner gửi/luật sư duyệt, không phải chữ giao diện. Mọi chữ giao diện khác đã ở
    `lib/messages.js`.
 3. **Header dính đầu trang** (ô tìm luôn trong màn hình) là thêm ngoài spec, không trái spec.
-4. **Quy trình:** spec yêu cầu pull request < 400 dòng kèm ảnh chụp; mockup này đang là các commit trên `main`.
+4. **Thứ tự khối trang chủ:** theo yêu cầu, khối «Tra cứu theo tỉnh/thành» đặt trước khối «Doanh nghiệp mới thành lập» (spec 3.1 liệt kê ngược lại); ô quảng cáo vẫn nằm giữa hai khối.
+5. **Quy trình:** spec yêu cầu pull request < 400 dòng kèm ảnh chụp; mockup này đang là các commit trên `main`.
 
 ## Câu hỏi mở cho owner (spec mục 9.4, cộng thêm)
 

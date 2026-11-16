@@ -9,15 +9,30 @@ import { buildHref } from '@/lib/url';
 import { startNavigation } from './NavigationProgress';
 
 /**
- * fields: [{ name, label, value, allLabel, options: [{ value, label }] }]
+ * fields: [{ name, label, value, allLabel, options: [{ value, label }], filter? }]
+ *   filter: false — không phải bộ lọc (vd. «Sắp xếp»): không đếm, không hiện thẻ, «Bỏ lọc» giữ nguyên.
  * hidden: tham số giữ nguyên (vd. { q })
+ * Bộ lọc đang bật hiện thành thẻ có nút × (bấm để bỏ riêng bộ lọc đó), cả trên điện thoại khi bảng lọc
+ * đang thu gọn.
  */
 export default function ListFilters({ action, fields, hidden = {} }) {
   const router = useRouter();
   const formRef = useRef(null);
   const [open, setOpen] = useState(false);
   const uid = useId();
-  const activeCount = fields.filter((f) => f.value).length;
+  const isFilter = (f) => f.filter !== false;
+  const activeCount = fields.filter((f) => f.value && isFilter(f)).length;
+  const current = Object.fromEntries(fields.map((f) => [f.name, f.value || '']));
+  const keep = Object.fromEntries(
+    fields.filter((f) => !isFilter(f)).map((f) => [f.name, f.value || '']),
+  );
+  const chips = fields
+    .filter((f) => f.value && isFilter(f))
+    .map((f) => ({
+      name: f.name,
+      label: f.options.find((o) => o.value === f.value)?.label || f.value,
+      href: buildHref(action, { ...hidden, ...current, [f.name]: '' }),
+    }));
 
   function apply() {
     const data = new FormData(formRef.current);
@@ -40,9 +55,9 @@ export default function ListFilters({ action, fields, hidden = {} }) {
     .join(' · ');
 
   const controls = (
-    <div className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4">
+    <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end md:gap-x-4">
       {fields.map((f) => (
-        <div key={f.name} className="flex min-w-0 flex-col gap-1 md:w-64">
+        <div key={f.name} className="flex min-w-0 flex-col gap-1 md:w-60">
           <label htmlFor={`${uid}-${f.name}`} className="text-sm font-semibold text-ink-2">
             {f.label}
           </label>
@@ -69,7 +84,7 @@ export default function ListFilters({ action, fields, hidden = {} }) {
       </noscript>
       {activeCount > 0 && (
         <a
-          href={buildHref(action, hidden)}
+          href={buildHref(action, { ...hidden, ...keep })}
           className="inline-flex min-h-11 items-center text-[15px] font-semibold"
         >
           {M.list.clearFilter}
@@ -114,6 +129,28 @@ export default function ListFilters({ action, fields, hidden = {} }) {
           {controls}
         </div>
       </div>
+      {chips.length > 0 && (
+        <ul aria-label={M.list.activeFilters} className="mt-1 flex flex-wrap gap-x-2">
+          {chips.map((c) => (
+            <li key={c.name}>
+              {/* Vùng bấm cao 44px (spec 7.3), phần nhìn thấy là viên thuốc gọn bên trong. */}
+              <a
+                href={c.href}
+                aria-label={M.list.removeFilter(c.label)}
+                onClick={() => startNavigation()}
+                className="group inline-flex min-h-11 items-center no-underline"
+              >
+                <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-brand/30 bg-brand-50 pr-2.5 pl-3 text-sm font-semibold text-brand-hover group-hover:border-brand">
+                  {c.label}
+                  <span aria-hidden="true" className="text-base leading-none">
+                    ×
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
     </form>
   );
 }

@@ -253,13 +253,74 @@ test('danh sách gợi ý ở ô tìm trang chủ không bị khung hero cắt',
   const input = page.locator('[data-hero-search] input');
   await input.click();
   await input.pressSequentially('son', { delay: 50 });
-  const last = page.locator('[data-hero-search] [role=option]').last();
-  await expect(last).toBeVisible();
-  // Điểm giữa gợi ý cuối cùng phải thuộc danh sách gợi ý (không bị phần tử khác che / cắt).
-  const box = await last.boundingBox();
+  const list = page.locator('[data-hero-search] [role=listbox]');
+  await expect(list.locator('[role=option]').first()).toBeVisible();
+  // Danh sách phải tràn ra dưới mép khung hero, và điểm ngay dưới mép đó vẫn thuộc danh sách (không bị
+  // khung hero cắt mất / nội dung bên dưới đè lên).
+  const hero = await page
+    .locator('[data-hero-search]')
+    .locator('xpath=ancestor::section[1]')
+    .boundingBox();
+  const lb = await list.boundingBox();
+  const heroBottom = hero.y + hero.height;
+  expect(lb.y + lb.height).toBeGreaterThan(heroBottom + 20);
   const onTop = await page.evaluate(
     ({ x, y }) => !!document.elementFromPoint(x, y)?.closest('[role=listbox]'),
-    { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+    { x: lb.x + lb.width / 2, y: heroBottom + 10 },
   );
   expect(onTop).toBe(true);
+});
+
+test('gợi ý chia nhóm và ghi rõ khớp ở đâu: gõ «Sơn» → nhóm Người đại diện hiện tên người + DN', async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto('/');
+  if (!isMobile) await expect(page.locator('[data-hero-search] input')).toBeFocused();
+  const input = page.locator('[data-hero-search] input');
+  await input.click();
+  await input.pressSequentially('Sơn', { delay: 40 });
+  const list = page.locator('[data-hero-search] [role=listbox]');
+  await expect(list.getByText('Người đại diện', { exact: true })).toBeVisible();
+  await expect(
+    list.getByRole('option', { name: /BÙI ĐỨC SƠN.*Đại diện · CÔNG TY TNHH THỰC PHẨM VIỆT TIẾN/ }),
+  ).toBeVisible();
+  await expect(list.getByText('Tỉnh/thành', { exact: true })).toBeVisible();
+  await expect(list.getByRole('option', { name: /Xem tất cả kết quả cho “Sơn”/ })).toBeVisible();
+  // Chọn gợi ý tỉnh bằng bàn phím → sang trang tỉnh
+  await list.getByRole('option', { name: /^Lạng Sơn/ }).click();
+  await expect(page).toHaveURL(/\/tinh\/lang-son$/);
+});
+
+test('trang kết quả: tab «Tìm theo» có số đếm, lọc người đại diện, thẻ bộ lọc bỏ được', async ({
+  page,
+}) => {
+  await page.goto('/tim-kiem?q=S%C6%A1n');
+  const tabs = page.getByRole('navigation', { name: 'Tìm theo' });
+  await expect(tabs.getByText('Tất cả')).toBeVisible();
+  // «Sơn» không kéo theo «Sông Hồng»
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Tìm thấy 7 kết quả/);
+  await tabs.getByRole('link', { name: /Người đại diện/ }).click();
+  await expect(page).toHaveURL(/theo=dai-dien/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Tìm thấy 6 kết quả/);
+
+  await page.goto('/tim-kiem?q=S%C6%A1n&tinh=ha-noi');
+  const chip = page.getByRole('link', { name: 'Bỏ lọc Hà Nội' });
+  await expect(chip).toBeVisible();
+  await chip.click();
+  await expect(page).not.toHaveURL(/tinh=/);
+});
+
+test('từ khoá có tên tỉnh → gợi ý «Lọc tại …» với từ khoá đã bỏ tên tỉnh', async ({ page }) => {
+  await page.goto('/tim-kiem?q=ph%E1%BA%A7n%20m%E1%BB%81m%20tp%20hcm');
+  const action = page.getByRole('link', { name: /Lọc tại TP Hồ Chí Minh/ });
+  await expect(action).toBeVisible();
+  await action.click();
+  await expect(page).toHaveURL(/tinh=ho-chi-minh/);
+  await expect(page).toHaveURL(/q=ph%E1%BA%A7n\+m%E1%BB%81m|q=ph%E1%BA%A7n%20m%E1%BB%81m/);
+});
+
+test('không tìm được DN bằng số điện thoại đã bị chủ DN ẩn', async ({ page }) => {
+  await page.goto('/tim-kiem?q=0901823874');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Tìm thấy 0 kết quả/);
 });

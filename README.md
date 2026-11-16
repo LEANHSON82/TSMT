@@ -116,6 +116,27 @@ Yêu cầu với API Go (xem `scripts/mock-api-server.mjs`):
 - Bật CORS cho domain web (trình duyệt gọi thẳng `/v1/suggest`, `/v1/phone-unlocks*`, `/v1/update-requests`), cho phép header `Content-Type`, expose `Retry-After`.
 - Bản staging nên hỗ trợ header `X-Mock-Scenario: 429|410|500` để QA ép nhánh lỗi; web gửi header này khi build với `NEXT_PUBLIC_MOCK_SCENARIOS=1`. Production **không** đặt biến này.
 
+### Đề xuất API tìm kiếm (gửi team Go)
+
+Hợp đồng ở spec mục 6 là bản nháp. Frontend đã làm theo bản mở rộng dưới đây; bộ tìm mẫu ở
+`mocks/search.js` (có unit test `tests/unit/search.test.js`) mô tả đúng hành vi mong muốn. API chưa hỗ trợ
+thì trang vẫn chạy (không có `matched` → mọi gợi ý vào nhóm «Doanh nghiệp»; không có `counts` → tab không
+hiện số).
+
+- `GET /v1/suggest?q=` → mỗi dòng thêm `representative` và `matched`
+  (`name` | `representative` | `mst` | `phone`) để ô gợi ý chia nhóm và ghi rõ khớp ở đâu.
+- `GET /v1/search` nhận thêm `field=name|representative|number`, `sort=founded_desc|founded_asc` (bỏ
+  trống = phù hợp nhất), `industry=`; mỗi DN thêm `matched`; thêm `counts: {all, name, representative,
+number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
+- Xếp hạng: khớp nguyên chữ trước khớp phần đầu; gõ có dấu thì đúng dấu xếp trên; mọi từ khoá khớp trong
+  cùng một trường; khớp tên DN xếp trên khớp người đại diện khi điểm bằng nhau; bỏ qua cụm chữ chung
+  («công ty», «TNHH», «cổ phần»…). Gợi ý (đang gõ) cho khớp phần đầu từ cuối; trang kết quả có kết quả
+  khớp nguyên chữ thì bỏ kết quả chỉ khớp phần đầu.
+- **Bắt buộc:** không tìm theo SĐT của DN đã ẩn hoặc không công khai SĐT; cần tối thiểu 6 số mới tìm
+  theo SĐT; không bao giờ trả SĐT trong kết quả tìm.
+- Gợi ý < 150 ms trên ~1 triệu DN, có bỏ dấu tiếng Việt và chịu gõ sai → nên dùng Meilisearch / Typesense,
+  hoặc Postgres `unaccent` + `pg_trgm`.
+
 ## Đã làm theo spec
 
 - **Trang:** đủ các trang ở mục 2. Header dính đầu trang: logo, ô tìm (máy tính trùng khít ô nhập của ô tìm lớn trang chủ; trang chủ chỉ hiện khi cuộn qua ô lớn), menu Tỉnh/thành · Ngành nghề · DN mới (≥ 1280px; nhỏ hơn dùng nút ☰). Có footer và banner cookie.
@@ -134,7 +155,7 @@ Yêu cầu với API Go (xem `scripts/mock-api-server.mjs`):
   - Số điện thoại «chạy số» rồi dừng ở số thật sau khi xem quảng cáo (`components/RollingNumber.jsx`); khôi phục từ sessionStorage thì không chạy.
   - Chuyển trang: nội dung trang mới hiện mờ dần + trượt lên 6px (0,22 s; không chạy ở lần tải đầu). Trang DN chưa có trong bộ đệm hiện khung chờ (`app/[mstSlug]/loading.js`); gợi ý tìm kiếm đang chọn được tải trước.
   - Header có bóng đổ khi cuộn khỏi đầu trang (scroll-driven); viền focus khép vào nút; ô form báo lỗi rung nhẹ khi bấm gửi.
-- **Tìm kiếm:** gợi ý khi gõ có trạng thái đang tải / không có gợi ý; kết quả và gợi ý tô sáng từ khoá (không phân biệt hoa/thường, dấu — `lib/highlight.js`).
+- **Tìm kiếm:** gợi ý chia nhóm Doanh nghiệp / Người đại diện / Tỉnh/thành (ghi rõ khớp ở đâu, khớp SĐT không hiện số) + dòng «Xem tất cả kết quả»; trạng thái đang tải / không có gợi ý. Trang kết quả có tab «Tìm theo» kèm số đếm, lọc tỉnh/tình trạng/ngành, sắp xếp, thẻ bộ lọc bỏ được từng cái, gợi ý «Lọc tại [tỉnh]» khi từ khoá có tên tỉnh. Tô sáng từng từ khoá ở đầu chữ (không phân biệt hoa/thường, dấu — `lib/highlight.js`).
 - **Chi tiết DN:**
   - Bảng thông tin ẩn dòng trống, ngành nghề thu gọn khi quá 10 ngành, khối DN cùng ngành.
   - Banner dưới bảng thông tin và cột phải dính khi cuộn.

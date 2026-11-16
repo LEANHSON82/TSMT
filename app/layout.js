@@ -7,6 +7,7 @@ import Analytics from '@/components/Analytics';
 import NavigationProgress from '@/components/NavigationProgress';
 import { Suspense } from 'react';
 import { getProvinces } from '@/lib/api';
+import { ProvincesProvider } from '@/components/ProvincesContext';
 import { POPULAR_INDUSTRIES } from '@/lib/popular-industries';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import { M } from '@/lib/messages';
@@ -57,10 +58,12 @@ export default async function RootLayout({ children }) {
         >
           {M.site.skipToContent}
         </a>
-        <HeaderBar provinces={provinces} industries={POPULAR_INDUSTRIES} />
-        <div id="main" className="flex flex-1 flex-col">
-          {children}
-        </div>
+        <ProvincesProvider provinces={provinces}>
+          <HeaderBar provinces={provinces} industries={POPULAR_INDUSTRIES} />
+          <div id="main" className="flex flex-1 flex-col">
+            {children}
+          </div>
+        </ProvincesProvider>
         <SiteFooter />
         <CookieConsent />
         <Analytics />

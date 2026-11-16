@@ -1,16 +1,21 @@
 'use client';
 
-// Ô tìm kiếm + gợi ý (spec mục 3.1): gõ từ 2 ký tự, chờ 300 ms mới gọi API, tối đa 8 gợi ý,
+// Ô tìm kiếm + gợi ý (spec mục 3.1): gõ từ 2 ký tự, chờ 300 ms mới gọi API, tối đa 8 gợi ý DN,
 // ↑↓ Enter Esc, theo mẫu combobox WAI-ARIA. Enter với MST hợp lệ → vào thẳng trang DN.
-import { useEffect, useId, useRef, useState } from 'react';
+// Gợi ý chia nhóm để người dùng biết khớp ở đâu: «Doanh nghiệp» (khớp tên / MST / SĐT — không bao giờ hiện
+// số), «Người đại diện» (hiện tên người + DN họ đại diện), «Tỉnh/thành» (từ danh mục có sẵn), và dòng
+// «Xem tất cả kết quả». API chưa trả `matched` thì mọi gợi ý vào nhóm «Doanh nghiệp» như trước.
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { suggestCompanies } from '@/lib/api';
 import { isValidMst, normalizeMst } from '@/lib/mst';
 import { track } from '@/lib/analytics';
 import { M } from '@/lib/messages';
+import { suggestProvinces } from '@/lib/search-intent';
 import Highlight from './Highlight';
 import { IconSearch } from './Icons';
 import { startNavigation } from './NavigationProgress';
+import { useProvinces } from './ProvincesContext';
 
 const MIN_CHARS = 2;
 const DEBOUNCE_MS = 300;
@@ -33,6 +38,9 @@ export default function SearchBox({
   const abortRef = useRef(null);
   const [value, setValue] = useState(defaultValue);
   const [items, setItems] = useState([]);
+  const [provItems, setProvItems] = useState([]);
+  const [lastQ, setLastQ] = useState(''); // từ khoá ứng với gợi ý đang hiện
+  const provinces = useProvinces();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   // 'idle' | 'loading' (đang lấy gợi ý) | 'empty' (không có gợi ý) | 'ready'
@@ -65,6 +73,7 @@ export default function SearchBox({
     if (q.length < MIN_CHARS) {
       abortRef.current?.abort();
       setItems([]);
+      setProvItems([]);
       setOpen(false);
       setStatus('idle');
       return undefined;
@@ -76,40 +85,68 @@ export default function SearchBox({
       setStatus('loading');
       try {
         const res = await suggestCompanies(q, { signal: ctrl.signal });
+        const provs = suggestProvinces(q, provinces);
+        const any = res.length > 0 || provs.length > 0;
         setItems(res.slice(0, 8));
-        setOpen(res.length > 0 && document.activeElement === inputRef.current);
+        setProvItems(provs);
+        setLastQ(q);
+        setOpen(any && document.activeElement === inputRef.current);
         setActive(-1);
-        setStatus(res.length ? 'ready' : 'empty');
+        setStatus(any ? 'ready' : 'empty');
       } catch (err) {
         if (err?.name !== 'AbortError') {
           setItems([]);
+          setProvItems([]);
           setOpen(false);
           setStatus('idle');
         }
       }
     }, DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [value]);
+  }, [value, provinces]);
+
+  // Danh sách phẳng theo thứ tự hiển thị (phím ↑↓ đi qua đúng thứ tự này).
+  const entries = useMemo(() => {
+    const list = [
+      ...items
+        .filter((i) => i.matched !== 'representative')
+        .map((item) => ({ kind: 'company', item })),
+      ...items.filter((i) => i.matched === 'representative').map((item) => ({ kind: 'rep', item })),
+      ...provItems.map((p) => ({ kind: 'province', p })),
+    ];
+    if (list.length) list.push({ kind: 'all' });
+    return list;
+  }, [items, provItems]);
+
+  const hrefOf = (e) =>
+    e.kind === 'province'
+      ? `/tinh/${e.p.slug}`
+      : e.kind === 'all'
+        ? `/tim-kiem?q=${encodeURIComponent(lastQ)}`
+        : `/${e.item.mst}-${e.item.slug}`;
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  // Gợi ý đang được chọn (rê chuột / phím mũi tên): tải trước trang DN để bấm vào là hiện ngay.
+  // Gợi ý đang được chọn (rê chuột / phím mũi tên): tải trước trang để bấm vào là hiện ngay.
   useEffect(() => {
-    const item = items[active];
-    if (item) router.prefetch(`/${item.mst}-${item.slug}`);
-  }, [active, items, router]);
+    const e = entries[active];
+    if (e && e.kind !== 'all') router.prefetch(hrefOf(e));
+    // hrefOf chỉ phụ thuộc entries / lastQ
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, entries, router]);
 
-  function goTo(item) {
+  function activate(e) {
     setOpen(false);
-    track('search', { query_type: 'mst', result_count: 1 });
+    if (e.kind === 'company' || e.kind === 'rep')
+      track('search', { query_type: 'mst', result_count: 1 });
     startNavigation();
-    router.push(`/${item.mst}-${item.slug}`);
+    router.push(hrefOf(e));
   }
 
   function onSubmit(e) {
     e.preventDefault();
-    if (open && active >= 0 && items[active]) {
-      goTo(items[active]);
+    if (open && active >= 0 && entries[active]) {
+      activate(entries[active]);
       return;
     }
     const q = value.trim();
@@ -132,15 +169,15 @@ export default function SearchBox({
 
   function onKeyDown(e) {
     if (e.key === 'ArrowDown') {
-      if (!items.length) return;
+      if (!entries.length) return;
       e.preventDefault();
       setOpen(true);
-      setActive((a) => (a + 1) % items.length);
+      setActive((a) => (a + 1) % entries.length);
     } else if (e.key === 'ArrowUp') {
-      if (!items.length) return;
+      if (!entries.length) return;
       e.preventDefault();
       setOpen(true);
-      setActive((a) => (a <= 0 ? items.length - 1 : a - 1));
+      setActive((a) => (a <= 0 ? entries.length - 1 : a - 1));
     } else if (e.key === 'Escape') {
       if (open) {
         e.preventDefault();
@@ -153,7 +190,7 @@ export default function SearchBox({
   const lg = size === 'lg';
   // 'nav': ô tìm trong thanh nav — kính lúp bên trong ô, không có nút «Tìm» (bấm Enter để tìm).
   const nav = size === 'nav';
-  const showList = open && items.length > 0;
+  const showList = open && entries.length > 0;
   const loading = status === 'loading';
   const showEmpty = status === 'empty' && focused;
   const spinner = (
@@ -221,7 +258,7 @@ export default function SearchBox({
             onKeyDown={onKeyDown}
             onFocus={() => {
               setFocused(true);
-              if (items.length) setOpen(true);
+              if (entries.length) setOpen(true);
             }}
             onBlur={() =>
               setTimeout(() => {
@@ -263,36 +300,46 @@ export default function SearchBox({
         hidden={!showList}
         className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1 max-h-[70vh] overflow-auto rounded-md border border-line bg-white py-1 text-left shadow-[0_8px_24px_rgba(10,42,94,0.14)] ${listClassName}`}
       >
-        {items.map((item, i) => (
-          <li
-            key={item.mst}
-            id={`${listId}-${i}`}
-            role="option"
-            aria-selected={i === active}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              goTo(item);
-            }}
-            onMouseEnter={() => setActive(i)}
-            style={{ animationDelay: `${i * 25}ms` }}
-            className={`motion-rise flex min-h-11 cursor-pointer flex-col justify-center gap-0.5 px-4 py-2 ${
-              i === active ? 'bg-brand-50' : ''
-            }`}
-          >
-            <span className="line-clamp-1 text-[15px] font-semibold text-navy">
-              <Highlight text={item.name} query={value} />
-            </span>
-            <span className="text-[13px] text-muted">
-              <span>
-                MST{' '}
-                <span className="tabular-nums">
-                  <Highlight text={item.mst} query={value} />
-                </span>
-              </span>{' '}
-              · {item.province}
-            </span>
-          </li>
-        ))}
+        {GROUPS.map(({ kind, label }) => {
+          const group = entries.map((e, i) => ({ e, i })).filter(({ e }) => e.kind === kind);
+          if (!group.length) return null;
+          return [
+            label && (
+              <li
+                key={`h-${kind}`}
+                role="presentation"
+                className="px-4 pt-2.5 pb-1 text-xs font-semibold tracking-wide text-muted uppercase"
+              >
+                {M.search[label]}
+              </li>
+            ),
+            ...group.map(({ e, i }) => (
+              <li
+                key={
+                  e.kind === 'province'
+                    ? `p-${e.p.code}`
+                    : e.kind === 'all'
+                      ? 'all'
+                      : `${e.kind}-${e.item.mst}`
+                }
+                id={`${listId}-${i}`}
+                role="option"
+                aria-selected={i === active}
+                onMouseDown={(ev) => {
+                  ev.preventDefault();
+                  activate(e);
+                }}
+                onMouseEnter={() => setActive(i)}
+                style={{ animationDelay: `${i * 25}ms` }}
+                className={`motion-rise flex min-h-11 cursor-pointer flex-col justify-center gap-0.5 px-4 py-2 ${
+                  i === active ? 'bg-brand-50' : ''
+                } ${e.kind === 'all' ? 'mt-1 border-t border-line-soft' : ''}`}
+              >
+                <SuggestionRow entry={e} query={lastQ} />
+              </li>
+            )),
+          ];
+        })}
       </ul>
       {/* Không có gợi ý: báo ngay dưới ô (aria-live để trình đọc màn hình đọc), Enter vẫn tìm được. */}
       <div aria-live="polite" className="sr-only">
@@ -307,5 +354,70 @@ export default function SearchBox({
         </p>
       )}
     </form>
+  );
+}
+
+// Thứ tự nhóm trong danh sách gợi ý; nhóm không có dòng nào thì ẩn cả tiêu đề.
+const GROUPS = [
+  { kind: 'company', label: 'groupCompanies' },
+  { kind: 'rep', label: 'groupRepresentatives' },
+  { kind: 'province', label: 'groupProvinces' },
+  { kind: 'all', label: null },
+];
+
+function SuggestionRow({ entry: e, query }) {
+  if (e.kind === 'all') {
+    return (
+      <span className="flex items-center gap-2 text-[15px] font-semibold text-brand">
+        <IconSearch size={18} className="flex-none" />
+        <span className="line-clamp-1">{M.search.seeAll(query)}</span>
+      </span>
+    );
+  }
+  if (e.kind === 'province') {
+    return (
+      <>
+        <span className="text-[15px] font-semibold text-navy">
+          <Highlight text={e.p.name} query={query} />
+        </span>
+        <span className="text-[13px] text-muted">
+          {M.search.provinceCount(e.p.company_count ?? 0)}
+        </span>
+      </>
+    );
+  }
+  const { item } = e;
+  if (e.kind === 'rep') {
+    return (
+      <>
+        <span className="line-clamp-1 text-[15px] font-semibold text-navy">
+          <Highlight text={item.representative} query={query} />
+        </span>
+        <span className="line-clamp-1 text-[13px] text-muted">
+          {M.search.repOf} · {item.name}
+        </span>
+      </>
+    );
+  }
+  return (
+    <>
+      <span className="line-clamp-1 text-[15px] font-semibold text-navy">
+        <Highlight text={item.name} query={query} />
+      </span>
+      <span className="flex flex-wrap items-center gap-x-1 text-[13px] text-muted">
+        <span>
+          MST{' '}
+          <span className="tabular-nums">
+            <Highlight text={item.mst} query={query} />
+          </span>
+        </span>
+        <span>· {item.province}</span>
+        {item.matched === 'phone' && (
+          <span className="ml-1 rounded bg-brand-50 px-1.5 text-xs font-semibold text-brand-hover">
+            {M.search.matchedPhone}
+          </span>
+        )}
+      </span>
+    </>
   );
 }

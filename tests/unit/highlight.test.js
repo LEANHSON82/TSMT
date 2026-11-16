@@ -17,6 +17,15 @@ describe('highlightParts', () => {
     expect(parts.map((p) => p.text).join('')).toBe('NAM PHƯƠNG NAM');
     expect(parts.filter((p) => p.hit)).toHaveLength(2);
   });
+  it('tô từng từ khoá ở đầu chữ, không tô giữa chữ', () => {
+    expect(hits('BÙI ĐỨC SƠN', 'bùi sơn')).toEqual(['BÙI', 'SƠN']);
+    expect(hits('BÙI ĐỨC SƠN', 'bui duc son')).toEqual(['BÙI ĐỨC SƠN']);
+    expect(hits('NELSON VIỆT NAM', 'son')).toEqual([]);
+    expect(hits('LÊ HOÀNG SƠN', 'hoa')).toEqual(['HOÀ']);
+  });
+  it('bỏ chữ chung «công ty» khi đã có từ khác', () => {
+    expect(hits('CÔNG TY TNHH SÔNG HỒNG', 'công ty sông')).toEqual(['SÔNG']);
+  });
   it('từ khoá quá ngắn hoặc không khớp thì không tô', () => {
     expect(hits('CÔNG TY A', 'a')).toEqual([]);
     expect(hits('CÔNG TY A', 'xyz')).toEqual([]);

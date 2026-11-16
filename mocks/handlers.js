@@ -8,7 +8,7 @@ import companiesData from './data/companies.json' with { type: 'json' };
 import phonesData from './data/phones.json' with { type: 'json' };
 import provincesData from './data/provinces.json' with { type: 'json' };
 import industriesData from './data/industries.json' with { type: 'json' };
-import { toSlug } from '../lib/slug.js';
+import { buildIndex, countByField, FIELD_GROUPS, search } from './search.js';
 
 const PAGE_SIZE = 20;
 const UNLOCK_TTL_MS = 10 * 60 * 1000;
@@ -18,13 +18,8 @@ const byMst = new Map(companiesData.map((c) => [c.mst, c]));
 // Trạng thái phiên mở SĐT, giữ trong bộ nhớ tiến trình.
 const store = (globalThis.__mockUnlockStore ||= { unlocks: new Map(), seq: 0, requestSeq: 1200 });
 
-const norm = (s) => toSlug(s).replace(/-/g, ' ');
-const searchIndex = companiesData.map((c) => ({
-  c,
-  text: ` ${norm(`${c.name} ${c.name_en || ''} ${c.name_short || ''}`)} `,
-  rep: ` ${norm(c.representative)} `,
-  phone: phonesData[c.mst] || '',
-}));
+// Bộ tìm mẫu (mocks/search.js): xếp hạng, matched, không tìm theo SĐT đã ẩn.
+const searchIndex = buildIndex(companiesData, phonesData);
 
 function error(status, code, message, extra = {}) {
   return HttpResponse.json({ error: { code, message }, ...extra }, { status });
@@ -59,35 +54,6 @@ function summary(c) {
   };
 }
 
-function searchCompanies(q) {
-  const query = String(q || '').trim();
-  if (!query) return [];
-  const digits = query.replace(/[\s.\-+]/g, '');
-  if (/^\d{3,}$/.test(digits)) {
-    const mstDigits = digits.replace(/^84/, '0');
-    return searchIndex
-      .filter(
-        (r) =>
-          r.c.mst.replace('-', '').startsWith(digits) ||
-          (mstDigits.length >= 6 && r.phone.includes(mstDigits)),
-      )
-      .map((r) => r.c)
-      .sort((a, b) =>
-        a.mst.replace('-', '') === digits ? -1 : b.mst.replace('-', '') === digits ? 1 : 0,
-      );
-  }
-  const tokens = norm(query).split(' ').filter(Boolean);
-  const phrase = ` ${tokens.join(' ')} `;
-  return searchIndex
-    .filter((r) => tokens.every((t) => r.text.includes(` ${t}`) || r.rep.includes(` ${t}`)))
-    .map((r) => ({
-      c: r.c,
-      score: (r.text.includes(phrase) ? 2 : 0) + (r.rep.includes(phrase) ? 1 : 0),
-    }))
-    .sort((a, b) => b.score - a.score || (a.c.founded_date < b.c.founded_date ? 1 : -1))
-    .map((r) => r.c);
-}
-
 function applyFilters(items, url) {
   const province = url.searchParams.get('province');
   const status = url.searchParams.get('status');
@@ -110,20 +76,46 @@ export const handlers = [
     return ind ? HttpResponse.json(ind) : error(404, 'not_found', 'Không có ngành này');
   }),
 
+  // Đề xuất mở rộng hợp đồng (README): mỗi gợi ý kèm representative + matched để giao diện ghi rõ khớp ở đâu.
   http.get('*/v1/suggest', ({ request }) => {
     const q = new URL(request.url).searchParams.get('q') || '';
     if (q.trim().length < 2) return HttpResponse.json({ items: [] });
-    const items = searchCompanies(q)
+    const items = search(searchIndex, q, { mode: 'suggest' })
       .slice(0, 8)
-      .map((c) => ({ mst: c.mst, name: c.name, slug: c.slug, province: c.province.name }));
+      .map(({ c, matched }) => ({
+        mst: c.mst,
+        name: c.name,
+        slug: c.slug,
+        province: c.province.name,
+        representative: c.representative,
+        matched,
+      }));
     return HttpResponse.json({ items });
   }),
 
+  // Đề xuất mở rộng: field=name|representative|number, sort=relevance|founded_desc|founded_asc,
+  // industry=; trả thêm matched từng DN và counts (số kết quả theo từng nhóm «Tìm theo»).
   http.get('*/v1/search', ({ request }) => {
     const url = new URL(request.url);
-    const found = applyFilters(searchCompanies(url.searchParams.get('q')), url);
-    const page = paginate(found, url.searchParams.get('page'));
-    return HttpResponse.json({ ...page, items: page.items.map(summary) });
+    const found = search(searchIndex, url.searchParams.get('q')).filter(
+      (r) => applyFilters([r.c], url).length,
+    );
+    const counts = countByField(found);
+    const field = url.searchParams.get('field');
+    let list = FIELD_GROUPS[field]
+      ? found.filter((r) => FIELD_GROUPS[field].includes(r.matched))
+      : found;
+    const sort = url.searchParams.get('sort');
+    if (sort === 'founded_desc' || sort === 'founded_asc') {
+      const dir = sort === 'founded_desc' ? -1 : 1;
+      list = [...list].sort((a, b) => (a.c.founded_date < b.c.founded_date ? -dir : dir));
+    }
+    const page = paginate(list, url.searchParams.get('page'));
+    return HttpResponse.json({
+      ...page,
+      counts,
+      items: page.items.map((r) => ({ ...summary(r.c), matched: r.matched })),
+    });
   }),
 
   http.get('*/v1/companies', ({ request }) => {

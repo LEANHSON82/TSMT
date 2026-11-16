@@ -1,0 +1,49 @@
+{
+  "name": "tracuu-dn-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "dev:webpack": "next dev",
+    "preview": "next build && next start",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:api": "E2E_API=1 playwright test",
+    "mock:gen": "node scripts/gen-mock-data.mjs",
+    "mock:api": "node scripts/mock-api-server.mjs"
+  },
+  "dependencies": {
+    "next": "^15.5.29",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
+    "@playwright/test": "^1.65.1",
+    "@tailwindcss/postcss": "^4.3.5",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.29",
+    "eslint-config-prettier": "^10.1.8",
+    "msw": "^2.15.0",
+    "postcss": "^8.5.33",
+    "prettier": "^3.10.1",
+    "tailwindcss": "^4.3.5",
+    "vitest": "^5.1.0"
+  },
+  "imports": {
+    "#mock-fetch": {
+      "react-server": "./mocks/server-fetch.js",
+      "default": "./mocks/client-fetch.js"
+    }
+  }
+}

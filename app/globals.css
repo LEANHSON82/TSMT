@@ -1,0 +1,488 @@
+@import 'tailwindcss';
+
+/* Màu và font lấy từ canvas thiết kế «TraMST» (Claude Design). */
+@theme {
+  --font-sans: var(--font-be-vietnam), system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-brand: #1446a0;
+  --color-brand-hover: #0f3680;
+  --color-brand-50: #eef3fc;
+  --color-navy: #0a2a5e;
+  --color-cta: #c2410c;
+  --color-cta-hover: #9a3412;
+  --color-cta-50: #fff4ed;
+
+  --color-page: #f5f7fa;
+  --color-ink: #111827;
+  --color-ink-2: #4b5563;
+  --color-muted: #5b6472;
+  --color-line: #d9dee7;
+  --color-line-soft: #eef0f3;
+  --color-field: #8a94a3;
+
+  --color-ok: #146c2e;
+  --color-ok-bg: #e7f6ec;
+  --color-ok-dot: #1f9d48;
+  --color-off: #4b5563;
+  --color-off-bg: #eef0f3;
+  --color-off-dot: #8a94a3;
+  --color-danger: #b42318;
+  --color-danger-bg: #fef3f2;
+  --color-warn: #b45309;
+  --color-warn-bg: #fffaeb;
+
+  --color-ad: #edf0f4;
+  --color-ad-line: #c4cbd6;
+  --color-footer: #0a2a5e;
+  --color-footer-text: #dce6f8;
+  --color-footer-line: #23447a;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* Đã có trạng thái nhấn riêng (bên dưới) nên tắt vệt xám mặc định khi chạm trên điện thoại. */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--color-page);
+    color: var(--color-ink);
+  }
+
+  a {
+    color: var(--color-brand);
+  }
+  a:hover {
+    color: var(--color-brand-hover);
+  }
+
+  /* Nút, link: vòng viền focus rõ khi dùng bàn phím (spec mục 7.3). Ô nhập liệu xem bên dưới. */
+  :where(
+    a,
+    button,
+    summary,
+    [tabindex],
+    input[type='file'],
+    input[type='checkbox'],
+    input[type='radio']
+  ):focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+
+  .on-dark :where(a, button):focus-visible {
+    outline-color: #ffffff;
+  }
+
+  /* Header dính: phần tử trong nội dung trang được nhảy tới (#mục) hoặc focus bằng bàn phím không bị
+     header che. KHÔNG dùng scroll-padding-top trên html: ô tìm nằm trong header dính (cách mép trên
+     < 96px) sẽ bị coi là "bị che", trình duyệt cuộn trang lên mỗi lần gõ phím. */
+  #main [id],
+  #main :focus {
+    scroll-margin-top: 96px;
+  }
+
+  /* Đổi màu/nền/viền mượt khi hover, focus, nhấn. Class transition-* của Tailwind vẫn ghi đè được. */
+  :where(a, button, summary, select, input, textarea) {
+    transition-property:
+      color, background-color, border-color, box-shadow, transform, filter, opacity;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out;
+  }
+
+  /* Trạng thái nhấn — trên điện thoại không có hover nên đây là phản hồi duy nhất khi chạm:
+     nút thu nhỏ 98%, link/mục thu gọn nhạt đi một chút. Link dùng opacity, KHÔNG dùng filter/transform:
+     hai thuộc tính đó biến link thành khối chứa của lớp phủ ::after (thẻ DN bấm được cả thẻ), lớp phủ
+     co lại khi nhấn và cú bấm ngoài chữ tên DN bị mất. */
+  :where(button):not(:disabled):active {
+    transform: scale(0.98);
+  }
+  :where(summary, a):active {
+    opacity: 0.75;
+  }
+  :where(select):active {
+    filter: brightness(0.96);
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Đã chọn cookie (xem CONSENT_BOOTSTRAP trong app/layout.js) → ẩn banner ngay từ lần vẽ đầu. */
+  html[data-consent] [data-cookie-banner] {
+    display: none;
+  }
+}
+
+/* Thanh tiến độ khi chuyển trang (components/NavigationProgress.jsx). Hiện sau 150 ms để không nháy
+   khi trang đã prefetch sẵn. Danh sách mờ đi trong lúc chờ. */
+.nav-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 80;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+.nav-progress::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: var(--color-brand);
+  transform: translateX(-100%);
+}
+html[data-navigating] .nav-progress {
+  opacity: 1;
+  transition: opacity 0.15s 0.15s;
+}
+html[data-navigating] .nav-progress::before {
+  animation: nav-slide 1.1s ease-in-out infinite;
+}
+@keyframes nav-slide {
+  to {
+    transform: translateX(260%);
+  }
+}
+[data-list-content] {
+  transition: opacity 0.15s;
+}
+html[data-navigating] [data-list-content] {
+  opacity: 0.5;
+  transition-delay: 0.15s;
+}
+
+/* Ô nhập liệu (ô tìm, ô form, ô chọn): focus chỉ đổi màu viền của chính ô sang xanh (dày 2px, nằm
+   trong ô), không thêm vòng ngoài. Tương phản xanh/trắng 9:1, viền chưa focus xám (spec 7.3, WCAG AA).
+   Để ngoài @layer để thắng các class màu viền của Tailwind. Ô đang báo lỗi thì giữ viền đỏ. */
+:where(
+  input:not([type='file'], [type='checkbox'], [type='radio'], [type='hidden']),
+  select,
+  textarea
+):focus {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: inset 0 0 0 1px var(--color-brand);
+}
+:where(input, select, textarea)[aria-invalid='true']:focus {
+  border-color: var(--color-danger);
+  box-shadow: inset 0 0 0 1px var(--color-danger);
+}
+
+/* Ô chọn (bộ lọc, form): bỏ mũi tên mặc định của trình duyệt, dùng mũi tên riêng đồng bộ với ô tìm. */
+.select-chevron {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b6472' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px;
+  padding-right: 40px;
+}
+
+/* ---- Chuyển động ----
+   Chỉ dùng transform/opacity (và màu nền) nên không làm xô bố cục (CLS 0). Chỉ chạy khi người dùng
+   thao tác (mở menu, hiện số…), không chạy với nội dung lúc tải trang (không làm chậm LCP).
+   Animation khởi động lại mỗi khi phần tử chuyển từ ẩn (display: none) sang hiện. */
+@keyframes motion-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes motion-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes motion-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes motion-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+@keyframes motion-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+@keyframes motion-pop {
+  0% {
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+}
+@keyframes motion-highlight {
+  from {
+    background-color: var(--color-brand-50);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+@keyframes motion-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes motion-ring {
+  to {
+    stroke-dashoffset: 100;
+  }
+}
+@keyframes motion-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+.motion-drop {
+  animation: motion-drop 0.16s ease-out both;
+}
+.motion-rise {
+  animation: motion-rise 0.22s ease-out both;
+}
+.motion-fade {
+  animation: motion-fade 0.2s ease-out both;
+}
+.motion-scale-in {
+  animation: motion-scale-in 0.18s ease-out both;
+}
+.motion-slide-in {
+  animation: motion-slide-in 0.2s ease-out both;
+}
+.motion-pop {
+  animation: motion-pop 0.28s ease-out both;
+}
+.motion-highlight {
+  animation: motion-highlight 1.4s ease-out 0.15s both;
+}
+/* Điện thoại: hộp thoại trồi lên từ dưới; máy tính: phóng nhẹ ở giữa. */
+.motion-sheet {
+  animation: motion-rise 0.2s ease-out both;
+}
+@media (min-width: 640px) {
+  .motion-sheet {
+    animation-name: motion-scale-in;
+  }
+}
+/* Icon tự vẽ nét (dấu ✓ khi gửi form thành công). */
+.motion-draw :is(path, circle, polyline, line) {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: motion-draw 0.6s ease-out 0.15s forwards;
+}
+/* Skeleton: ánh sáng lướt qua thay vì nhấp nháy. */
+.skeleton {
+  background: linear-gradient(
+      90deg,
+      var(--color-line-soft) 30%,
+      #f8f9fb 50%,
+      var(--color-line-soft) 70%
+    )
+    0 0 / 300% 100%;
+  animation: motion-shimmer 1.4s ease-in-out infinite;
+}
+/* Chuyển trang (components/NavigationProgress.jsx): không fill-mode → hết animation thì không còn
+   transform trên #main. */
+@keyframes motion-page {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.page-enter {
+  animation: motion-page 0.22s ease-out;
+}
+
+/* Header dính: cuộn khỏi đầu trang thì viền dưới nhạt đi, hiện bóng đổ mềm (scroll-driven, không JS). */
+@keyframes header-lift {
+  to {
+    border-bottom-color: transparent;
+    box-shadow: 0 4px 16px rgba(10, 42, 94, 0.08);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .header-lift {
+    animation: header-lift linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 64px;
+  }
+}
+
+/* Viền focus (bàn phím) «khép» vào nút thay vì hiện phắt. */
+@keyframes focus-in {
+  from {
+    outline-offset: 6px;
+  }
+}
+:where(a, button, summary, [tabindex]):focus-visible {
+  animation: focus-in 0.15s ease-out;
+}
+
+/* Ô form báo lỗi khi bấm gửi: rung nhẹ 2 lần (components/UpdateRequestForm.jsx gắn .motion-shake). */
+@keyframes motion-shake {
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+.motion-shake {
+  animation: motion-shake 0.32s ease-in-out;
+}
+
+/* Chấm tỉnh trên bản đồ (components/VnDotMap.jsx). Đang chọn: cam, to hơn, có vòng sóng. */
+.map-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-brand);
+  opacity: 0.5;
+  transform: translate(-50%, -50%);
+  transition:
+    transform 0.15s ease-out,
+    background-color 0.15s ease-out,
+    opacity 0.15s ease-out;
+}
+.map-dot.is-on {
+  z-index: 1;
+  background: var(--color-cta);
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.6);
+}
+.map-dot.is-on::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 1.5px solid var(--color-cta);
+  border-radius: inherit;
+  animation: map-pulse 2.4s ease-out infinite;
+}
+@keyframes map-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+/* Trang chủ: rê chuột / focus tên tỉnh trong danh sách → chấm tỉnh đó sáng lên. Mã tỉnh theo danh mục 34
+   tỉnh/thành (lib/vn-map-points.js, sinh bằng scripts/gen-vn-dots.py). */
+.prov-map-scope:has([data-prov='01']:is(:hover, :focus-visible)) [data-map-prov='01'],
+.prov-map-scope:has([data-prov='04']:is(:hover, :focus-visible)) [data-map-prov='04'],
+.prov-map-scope:has([data-prov='08']:is(:hover, :focus-visible)) [data-map-prov='08'],
+.prov-map-scope:has([data-prov='10']:is(:hover, :focus-visible)) [data-map-prov='10'],
+.prov-map-scope:has([data-prov='11']:is(:hover, :focus-visible)) [data-map-prov='11'],
+.prov-map-scope:has([data-prov='12']:is(:hover, :focus-visible)) [data-map-prov='12'],
+.prov-map-scope:has([data-prov='14']:is(:hover, :focus-visible)) [data-map-prov='14'],
+.prov-map-scope:has([data-prov='19']:is(:hover, :focus-visible)) [data-map-prov='19'],
+.prov-map-scope:has([data-prov='20']:is(:hover, :focus-visible)) [data-map-prov='20'],
+.prov-map-scope:has([data-prov='22']:is(:hover, :focus-visible)) [data-map-prov='22'],
+.prov-map-scope:has([data-prov='24']:is(:hover, :focus-visible)) [data-map-prov='24'],
+.prov-map-scope:has([data-prov='25']:is(:hover, :focus-visible)) [data-map-prov='25'],
+.prov-map-scope:has([data-prov='31']:is(:hover, :focus-visible)) [data-map-prov='31'],
+.prov-map-scope:has([data-prov='33']:is(:hover, :focus-visible)) [data-map-prov='33'],
+.prov-map-scope:has([data-prov='37']:is(:hover, :focus-visible)) [data-map-prov='37'],
+.prov-map-scope:has([data-prov='38']:is(:hover, :focus-visible)) [data-map-prov='38'],
+.prov-map-scope:has([data-prov='40']:is(:hover, :focus-visible)) [data-map-prov='40'],
+.prov-map-scope:has([data-prov='42']:is(:hover, :focus-visible)) [data-map-prov='42'],
+.prov-map-scope:has([data-prov='45']:is(:hover, :focus-visible)) [data-map-prov='45'],
+.prov-map-scope:has([data-prov='46']:is(:hover, :focus-visible)) [data-map-prov='46'],
+.prov-map-scope:has([data-prov='48']:is(:hover, :focus-visible)) [data-map-prov='48'],
+.prov-map-scope:has([data-prov='51']:is(:hover, :focus-visible)) [data-map-prov='51'],
+.prov-map-scope:has([data-prov='52']:is(:hover, :focus-visible)) [data-map-prov='52'],
+.prov-map-scope:has([data-prov='56']:is(:hover, :focus-visible)) [data-map-prov='56'],
+.prov-map-scope:has([data-prov='66']:is(:hover, :focus-visible)) [data-map-prov='66'],
+.prov-map-scope:has([data-prov='68']:is(:hover, :focus-visible)) [data-map-prov='68'],
+.prov-map-scope:has([data-prov='75']:is(:hover, :focus-visible)) [data-map-prov='75'],
+.prov-map-scope:has([data-prov='79']:is(:hover, :focus-visible)) [data-map-prov='79'],
+.prov-map-scope:has([data-prov='80']:is(:hover, :focus-visible)) [data-map-prov='80'],
+.prov-map-scope:has([data-prov='86']:is(:hover, :focus-visible)) [data-map-prov='86'],
+.prov-map-scope:has([data-prov='87']:is(:hover, :focus-visible)) [data-map-prov='87'],
+.prov-map-scope:has([data-prov='89']:is(:hover, :focus-visible)) [data-map-prov='89'],
+.prov-map-scope:has([data-prov='92']:is(:hover, :focus-visible)) [data-map-prov='92'],
+.prov-map-scope:has([data-prov='96']:is(:hover, :focus-visible)) [data-map-prov='96'] {
+  z-index: 1;
+  background: var(--color-cta);
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(2);
+}
+
+/* Trồi lên khi cuộn tới: khối nằm dưới màn hình đầu trượt lên nhẹ khi cuộn vào. Dùng CSS scroll-driven
+   animation (không JS). Khối đã nằm trong màn hình lúc tải đã ở trạng thái cuối → không chậm LCP.
+   Hiện rõ hẳn khi phần tử đã lộ 120px (tính theo px để khối cao như bảng ngành không bị mờ lâu).
+   Trình duyệt chưa hỗ trợ / người dùng chọn giảm chuyển động: hiện bình thường. Không gắn lên ô quảng cáo. */
+/* Chỉ trượt + thu nhỏ, KHÔNG làm mờ: khối nằm dở ở mép dưới màn hình sẽ đứng ở trạng thái giữa chừng cho
+   tới khi cuộn — nếu mờ thì chữ lúc đó không đủ tương phản (Lighthouse/axe báo lỗi color-contrast). */
+@keyframes motion-reveal {
+  from {
+    transform: translateY(32px) scale(0.98);
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* fill-mode backwards (không phải both): trượt xong thì animation thôi tác động, phần tử được vẽ lại
+       như thường. Giữ trạng thái cuối khiến phần tử thành lớp vẽ riêng mãi, ở toạ độ lẻ (màn hình phóng
+       125%…) các đường kẻ 1px bên trong bị làm tròn mất. */
+    .reveal {
+      animation: motion-reveal linear backwards;
+      animation-timeline: view();
+      animation-range: entry 0% entry 120px;
+    }
+  }
+}
+
+/* Số điện thoại «chạy số» sau khi xem quảng cáo (components/RollingNumber.jsx): mỗi chữ số là một cột
+   10 số cuộn dọc rồi dừng ở số thật; --to do JS đặt theo độ dài cột. */
+@keyframes motion-roll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(var(--to));
+  }
+}
+.motion-roll {
+  animation: motion-roll 0.9s cubic-bezier(0.2, 0.7, 0.15, 1) both;
+}
+
+/* Nội dung mục thu gọn (<details>) hiện ra mượt khi mở. */
+details[open] > :not(summary) {
+  animation: motion-drop 0.16s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress::before {
+    width: 100%;
+    transform: none;
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,67 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { M } from '@/lib/messages';
+import { IconCheck, IconCopy } from './Icons';
+
+export async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      ta.remove();
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+}
+
+/** Nút sao chép icon; báo «Đã sao chép» qua aria-live. */
+export default function CopyButton({ text, label, onCopied, className = '' }) {
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return undefined;
+    const t = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(t);
+  }, [copied]);
+
+  return (
+    <button
+      type="button"
+      aria-label={copied ? M.company.copied : label}
+      title={label}
+      onClick={async () => {
+        if (await copyText(text)) {
+          setCopied(true);
+          onCopied?.();
+        }
+      }}
+      className={`relative inline-flex h-11 w-11 flex-none items-center justify-center rounded-md text-brand hover:bg-brand-50 ${className}`}
+    >
+      {copied ? <IconCheck size={18} className="motion-pop text-ok" /> : <IconCopy size={18} />}
+      <span aria-live="polite" className="sr-only">
+        {copied ? M.company.copied : ''}
+      </span>
+      {copied && (
+        <span
+          aria-hidden="true"
+          // Hiện bên trái nút, trong cùng hàng: bảng thông tin cắt phần tràn ra ngoài (bo góc) nên
+          // đặt phía trên nút sẽ bị che ở hàng đầu.
+          className="motion-fade pointer-events-none absolute top-1/2 right-full mr-1 -translate-y-1/2 rounded bg-navy px-2 py-1 text-xs whitespace-nowrap text-white"
+        >
+          {M.company.copied}
+        </span>
+      )}
+    </button>
+  );
+}

@@ -1,0 +1,206 @@
+[
+ {
+  "code": "79",
+  "name": "TP Hồ Chí Minh",
+  "slug": "ho-chi-minh",
+  "company_count": 54
+ },
+ {
+  "code": "01",
+  "name": "Hà Nội",
+  "slug": "ha-noi",
+  "company_count": 29
+ },
+ {
+  "code": "31",
+  "name": "Hải Phòng",
+  "slug": "hai-phong",
+  "company_count": 16
+ },
+ {
+  "code": "92",
+  "name": "Cần Thơ",
+  "slug": "can-tho",
+  "company_count": 14
+ },
+ {
+  "code": "38",
+  "name": "Thanh Hóa",
+  "slug": "thanh-hoa",
+  "company_count": 11
+ },
+ {
+  "code": "66",
+  "name": "Đắk Lắk",
+  "slug": "dak-lak",
+  "company_count": 10
+ },
+ {
+  "code": "75",
+  "name": "Đồng Nai",
+  "slug": "dong-nai",
+  "company_count": 8
+ },
+ {
+  "code": "33",
+  "name": "Hưng Yên",
+  "slug": "hung-yen",
+  "company_count": 8
+ },
+ {
+  "code": "24",
+  "name": "Bắc Ninh",
+  "slug": "bac-ninh",
+  "company_count": 7
+ },
+ {
+  "code": "48",
+  "name": "Đà Nẵng",
+  "slug": "da-nang",
+  "company_count": 7
+ },
+ {
+  "code": "80",
+  "name": "Tây Ninh",
+  "slug": "tay-ninh",
+  "company_count": 7
+ },
+ {
+  "code": "56",
+  "name": "Khánh Hòa",
+  "slug": "khanh-hoa",
+  "company_count": 6
+ },
+ {
+  "code": "40",
+  "name": "Nghệ An",
+  "slug": "nghe-an",
+  "company_count": 6
+ },
+ {
+  "code": "89",
+  "name": "An Giang",
+  "slug": "an-giang",
+  "company_count": 5
+ },
+ {
+  "code": "52",
+  "name": "Gia Lai",
+  "slug": "gia-lai",
+  "company_count": 5
+ },
+ {
+  "code": "46",
+  "name": "Huế",
+  "slug": "hue",
+  "company_count": 5
+ },
+ {
+  "code": "12",
+  "name": "Lai Châu",
+  "slug": "lai-chau",
+  "company_count": 5
+ },
+ {
+  "code": "10",
+  "name": "Lào Cai",
+  "slug": "lao-cai",
+  "company_count": 5
+ },
+ {
+  "code": "19",
+  "name": "Thái Nguyên",
+  "slug": "thai-nguyen",
+  "company_count": 5
+ },
+ {
+  "code": "68",
+  "name": "Lâm Đồng",
+  "slug": "lam-dong",
+  "company_count": 4
+ },
+ {
+  "code": "22",
+  "name": "Quảng Ninh",
+  "slug": "quang-ninh",
+  "company_count": 4
+ },
+ {
+  "code": "45",
+  "name": "Quảng Trị",
+  "slug": "quang-tri",
+  "company_count": 4
+ },
+ {
+  "code": "86",
+  "name": "Vĩnh Long",
+  "slug": "vinh-long",
+  "company_count": 4
+ },
+ {
+  "code": "04",
+  "name": "Cao Bằng",
+  "slug": "cao-bang",
+  "company_count": 3
+ },
+ {
+  "code": "96",
+  "name": "Cà Mau",
+  "slug": "ca-mau",
+  "company_count": 2
+ },
+ {
+  "code": "11",
+  "name": "Điện Biên",
+  "slug": "dien-bien",
+  "company_count": 2
+ },
+ {
+  "code": "42",
+  "name": "Hà Tĩnh",
+  "slug": "ha-tinh",
+  "company_count": 2
+ },
+ {
+  "code": "20",
+  "name": "Lạng Sơn",
+  "slug": "lang-son",
+  "company_count": 2
+ },
+ {
+  "code": "37",
+  "name": "Ninh Bình",
+  "slug": "ninh-binh",
+  "company_count": 2
+ },
+ {
+  "code": "14",
+  "name": "Sơn La",
+  "slug": "son-la",
+  "company_count": 2
+ },
+ {
+  "code": "08",
+  "name": "Tuyên Quang",
+  "slug": "tuyen-quang",
+  "company_count": 2
+ },
+ {
+  "code": "25",
+  "name": "Phú Thọ",
+  "slug": "phu-tho",
+  "company_count": 1
+ },
+ {
+  "code": "51",
+  "name": "Quảng Ngãi",
+  "slug": "quang-ngai",
+  "company_count": 1
+ },
+ {
+  "code": "87",
+  "name": "Đồng Tháp",
+  "slug": "dong-thap",
+  "company_count": 0
+ }
+]

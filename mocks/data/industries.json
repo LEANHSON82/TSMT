@@ -1,0 +1,202 @@
+[
+ {
+  "code": "4101",
+  "name": "Xây dựng nhà để ở",
+  "slug": "xay-dung-nha-de-o"
+ },
+ {
+  "code": "4102",
+  "name": "Xây dựng nhà không để ở",
+  "slug": "xay-dung-nha-khong-de-o"
+ },
+ {
+  "code": "4211",
+  "name": "Xây dựng công trình đường sắt",
+  "slug": "xay-dung-cong-trinh-duong-sat"
+ },
+ {
+  "code": "4321",
+  "name": "Lắp đặt hệ thống điện",
+  "slug": "lap-dat-he-thong-dien"
+ },
+ {
+  "code": "4322",
+  "name": "Lắp đặt hệ thống cấp, thoát nước, lò sưởi và điều hoà không khí",
+  "slug": "lap-dat-he-thong-cap-thoat-nuoc-lo-suoi-va-dieu-hoa-khong-khi"
+ },
+ {
+  "code": "4330",
+  "name": "Hoàn thiện công trình xây dựng",
+  "slug": "hoan-thien-cong-trinh-xay-dung"
+ },
+ {
+  "code": "4390",
+  "name": "Hoạt động xây dựng chuyên dụng khác",
+  "slug": "hoat-dong-xay-dung-chuyen-dung-khac"
+ },
+ {
+  "code": "2011",
+  "name": "Sản xuất hóa chất cơ bản",
+  "slug": "san-xuat-hoa-chat-co-ban"
+ },
+ {
+  "code": "1079",
+  "name": "Sản xuất thực phẩm khác chưa được phân vào đâu",
+  "slug": "san-xuat-thuc-pham-khac-chua-duoc-phan-vao-dau"
+ },
+ {
+  "code": "1410",
+  "name": "May trang phục (trừ trang phục từ da lông thú)",
+  "slug": "may-trang-phuc-tru-trang-phuc-tu-da-long-thu"
+ },
+ {
+  "code": "2511",
+  "name": "Sản xuất các cấu kiện kim loại",
+  "slug": "san-xuat-cac-cau-kien-kim-loai"
+ },
+ {
+  "code": "3312",
+  "name": "Sửa chữa máy móc, thiết bị",
+  "slug": "sua-chua-may-moc-thiet-bi"
+ },
+ {
+  "code": "4610",
+  "name": "Đại lý, môi giới, đấu giá hàng hóa",
+  "slug": "dai-ly-moi-gioi-dau-gia-hang-hoa"
+ },
+ {
+  "code": "4632",
+  "name": "Bán buôn thực phẩm",
+  "slug": "ban-buon-thuc-pham"
+ },
+ {
+  "code": "4641",
+  "name": "Bán buôn vải, hàng may mặc, giày dép",
+  "slug": "ban-buon-vai-hang-may-mac-giay-dep"
+ },
+ {
+  "code": "4651",
+  "name": "Bán buôn máy vi tính, thiết bị ngoại vi và phần mềm",
+  "slug": "ban-buon-may-vi-tinh-thiet-bi-ngoai-vi-va-phan-mem"
+ },
+ {
+  "code": "4659",
+  "name": "Bán buôn máy móc, thiết bị và phụ tùng máy khác",
+  "slug": "ban-buon-may-moc-thiet-bi-va-phu-tung-may-khac"
+ },
+ {
+  "code": "4663",
+  "name": "Bán buôn vật liệu, thiết bị lắp đặt khác trong xây dựng",
+  "slug": "ban-buon-vat-lieu-thiet-bi-lap-dat-khac-trong-xay-dung"
+ },
+ {
+  "code": "4690",
+  "name": "Bán buôn tổng hợp",
+  "slug": "ban-buon-tong-hop"
+ },
+ {
+  "code": "4752",
+  "name": "Bán lẻ đồ ngũ kim, sơn, kính và thiết bị lắp đặt khác trong xây dựng trong các cửa hàng chuyên doanh",
+  "slug": "ban-le-do-ngu-kim-son-kinh-va-thiet-bi-lap-dat-khac-trong-xay-dung-trong-cac-cua"
+ },
+ {
+  "code": "4791",
+  "name": "Bán lẻ theo yêu cầu đặt hàng qua bưu điện hoặc internet",
+  "slug": "ban-le-theo-yeu-cau-dat-hang-qua-buu-dien-hoac-internet"
+ },
+ {
+  "code": "4933",
+  "name": "Vận tải hàng hóa bằng đường bộ",
+  "slug": "van-tai-hang-hoa-bang-duong-bo"
+ },
+ {
+  "code": "5210",
+  "name": "Kho bãi và lưu giữ hàng hóa",
+  "slug": "kho-bai-va-luu-giu-hang-hoa"
+ },
+ {
+  "code": "5229",
+  "name": "Hoạt động dịch vụ hỗ trợ khác liên quan đến vận tải",
+  "slug": "hoat-dong-dich-vu-ho-tro-khac-lien-quan-den-van-tai"
+ },
+ {
+  "code": "5510",
+  "name": "Dịch vụ lưu trú ngắn ngày",
+  "slug": "dich-vu-luu-tru-ngan-ngay"
+ },
+ {
+  "code": "5610",
+  "name": "Nhà hàng và các dịch vụ ăn uống phục vụ lưu động",
+  "slug": "nha-hang-va-cac-dich-vu-an-uong-phuc-vu-luu-dong"
+ },
+ {
+  "code": "6201",
+  "name": "Lập trình máy vi tính",
+  "slug": "lap-trinh-may-vi-tinh"
+ },
+ {
+  "code": "6202",
+  "name": "Tư vấn máy vi tính và quản trị hệ thống máy vi tính",
+  "slug": "tu-van-may-vi-tinh-va-quan-tri-he-thong-may-vi-tinh"
+ },
+ {
+  "code": "6311",
+  "name": "Xử lý dữ liệu, cho thuê và các hoạt động liên quan",
+  "slug": "xu-ly-du-lieu-cho-thue-va-cac-hoat-dong-lien-quan"
+ },
+ {
+  "code": "6810",
+  "name": "Kinh doanh bất động sản, quyền sử dụng đất thuộc chủ sở hữu, chủ sử dụng hoặc đi thuê",
+  "slug": "kinh-doanh-bat-dong-san-quyen-su-dung-dat-thuoc-chu-so-huu-chu-su-dung-hoac-di-t"
+ },
+ {
+  "code": "6920",
+  "name": "Hoạt động liên quan đến kế toán, kiểm toán và tư vấn về thuế",
+  "slug": "hoat-dong-lien-quan-den-ke-toan-kiem-toan-va-tu-van-ve-thue"
+ },
+ {
+  "code": "7020",
+  "name": "Hoạt động tư vấn quản lý",
+  "slug": "hoat-dong-tu-van-quan-ly"
+ },
+ {
+  "code": "7110",
+  "name": "Hoạt động kiến trúc và tư vấn kỹ thuật có liên quan",
+  "slug": "hoat-dong-kien-truc-va-tu-van-ky-thuat-co-lien-quan"
+ },
+ {
+  "code": "7120",
+  "name": "Kiểm tra và phân tích kỹ thuật",
+  "slug": "kiem-tra-va-phan-tich-ky-thuat"
+ },
+ {
+  "code": "7310",
+  "name": "Quảng cáo",
+  "slug": "quang-cao"
+ },
+ {
+  "code": "7490",
+  "name": "Hoạt động chuyên môn, khoa học và công nghệ khác chưa được phân vào đâu",
+  "slug": "hoat-dong-chuyen-mon-khoa-hoc-va-cong-nghe-khac-chua-duoc-phan-vao-dau"
+ },
+ {
+  "code": "7911",
+  "name": "Đại lý du lịch",
+  "slug": "dai-ly-du-lich"
+ },
+ {
+  "code": "8299",
+  "name": "Hoạt động dịch vụ hỗ trợ kinh doanh khác còn lại chưa được phân vào đâu",
+  "slug": "hoat-dong-dich-vu-ho-tro-kinh-doanh-khac-con-lai-chua-duoc-phan-vao-dau"
+ },
+ {
+  "code": "8559",
+  "name": "Giáo dục khác chưa được phân vào đâu",
+  "slug": "giao-duc-khac-chua-duoc-phan-vao-dau"
+ },
+ {
+  "code": "0118",
+  "name": "Trồng rau, đậu các loại và trồng hoa",
+  "slug": "trong-rau-dau-cac-loai-va-trong-hoa"
+ }
+]

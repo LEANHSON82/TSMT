@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { startTransition, useEffect } from 'react';
-import { ErrorState } from '@/components/States';
+import ErrorState from '@/components/ErrorState';
 import { M } from '@/lib/messages';
 
 // Lỗi khi tải dữ liệu: câu thông báo + nút Thử lại (spec mục 3).

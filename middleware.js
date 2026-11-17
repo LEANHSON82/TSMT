@@ -14,9 +14,14 @@ import { toSlug } from './lib/slug.js';
 export const config = {
   runtime: 'nodejs',
   matcher: [
-    // Đường dẫn MỘT đoạn (chi tiết DN), trừ các trang/tệp có sẵn. Đoạn có dấu chấm là tệp tĩnh trong
-    // public/ (vn-dots.svg…) — slug DN không bao giờ có dấu chấm.
-    '/((?!_next|api|tinh|nganh|tim-kiem|doanh-nghiep-moi-thanh-lap|yeu-cau-cap-nhat|gioi-thieu|lien-he|dieu-khoan|chinh-sach-bao-mat|khong-tim-thay|sitemap|sitemaps|robots|icon|favicon)[^/.]+)',
+    // Đường dẫn MỘT đoạn (chi tiết DN), trừ các trang/tệp có sẵn (ảnh do Next sinh: icon, opengraph-image…). Đoạn có
+    // dấu chấm (/wp-login.php, /{mst}-{slug}.html) cũng vào đây để trả 404 / 301 thật — không rơi vào
+    // trang [mstSlug] (có loading.js nên đã gửi 200 trước khi biết là 404).
+    '/((?!_next|api|tinh|nganh|tim-kiem|doanh-nghiep-moi-thanh-lap|yeu-cau-cap-nhat|gioi-thieu|lien-he|dieu-khoan|chinh-sach-bao-mat|khong-tim-thay|sitemap|sitemaps|robots|icon|favicon|opengraph-image|twitter-image|apple-icon)[^/]+)',
+    // Đường dẫn có chữ hoa (link ngoài viết hoa) → 301 về chữ thường.
+    '/((?!_next|api)(?:.*[A-Z].*))',
+    // Truy cập thẳng trang 404 → trả đúng mã 404.
+    '/khong-tim-thay',
     '/tinh/:slug',
     '/nganh/:codeSlug',
     '/doanh-nghiep-moi-thanh-lap',
@@ -178,7 +183,22 @@ export async function middleware(request) {
   } catch {
     return notFound(request);
   }
+  // URL có chữ hoa → 301 về chữ thường (slug, tỉnh, ngành đều là chữ thường).
+  if (path !== path.toLowerCase()) {
+    const url = request.nextUrl.clone();
+    url.pathname = path.toLowerCase();
+    return NextResponse.redirect(url, 301);
+  }
   const parts = path.split('/').filter(Boolean);
+
+  if (parts.length === 1 && parts[0] === 'khong-tim-thay') return notFound(request);
+
+  // Một đoạn có dấu chấm: /{mst}-{slug}.html → 301 bỏ đuôi (rồi chuẩn hoá tiếp); còn lại → 404.
+  if (parts.length === 1 && parts[0].includes('.')) {
+    const stem = parts[0].replace(/\.(html?|php|aspx?)$/, '');
+    if (stem !== parts[0] && parseMstSlug(stem)) return redirect301(request, `/${stem}`);
+    return notFound(request);
+  }
 
   // Truy cập thẳng route nội bộ → 301 về URL công khai (tránh trùng nội dung).
   const qi = parts.indexOf('q');

@@ -1,4 +1,4 @@
-// Route nội bộ cho /tinh/{slug}?page=N (middleware.js rewrite vào đây; truy cập thẳng bị 301 về ?page=).
+// Route nội bộ cho /tinh/{slug}?page=N (rewrites() trong next.config.mjs chuyển vào đây; truy cập thẳng bị 301 về ?page=).
 import { notFound } from 'next/navigation';
 import { internalListQuery } from '@/lib/url';
 import { ProvinceList, provinceListMetadata } from '../../view';

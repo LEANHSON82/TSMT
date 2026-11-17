@@ -21,7 +21,7 @@ export default function Pagination({ page, totalPages, basePath, params = {} }) 
   if (totalPages <= 1) return null;
   const href = (p) => buildHref(basePath, { ...params, page: p });
   const box =
-    'inline-flex h-11 min-w-11 items-center justify-center rounded-md border px-3 text-[15px] font-semibold tabular-nums no-underline';
+    'press inline-flex h-11 min-w-11 items-center justify-center rounded-md border px-3 text-body font-semibold tabular-nums no-underline';
   return (
     <nav aria-label={M.pagination.label} className="flex justify-center">
       <ul className="flex flex-wrap items-center justify-center gap-1.5">

@@ -19,8 +19,11 @@ export async function newListMetadata({ searchParams }) {
   return {
     title: `${M.list.newCompanies.title}${where}${M.common.pageSuffix(page)}`,
     description: M.list.newCompanies.metaDescription(where),
+    // Lọc theo tỉnh: nội dung trùng y hệt /tinh/{slug} (cùng sắp xếp mới nhất) → canonical về trang tỉnh.
     alternates: {
-      canonical: buildHref('/doanh-nghiep-moi-thanh-lap', { tinh: province?.slug, page }),
+      canonical: province
+        ? buildHref(`/tinh/${province.slug}`, { page })
+        : buildHref('/doanh-nghiep-moi-thanh-lap', { page }),
     },
   };
 }

@@ -4,6 +4,7 @@ import { M } from '@/lib/messages';
 import CopyButton from './CopyButton';
 import PhoneReveal from './PhoneReveal';
 import StatusBadge from './StatusBadge';
+import { companyPath } from '@/lib/mst';
 import {
   IconBanknote,
   IconBuilding,
@@ -26,16 +27,16 @@ function Row({ icon: Icon, label, children, action, compact = false }) {
     <div
       className={`border-t border-line-soft px-4 py-3 first:border-t-0 md:grid md:grid-cols-[202px_minmax(0,1fr)] md:items-center md:gap-0 md:px-5 ${
         compact
-          ? 'grid grid-cols-[140px_minmax(0,1fr)] items-center gap-x-2'
+          ? 'grid grid-cols-[150px_minmax(0,1fr)] items-center gap-x-2'
           : 'flex flex-col gap-1'
       }`}
     >
-      <dt className="flex items-center gap-3 text-sm text-muted md:text-[15px]">
+      <dt className="flex items-center gap-2.5 text-sm text-muted md:gap-3 md:text-body">
         <Icon size={20} className="flex-none text-field" />
         {label}
       </dt>
       <dd className={`flex min-w-0 items-center gap-1 md:pl-0 ${compact ? '' : 'pl-8'}`}>
-        <div className="min-w-0 flex-1 text-[15px] leading-[22px] break-words text-ink">
+        <div className="min-w-0 flex-1 text-body leading-[22px] break-words text-ink">
           {children}
         </div>
         {action && <div className="-my-2.5 flex flex-none items-center">{action}</div>}
@@ -48,21 +49,20 @@ export default function CompanyInfoTable({ company: c, parent }) {
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address || '')}`;
   return (
     <dl className="overflow-hidden rounded-xl border border-line bg-white">
+      {/* Không compact: điện thoại để MST xuống dưới nhãn (đủ chỗ cho MST chi nhánh 14 ký tự + nút chép). */}
       <Row
-        compact
         icon={IconDoc}
         label={M.company.mst}
         action={<CopyButton text={c.mst} label={M.company.copyMst} />}
       >
-        <span className="text-[17px] font-semibold tracking-[0.02em] tabular-nums">{c.mst}</span>
+        <span className="text-lg font-semibold tracking-[0.02em] whitespace-nowrap tabular-nums">
+          {c.mst}
+        </span>
       </Row>
 
       {c.parent_mst && (
         <Row icon={IconBuilding} label={M.company.parent}>
-          <Link
-            href={parent ? `/${parent.mst}-${parent.slug}` : `/${c.parent_mst}`}
-            className="font-semibold"
-          >
+          <Link href={parent ? companyPath(parent) : `/${c.parent_mst}`} className="font-semibold">
             {parent?.name || c.parent_mst}
           </Link>
           <span className="ml-1 text-sm text-muted">
@@ -96,6 +96,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
         <Row compact icon={IconUser} label={M.company.representative}>
           <Link
             href={`/tim-kiem?q=${encodeURIComponent(c.representative)}`}
+            rel="nofollow"
             className="text-ink no-underline hover:text-brand"
           >
             {c.representative}

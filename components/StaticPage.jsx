@@ -31,7 +31,7 @@ export default function StaticPage({
                   <li key={s.id}>
                     <a
                       href={`#${s.id}`}
-                      className="flex min-h-11 items-center text-[15px] no-underline"
+                      className="flex min-h-11 items-center text-body no-underline"
                     >
                       {i + 1}. {s.title}
                     </a>
@@ -45,7 +45,7 @@ export default function StaticPage({
           <header className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-6">
               <div className="flex min-w-0 flex-col gap-2">
-                <h1 className="text-2xl leading-8 font-semibold text-navy md:text-[30px] md:leading-[38px]">
+                <h1 className="text-2xl leading-8 font-semibold text-navy md:text-3xl md:leading-[38px]">
                   {title}
                 </h1>
                 <p className="text-sm text-muted">{M.staticPage.updated(updated)}</p>

@@ -2,11 +2,12 @@
 
 // Bộ lọc danh sách (spec mục 3.2): đổi lọc thì cập nhật URL (giữ được khi chia sẻ link, khi bấm Back).
 // Là <form method="get"> thật nên vẫn chạy khi JS chưa tải; có JS thì tự áp dụng khi đổi lựa chọn.
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { M } from '@/lib/messages';
 import { buildHref } from '@/lib/url';
-import { startNavigation } from './NavigationProgress';
+import { armNavFallback, startNavigation } from './NavigationProgress';
 
 /**
  * fields: [{ name, label, value, allLabel, options: [{ value, label }], filter? }]
@@ -15,10 +16,37 @@ import { startNavigation } from './NavigationProgress';
  * Bộ lọc đang bật hiện thành thẻ có nút × (bấm để bỏ riêng bộ lọc đó), cả trên điện thoại khi bảng lọc
  * đang thu gọn.
  */
+// Ô vừa đổi trước khi chuyển trang — trang mới dựng lại bộ lọc thì đưa focus về đúng ô đó.
+let refocusName = null;
+const KEY_NAV = [
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'Home',
+  'End',
+  'PageUp',
+  'PageDown',
+];
+
 export default function ListFilters({ action, fields, hidden = {} }) {
   const router = useRouter();
   const formRef = useRef(null);
   const [open, setOpen] = useState(false);
+  // Chuột/chạm: đổi lựa chọn là áp dụng ngay. Bàn phím (mũi tên, gõ chữ): chỉ áp dụng khi Enter hoặc rời
+  // ô — không chuyển trang sau mỗi lần nhấn phím (WCAG 3.2.2).
+  const keyboardRef = useRef(false);
+  const pendingRef = useRef(null);
+  useEffect(() => {
+    if (!refocusName) return;
+    formRef.current?.querySelector(`[name="${refocusName}"]`)?.focus();
+    refocusName = null;
+  }, []);
+  const commit = (name) => {
+    pendingRef.current = null;
+    refocusName = name;
+    apply();
+  };
   const uid = useId();
   const isFilter = (f) => f.filter !== false;
   const activeCount = fields.filter((f) => f.value && isFilter(f)).length;
@@ -41,13 +69,8 @@ export default function ListFilters({ action, fields, hidden = {} }) {
     const href = buildHref(action, params);
     startNavigation();
     router.push(href);
-    // Dự phòng: router của Next đôi khi bỏ qua lệnh chuyển trang nếu gọi quá sớm sau khi trang vừa tải
-    // (lặp lại được ~1/10 lần trong test e2e). Sau 3 giây URL vẫn chưa đổi thì tải trang thường.
-    const target = new URL(href, window.location.href);
-    const key = (u) => `${u.pathname}?${[...u.searchParams].sort().join('&')}`; // bỏ qua khác biệt + / %20
-    setTimeout(() => {
-      if (key(new URL(window.location.href)) !== key(target)) window.location.assign(target.href);
-    }, 3000);
+    // Dự phòng khi router của Next bỏ qua lệnh chuyển trang cùng đường dẫn (xem NavigationProgress).
+    armNavFallback(href);
   }
 
   const summary = fields
@@ -55,9 +78,9 @@ export default function ListFilters({ action, fields, hidden = {} }) {
     .join(' · ');
 
   const controls = (
-    <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end md:gap-x-4">
+    <div className="grid gap-3 md:grid-cols-2 md:items-end md:gap-x-4 lg:grid-cols-4">
       {fields.map((f) => (
-        <div key={f.name} className="flex min-w-0 flex-col gap-1 md:w-60">
+        <div key={f.name} className="flex min-w-0 flex-col gap-1">
           <label htmlFor={`${uid}-${f.name}`} className="text-sm font-semibold text-ink-2">
             {f.label}
           </label>
@@ -65,8 +88,25 @@ export default function ListFilters({ action, fields, hidden = {} }) {
             id={`${uid}-${f.name}`}
             name={f.name}
             defaultValue={f.value || ''}
-            onChange={apply}
-            className="select-chevron h-11 w-full cursor-pointer rounded-md border border-field bg-white px-3 text-[15px] text-ink hover:border-ink-2"
+            onPointerDown={() => {
+              keyboardRef.current = false;
+            }}
+            onKeyDown={(e) => {
+              if (KEY_NAV.includes(e.key) || e.key.length === 1) keyboardRef.current = true;
+              if (e.key === 'Enter' && pendingRef.current === f.name) {
+                e.preventDefault();
+                commit(f.name);
+              }
+            }}
+            onChange={() => {
+              if (keyboardRef.current) pendingRef.current = f.name;
+              else commit(f.name);
+            }}
+            onBlur={() => {
+              keyboardRef.current = false;
+              if (pendingRef.current === f.name) commit(f.name);
+            }}
+            className="select-chevron h-11 w-full cursor-pointer rounded-md border border-field bg-white px-3 text-body text-ink hover:border-ink-2"
           >
             <option value="">{f.allLabel}</option>
             {f.options.map((o) => (
@@ -83,12 +123,12 @@ export default function ListFilters({ action, fields, hidden = {} }) {
         </button>
       </noscript>
       {activeCount > 0 && (
-        <a
+        <Link
           href={buildHref(action, { ...hidden, ...keep })}
-          className="inline-flex min-h-11 items-center text-[15px] font-semibold"
+          className="inline-flex min-h-11 items-center text-body font-semibold"
         >
           {M.list.clearFilter}
-        </a>
+        </Link>
       )}
     </div>
   );
@@ -134,10 +174,9 @@ export default function ListFilters({ action, fields, hidden = {} }) {
           {chips.map((c) => (
             <li key={c.name}>
               {/* Vùng bấm cao 44px (spec 7.3), phần nhìn thấy là viên thuốc gọn bên trong. */}
-              <a
+              <Link
                 href={c.href}
                 aria-label={M.list.removeFilter(c.label)}
-                onClick={() => startNavigation()}
                 className="group inline-flex min-h-11 items-center no-underline"
               >
                 <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-brand/30 bg-brand-50 pr-2.5 pl-3 text-sm font-semibold text-brand-hover group-hover:border-brand">
@@ -146,7 +185,7 @@ export default function ListFilters({ action, fields, hidden = {} }) {
                     ×
                   </span>
                 </span>
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

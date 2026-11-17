@@ -19,10 +19,13 @@ export default function IndustryTable({ industries }) {
 
   return (
     <div className="overflow-hidden rounded-xl border border-line bg-white">
-      <table id={tableId} className="w-full border-collapse text-sm md:text-[15px]">
+      <table id={tableId} className="w-full border-collapse text-sm md:text-body">
         <thead>
-          <tr className="bg-page text-left text-[13px] font-semibold text-ink-2">
-            <th scope="col" className="w-[72px] py-2.5 pr-2 pl-4 md:w-[120px] md:px-5 md:py-3">
+          <tr className="bg-page text-left text-meta font-semibold text-ink-2">
+            <th
+              scope="col"
+              className="w-[72px] py-2.5 pr-2 pl-4 whitespace-nowrap md:w-[120px] md:px-5 md:py-3"
+            >
               {M.company.industryCode}
             </th>
             <th scope="col" className="py-2.5 pr-4 pl-2 md:py-3 md:pr-5 md:pl-0">
@@ -69,7 +72,7 @@ export default function IndustryTable({ industries }) {
             aria-expanded={expanded}
             aria-controls={tableId}
             onClick={() => setExpanded((v) => !v)}
-            className="flex h-12 w-full items-center justify-center gap-1.5 rounded-md border-[1.5px] border-brand bg-white text-[15px] font-semibold text-brand hover:bg-brand-50 md:inline-flex md:h-11 md:w-auto md:px-4"
+            className="flex h-12 w-full items-center justify-center gap-1.5 rounded-md border-[1.5px] border-brand bg-white text-body font-semibold text-brand hover:bg-brand-50 md:inline-flex md:h-11 md:w-auto md:px-4"
           >
             {expanded ? M.company.showLessIndustries : M.company.showMoreIndustries(extra)}
             {expanded ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}

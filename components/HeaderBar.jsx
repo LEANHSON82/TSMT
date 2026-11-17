@@ -6,12 +6,13 @@
 // Máy tính: dropdown (Esc / bấm ra ngoài để đóng, focus quay về nút).
 // Điện thoại: menu toàn màn hình + danh sách con có nút «‹ Menu».
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { M } from '@/lib/messages';
 import { SITE_NAME } from '@/lib/site';
 import IndustryCode from './IndustryCode';
-import Logo from './Logo';
+import { trapTab } from './focusTrap';
+import Logo, { LogoMark } from './Logo';
 import SearchBox from './SearchBox';
 import {
   IconBriefcase,
@@ -25,6 +26,20 @@ import {
   IconMenu,
 } from './Icons';
 
+// Ô tìm trên header. Dưới 1024px ô hẹp: danh sách gợi ý rộng hết màn hình, ngay dưới header.
+const NAV_SEARCH = {
+  size: 'nav',
+  placeholder: M.search.placeholderHeader,
+  placeholderWide: M.search.placeholderNavWide,
+  listClassName:
+    'max-lg:fixed max-lg:inset-x-0 max-lg:top-14 max-lg:mt-0 md:max-lg:top-16 max-lg:rounded-none max-lg:border-x-0',
+};
+
+function SearchWithQuery() {
+  const q = useSearchParams().get('q') || '';
+  return <SearchBox key={q} defaultValue={q} {...NAV_SEARCH} />;
+}
+
 function SiteLogo() {
   return (
     <Link
@@ -32,7 +47,12 @@ function SiteLogo() {
       aria-label={`${SITE_NAME} — ${M.nav.home}`}
       className="inline-flex min-h-11 flex-none items-center no-underline"
     >
-      <Logo className="h-[22px] w-auto md:h-6" />
+      {/* Dưới 414px chỉ hiện biểu tượng (ô tìm bên cạnh có thêm ~70px). 1024–1279: thấp hơn một chút để
+          không chạm ô tìm (đặt tuyệt đối từ giữa trang − 380px). */}
+      <svg viewBox="0 0 48 48" aria-hidden="true" className="h-8 w-8 min-[414px]:hidden">
+        <LogoMark />
+      </svg>
+      <Logo className="h-7 w-auto max-[413px]:hidden md:h-8 lg:h-7 xl:h-8" />
     </Link>
   );
 }
@@ -53,14 +73,17 @@ function DesktopDropdown({ id, label, open, current, onToggle, onClose, children
         btnRef.current?.focus();
       }
     };
-    const onClick = (e) => {
-      if (!panelRef.current?.contains(e.target) && !btnRef.current?.contains(e.target)) onClose();
-    };
+    const outside = (t) => !panelRef.current?.contains(t) && !btnRef.current?.contains(t);
+    const onClick = (e) => outside(e.target) && onClose();
+    // Tab ra khỏi nút + bảng thì đóng bảng (không để focus đi vào nội dung nằm dưới bảng).
+    const onFocus = (e) => outside(e.target) && onClose();
     document.addEventListener('keydown', onKey);
     document.addEventListener('mousedown', onClick);
+    document.addEventListener('focusin', onFocus);
     return () => {
       document.removeEventListener('keydown', onKey);
       document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('focusin', onFocus);
     };
   }, [open, onClose]);
 
@@ -100,13 +123,18 @@ function MobileMenu({ provinces, industries, pathname, onClose }) {
   const [sub, setSub] = useState(null); // null | 'provinces' | 'industries'
   const closeRef = useRef(null);
   const backRef = useRef(null);
+  const panelRef = useRef(null);
 
   useEffect(() => {
     (sub ? backRef : closeRef).current?.focus();
   }, [sub]);
 
   useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose();
+    // Esc đóng; Tab không thoát ra nội dung trang đang bị menu che (spec 7.3).
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+      else trapTab(e, panelRef.current);
+    };
     document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -117,143 +145,159 @@ function MobileMenu({ provinces, industries, pathname, onClose }) {
   }, [onClose]);
 
   const itemCls =
-    'flex min-h-[60px] items-center gap-3.5 border-b border-line-soft px-4 text-[17px] font-semibold no-underline hover:bg-page';
+    'flex min-h-[60px] items-center gap-3.5 border-b border-line-soft px-4 text-lg font-semibold no-underline hover:bg-page';
   // Mục của trang đang xem: nền nhạt + vạch trái.
   const currentCls = 'bg-brand-50 text-brand shadow-[inset_3px_0_0_var(--color-brand)]';
   const cur = (on) => (on ? currentCls : 'text-navy');
 
   return (
-    <div
-      id="mobile-menu"
-      role="dialog"
-      aria-modal="true"
-      aria-label={
-        sub === 'provinces' ? M.nav.provinces : sub === 'industries' ? M.nav.industries : 'Menu'
-      }
-      className="motion-slide-in fixed inset-0 z-50 flex flex-col bg-white xl:hidden"
-    >
-      {sub ? (
-        <>
-          <div className="grid h-14 flex-none grid-cols-[96px_minmax(0,1fr)_96px] items-center border-b border-line px-2">
-            <button
-              ref={backRef}
-              type="button"
-              onClick={() => setSub(null)}
-              aria-label={M.nav.backToMain}
-              className="inline-flex h-11 items-center gap-0.5 justify-self-start rounded-md pr-2.5 pl-1 text-[15px] font-semibold text-brand"
-            >
-              <IconChevronLeft size={22} strokeWidth={1.8} />
-              {M.nav.backToMenu}
-            </button>
-            <h2 className="truncate text-center text-[17px] font-semibold text-navy">
-              {sub === 'provinces' ? M.nav.provinces : M.nav.industries}
-            </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label={M.nav.closeMenu}
-              className="inline-flex h-11 w-11 items-center justify-center justify-self-end rounded-md text-navy"
-            >
-              <IconClose size={24} strokeWidth={1.6} />
-            </button>
-          </div>
-          <p className="px-4 pt-3 pb-2 text-[13px] text-muted">
-            {sub === 'provinces' ? M.nav.provincesNote(provinces.length) : M.nav.industriesSubNote}
-          </p>
-          <nav
-            aria-label={sub === 'provinces' ? M.nav.provinces : M.nav.industries}
-            className="min-h-0 flex-1 overflow-y-auto"
-          >
-            <ul>
+    <>
+      {/* Máy tính bảng (768–1279px): menu là ngăn kéo 400px bên phải, nền mờ phía sau (bấm để đóng).
+        Điện thoại: phủ toàn màn hình. */}
+      <div
+        aria-hidden="true"
+        onClick={onClose}
+        className="motion-fade fixed inset-0 z-50 hidden bg-[rgba(10,20,40,0.45)] md:block xl:hidden"
+      />
+      <div
+        id="mobile-menu"
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={
+          sub === 'provinces'
+            ? M.nav.provinces
+            : sub === 'industries'
+              ? M.nav.industries
+              : M.nav.menu
+        }
+        className="motion-slide-in fixed inset-0 z-50 flex flex-col bg-white md:left-auto md:w-[400px] md:border-l md:border-line md:shadow-[-8px_0_24px_rgba(10,42,94,0.12)] xl:hidden"
+      >
+        {sub ? (
+          <>
+            <div className="grid h-14 flex-none grid-cols-[96px_minmax(0,1fr)_96px] items-center border-b border-line px-2 md:h-16">
+              <button
+                ref={backRef}
+                type="button"
+                onClick={() => setSub(null)}
+                aria-label={M.nav.backToMain}
+                className="inline-flex h-11 items-center gap-0.5 justify-self-start rounded-md pr-2.5 pl-1 text-body font-semibold text-brand"
+              >
+                <IconChevronLeft size={22} strokeWidth={1.8} />
+                {M.nav.backToMenu}
+              </button>
+              <h2 className="truncate text-center text-lg font-semibold text-navy">
+                {sub === 'provinces' ? M.nav.provinces : M.nav.industries}
+              </h2>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label={M.nav.closeMenu}
+                className="inline-flex h-11 w-11 items-center justify-center justify-self-end rounded-md text-navy"
+              >
+                <IconClose size={24} strokeWidth={1.6} />
+              </button>
+            </div>
+            <p className="px-4 pt-3 pb-2 text-meta text-muted">
               {sub === 'provinces'
-                ? provinces.map((p) => (
-                    <li key={p.code}>
-                      <Link
-                        href={`/tinh/${p.slug}`}
-                        onClick={onClose}
-                        aria-current={pathname === `/tinh/${p.slug}` ? 'page' : undefined}
-                        className={`flex min-h-[52px] items-center justify-between border-t border-line-soft px-4 text-base text-navy no-underline ${cur(pathname === `/tinh/${p.slug}`)}`}
-                      >
-                        {p.name}
-                        <IconChevronRight size={18} className="text-muted" />
-                      </Link>
-                    </li>
-                  ))
-                : industries.map((n) => (
-                    <li key={n.code}>
-                      <Link
-                        href={n.href}
-                        onClick={onClose}
-                        className="flex min-h-[60px] items-center gap-3 border-t border-line-soft px-4 py-2 text-navy no-underline"
-                      >
-                        <IndustryCode code={n.code} />
-                        <span className="flex-1 text-[15px] leading-[21px]">{n.name}</span>
-                        <IconChevronRight size={18} className="flex-none text-muted" />
-                      </Link>
-                    </li>
-                  ))}
-            </ul>
-          </nav>
-        </>
-      ) : (
-        <>
-          <div className="flex h-14 flex-none items-center justify-between border-b border-line pr-2 pl-4">
-            <SiteLogo />
-            <button
-              ref={closeRef}
-              type="button"
-              onClick={onClose}
-              aria-label={M.nav.closeMenu}
-              aria-expanded="true"
-              aria-controls="mobile-menu"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-brand-50 text-navy"
+                ? M.nav.provincesNote(provinces.length)
+                : M.nav.industriesSubNote}
+            </p>
+            <nav
+              aria-label={sub === 'provinces' ? M.nav.provinces : M.nav.industries}
+              className="min-h-0 flex-1 overflow-y-auto"
             >
-              <IconClose size={24} strokeWidth={1.6} />
-            </button>
-          </div>
-          <nav aria-label={M.nav.mainMenu} className="flex flex-1 flex-col py-2">
-            <button
-              type="button"
-              className={`${itemCls} w-full text-left ${cur(pathname.startsWith('/tinh/'))}`}
-              onClick={() => setSub('provinces')}
-            >
-              <IconMapPin size={22} className="flex-none text-brand" />
-              <span className="flex-1">{M.nav.provinces}</span>
-              <IconChevronRight size={18} className="text-muted" />
-            </button>
-            <button
-              type="button"
-              className={`${itemCls} w-full text-left ${cur(pathname.startsWith('/nganh/'))}`}
-              onClick={() => setSub('industries')}
-            >
-              <IconBriefcase size={22} className="flex-none text-brand" />
-              <span className="flex-1">{M.nav.industries}</span>
-              <IconChevronRight size={18} className="text-muted" />
-            </button>
-            <Link
-              href="/doanh-nghiep-moi-thanh-lap"
-              onClick={onClose}
-              aria-current={pathname === '/doanh-nghiep-moi-thanh-lap' ? 'page' : undefined}
-              className={`${itemCls} ${cur(pathname === '/doanh-nghiep-moi-thanh-lap')}`}
-            >
-              <IconCalendarPlus size={22} className="flex-none text-brand" />
-              <span className="flex-1">{M.nav.newCompanies}</span>
-              <IconChevronRight size={18} className="text-muted" />
-            </Link>
-            <Link
-              href="/yeu-cau-cap-nhat"
-              onClick={onClose}
-              aria-current={pathname === '/yeu-cau-cap-nhat' ? 'page' : undefined}
-              className={`${itemCls} ${cur(pathname === '/yeu-cau-cap-nhat')}`}
-            >
-              <IconEyeOff size={22} className="flex-none text-brand" />
-              <span className="flex-1">{M.nav.updateRequest}</span>
-              <IconChevronRight size={18} className="text-muted" />
-            </Link>
-          </nav>
-        </>
-      )}
-    </div>
+              <ul>
+                {sub === 'provinces'
+                  ? provinces.map((p) => (
+                      <li key={p.code}>
+                        <Link
+                          href={`/tinh/${p.slug}`}
+                          onClick={onClose}
+                          aria-current={pathname === `/tinh/${p.slug}` ? 'page' : undefined}
+                          className={`flex min-h-[52px] items-center justify-between border-t border-line-soft px-4 text-base text-navy no-underline ${cur(pathname === `/tinh/${p.slug}`)}`}
+                        >
+                          {p.name}
+                          <IconChevronRight size={18} className="text-muted" />
+                        </Link>
+                      </li>
+                    ))
+                  : industries.map((n) => (
+                      <li key={n.code}>
+                        <Link
+                          href={n.href}
+                          onClick={onClose}
+                          className="flex min-h-[60px] items-center gap-3 border-t border-line-soft px-4 py-2 text-navy no-underline"
+                        >
+                          <IndustryCode code={n.code} />
+                          <span className="flex-1 text-body leading-[21px]">{n.name}</span>
+                          <IconChevronRight size={18} className="flex-none text-muted" />
+                        </Link>
+                      </li>
+                    ))}
+              </ul>
+            </nav>
+          </>
+        ) : (
+          <>
+            <div className="flex h-14 flex-none items-center justify-between border-b border-line pr-2 pl-4 md:h-16 md:px-4">
+              <SiteLogo />
+              <button
+                ref={closeRef}
+                type="button"
+                onClick={onClose}
+                aria-label={M.nav.closeMenu}
+                aria-expanded="true"
+                aria-controls="mobile-menu"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-brand-50 text-navy"
+              >
+                <IconClose size={24} strokeWidth={1.6} />
+              </button>
+            </div>
+            <nav aria-label={M.nav.mainMenu} className="flex flex-1 flex-col py-2">
+              <button
+                type="button"
+                className={`${itemCls} w-full text-left ${cur(pathname.startsWith('/tinh/'))}`}
+                onClick={() => setSub('provinces')}
+              >
+                <IconMapPin size={22} className="flex-none text-brand" />
+                <span className="flex-1">{M.nav.provinces}</span>
+                <IconChevronRight size={18} className="text-muted" />
+              </button>
+              <button
+                type="button"
+                className={`${itemCls} w-full text-left ${cur(pathname.startsWith('/nganh/'))}`}
+                onClick={() => setSub('industries')}
+              >
+                <IconBriefcase size={22} className="flex-none text-brand" />
+                <span className="flex-1">{M.nav.industries}</span>
+                <IconChevronRight size={18} className="text-muted" />
+              </button>
+              <Link
+                href="/doanh-nghiep-moi-thanh-lap"
+                onClick={onClose}
+                aria-current={pathname === '/doanh-nghiep-moi-thanh-lap' ? 'page' : undefined}
+                className={`${itemCls} ${cur(pathname === '/doanh-nghiep-moi-thanh-lap')}`}
+              >
+                <IconCalendarPlus size={22} className="flex-none text-brand" />
+                <span className="flex-1">{M.nav.newCompanies}</span>
+                <IconChevronRight size={18} className="text-muted" />
+              </Link>
+              <Link
+                href="/yeu-cau-cap-nhat"
+                onClick={onClose}
+                aria-current={pathname === '/yeu-cau-cap-nhat' ? 'page' : undefined}
+                className={`${itemCls} ${cur(pathname === '/yeu-cau-cap-nhat')}`}
+              >
+                <IconEyeOff size={22} className="flex-none text-brand" />
+                <span className="flex-1">{M.nav.updateRequest}</span>
+                <IconChevronRight size={18} className="text-muted" />
+              </Link>
+            </nav>
+          </>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -308,13 +352,15 @@ export default function HeaderBar({ provinces, industries }) {
             showHeaderSearch ? 'opacity-100' : 'invisible opacity-0'
           }`}
         >
-          <SearchBox
-            size="nav"
-            placeholder={M.search.placeholderHeader}
-            placeholderWide={M.search.placeholderNavWide}
-            // Dưới 1024px ô trong header hẹp: danh sách gợi ý rộng hết màn hình, ngay dưới header.
-            listClassName="max-lg:fixed max-lg:inset-x-0 max-lg:top-14 max-lg:mt-0 md:max-lg:top-16 max-lg:rounded-none max-lg:border-x-0"
-          />
+          {/* Trang kết quả: ô giữ sẵn từ khoá đang tìm. useSearchParams chỉ chạy trên /tim-kiem (trang vốn
+              render động) — các trang tĩnh/ISR khác không bị chuyển sang render phía trình duyệt. */}
+          {pathname === '/tim-kiem' ? (
+            <Suspense fallback={<SearchBox {...NAV_SEARCH} />}>
+              <SearchWithQuery />
+            </Suspense>
+          ) : (
+            <SearchBox {...NAV_SEARCH} />
+          )}
         </div>
 
         <nav aria-label={M.nav.mainMenu} className="ml-auto hidden items-center xl:flex">
@@ -327,10 +373,9 @@ export default function HeaderBar({ provinces, industries }) {
             onClose={closeDropdown}
           >
             <div className="mb-3 flex items-baseline gap-3">
-              <h2 className="text-base font-semibold text-navy">{M.nav.provincesHeading}</h2>
-              <span className="text-[13px] text-muted">
-                {M.nav.provincesNote(provinces.length)}
-              </span>
+              {/* Không dùng h2: bảng nằm trước H1 của trang (sai thứ bậc heading). */}
+              <p className="text-base font-semibold text-navy">{M.nav.provincesHeading}</p>
+              <span className="text-meta text-muted">{M.nav.provincesNote(provinces.length)}</span>
             </div>
             <ul className="grid grid-cols-4 gap-x-4 gap-y-0.5 lg:grid-cols-6">
               {sortedProvinces.map((p) => (
@@ -338,7 +383,7 @@ export default function HeaderBar({ provinces, industries }) {
                   <Link
                     href={`/tinh/${p.slug}`}
                     aria-current={pathname === `/tinh/${p.slug}` ? 'page' : undefined}
-                    className={`flex min-h-11 items-center rounded-md px-2.5 text-[15px] no-underline ${
+                    className={`flex min-h-11 items-center rounded-md px-2.5 text-body no-underline ${
                       pathname === `/tinh/${p.slug}`
                         ? 'bg-brand-50 font-semibold text-brand'
                         : 'hover:bg-page'
@@ -359,8 +404,8 @@ export default function HeaderBar({ provinces, industries }) {
             onClose={closeDropdown}
           >
             <div className="mb-3 flex items-baseline gap-3">
-              <h2 className="text-base font-semibold text-navy">{M.nav.industriesHeading}</h2>
-              <span className="text-[13px] text-muted">{M.nav.industriesNote}</span>
+              <p className="text-base font-semibold text-navy">{M.nav.industriesHeading}</p>
+              <span className="text-meta text-muted">{M.nav.industriesNote}</span>
             </div>
             <ul className="grid grid-cols-2 gap-x-8 gap-y-0.5">
               {industries.map((n) => (
@@ -370,7 +415,7 @@ export default function HeaderBar({ provinces, industries }) {
                     className="flex min-h-12 items-center gap-3 rounded-md px-2.5 py-1 no-underline hover:bg-page"
                   >
                     <IndustryCode code={n.code} />
-                    <span className="text-[15px] leading-[21px]">{n.name}</span>
+                    <span className="text-body leading-[21px]">{n.name}</span>
                   </Link>
                 </li>
               ))}

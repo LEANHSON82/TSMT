@@ -1,4 +1,4 @@
-// Route nội bộ cho /doanh-nghiep-moi-thanh-lap?tinh=&page= (middleware.js rewrite vào đây).
+// Route nội bộ cho /doanh-nghiep-moi-thanh-lap?tinh=&page= (rewrites() trong next.config.mjs chuyển vào đây).
 import { notFound } from 'next/navigation';
 import { internalListQuery } from '@/lib/url';
 import { NewCompaniesList, newListMetadata } from '../../../view';

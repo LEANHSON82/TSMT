@@ -1,4 +1,4 @@
-// Route nội bộ cho /nganh/{ma-nganh}-{slug}?tinh=&page= (middleware.js rewrite vào đây).
+// Route nội bộ cho /nganh/{ma-nganh}-{slug}?tinh=&page= (rewrites() trong next.config.mjs chuyển vào đây).
 import { notFound } from 'next/navigation';
 import { internalListQuery } from '@/lib/url';
 import { IndustryList, industryListMetadata } from '../../../view';

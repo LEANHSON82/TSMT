@@ -26,6 +26,9 @@ import { getTurnstileToken } from '@/lib/turnstile';
 
 const MAX_AUTO_RETRIES = 2;
 const MAX_RENEWALS = 2;
+/** Chuỗi có ít nhất 6 chữ số (số điện thoại hợp lệ — loại «undefined», chuỗi rỗng…). */
+const isPhone = (v) => typeof v === 'string' && /\d{6}/.test(v.replace(/\D/g, ''));
+
 const storageKey = (mst) => `phone:${mst}`;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -55,7 +58,7 @@ export function usePhoneUnlock(mst) {
   // Trong cùng tab, quay lại DN đã mở thì không phải xem lại video (sessionStorage theo MST).
   useEffect(() => {
     const saved = safeSession.get(storageKey(mst));
-    if (saved) {
+    if (isPhone(saved)) {
       setPhone(saved);
       setState('success');
     }
@@ -101,6 +104,8 @@ export function usePhoneUnlock(mst) {
           ad_result: adResultRef.current,
           turnstile_token: token,
         });
+        // Phản hồi 200 nhưng không có số hợp lệ → coi như lỗi mạng (tự thử lại / nút «Thử lại»).
+        if (!isPhone(res?.phone)) throw Object.assign(new Error('bad_response'), { status: 0 });
         const adType = adResultRef.current?.type;
         unlockRef.current = null;
         adResultRef.current = null;
@@ -146,10 +151,26 @@ export function usePhoneUnlock(mst) {
     }
     setState('ad');
     const onShown = (adType) => track('phone_unlock_ad_shown', { mst, ad_type: adType });
-    let result = await showRewarded({ onShown: () => onShown(REWARDED_AD_TYPE) });
+    // Script quảng cáo ném lỗi (GPT thật) → coi như không có quảng cáo, chuyển sang quảng cáo dự phòng;
+    // dự phòng cũng lỗi / không hiện được → báo lỗi có nút «Thử lại», không kẹt ở trạng thái «Đang tải».
+    let result;
+    try {
+      result = await showRewarded({ onShown: () => onShown(REWARDED_AD_TYPE) });
+    } catch {
+      result = { status: 'no_fill' };
+    }
     if (result.status === 'no_fill') {
       track('phone_unlock_no_fill', { mst, device: getDevice() });
-      result = await showFallback({ onShown: () => onShown('fallback') });
+      try {
+        result = await showFallback({ onShown: () => onShown('fallback') });
+      } catch {
+        result = { status: 'error' };
+      }
+      if (result.status === 'no_fill' || result.status === 'error') {
+        unlockRef.current = null;
+        fail({ status: 0, code: 'ad_unavailable' });
+        return;
+      }
     }
     if (result.status === 'blocked') {
       track('phone_unlock_blocked', { mst });

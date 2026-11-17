@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePhoneUnlock } from '@/hooks/usePhoneUnlock';
 import { track } from '@/lib/analytics';
 import { M } from '@/lib/messages';
-import AdOverlayHost from './AdOverlayHost';
+import dynamic from 'next/dynamic';
 import { copyText } from './CopyButton';
 import Modal from './Modal';
 import RollingNumber from './RollingNumber';
@@ -20,6 +20,8 @@ import {
   IconRefresh,
   IconZalo,
 } from './Icons';
+
+const AdOverlayHost = dynamic(() => import('./AdOverlayHost'), { ssr: false });
 
 function Spinner() {
   return (
@@ -58,6 +60,11 @@ function PhoneUnlocker({ mst, masked }) {
   const { state, phone, retryAt, start, confirm, cancel, retry } = usePhoneUnlock(mst);
   const minutesLeft = useMinutesLeft(state === 'rate_limited' ? retryAt : null);
   const confirmBtnRef = useRef(null);
+  // Đã bấm «Xem số điện thoại» ít nhất một lần → giữ lớp quảng cáo trong trang.
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (state !== 'idle' && state !== 'success') setArmed(true);
+  }, [state]);
   const [copied, setCopied] = useState(false);
   // Chỉ chạy hiệu ứng hiện số khi người dùng vừa đi qua luồng xem quảng cáo trong lần mở trang này,
   // không chạy khi số được khôi phục từ sessionStorage.
@@ -72,6 +79,19 @@ function PhoneUnlocker({ mst, masked }) {
     return () => clearTimeout(t);
   }, [copied]);
 
+  // Vừa xem xong quảng cáo → đưa focus vào khối số (nút cũ đã biến mất, không để focus rơi về <body>).
+  const revealedRef = useRef(null);
+  useEffect(() => {
+    if (state === 'success' && playedRef.current) revealedRef.current?.focus();
+  }, [state]);
+
+  // Vùng thông báo cố định (luôn có trong DOM ở cả hai nhánh) để trình đọc màn hình đọc số khi hiện ra.
+  const live = (
+    <p aria-live="polite" className="sr-only">
+      {state === 'success' && phone ? M.phone.revealedSr(phone) : ''}
+    </p>
+  );
+
   if (state === 'success' && phone) {
     const digits = phone.replace(/\D/g, '');
     const act = (action) => track('phone_action', { mst, action });
@@ -81,61 +101,67 @@ function PhoneUnlocker({ mst, masked }) {
     const rise = animate ? 'motion-rise' : '';
     const delay = (i) => (animate ? { animationDelay: `${i * 60}ms` } : undefined);
     const btn =
-      'inline-flex h-11 items-center justify-center gap-1 rounded-md border-[1.5px] border-brand bg-white px-1.5 text-sm font-semibold whitespace-nowrap text-brand no-underline hover:bg-brand-50 sm:gap-1.5 sm:px-3 sm:text-[15px]';
+      // press: nhấn thu nhỏ như <button>; sm:min-w: «Sao chép» ↔ «Đã sao chép» không làm xô hàng nút.
+      'press inline-flex h-11 items-center justify-center gap-1 rounded-md border-[1.5px] border-brand bg-white px-1.5 text-sm font-semibold whitespace-nowrap text-brand no-underline hover:bg-brand-50 sm:min-w-[150px] sm:gap-1.5 sm:px-3 sm:text-body';
     return (
-      <div
-        className={`flex flex-col gap-2.5 ${animate ? 'motion-rise' : ''}`}
-        data-testid="phone-revealed"
-      >
-        <span
-          className={`-mx-1.5 w-fit rounded px-1.5 text-lg font-semibold tracking-[0.02em] text-ink tabular-nums ${animate ? 'motion-highlight' : ''}`}
+      <>
+        {live}
+        <div
+          className={`flex flex-col gap-2.5 ${animate ? 'motion-rise' : ''}`}
+          data-testid="phone-revealed"
+          ref={revealedRef}
+          tabIndex={-1}
         >
-          {animate ? <RollingNumber value={phone} /> : phone}
-        </span>
-        <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
-          <a
-            href={`tel:${digits}`}
-            onClick={() => act('call')}
-            className={`${btn} ${rise}`}
-            style={delay(1)}
+          <span
+            className={`-mx-1.5 w-fit rounded px-1.5 text-lg font-semibold tracking-[0.02em] text-ink tabular-nums ${animate ? 'motion-highlight' : ''}`}
           >
-            <IconPhone size={16} />
-            {M.phone.call}
-          </a>
-          <button
-            type="button"
-            className={`${btn} ${rise}`}
-            style={delay(2)}
-            onClick={async () => {
-              if (await copyText(phone)) {
-                setCopied(true);
-                act('copy');
-              }
-            }}
-          >
-            {copied ? (
-              <IconCheck size={16} className="motion-pop text-ok" />
-            ) : (
-              <IconCopy size={16} />
-            )}
-            {copied ? M.phone.copiedShort : M.phone.copy}
-          </button>
-          <a
-            href={`https://zalo.me/${digits}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => act('zalo')}
-            className={`${btn} ${rise}`}
-            style={delay(3)}
-          >
-            <IconZalo size={16} />
-            {M.phone.zalo}
-          </a>
+            {animate ? <RollingNumber value={phone} /> : phone}
+          </span>
+          <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
+            <a
+              href={`tel:${digits}`}
+              onClick={() => act('call')}
+              className={`${btn} ${rise}`}
+              style={delay(1)}
+            >
+              <IconPhone size={16} />
+              {M.phone.call}
+            </a>
+            <button
+              type="button"
+              className={`${btn} ${rise}`}
+              style={delay(2)}
+              onClick={async () => {
+                if (await copyText(phone)) {
+                  setCopied(true);
+                  act('copy');
+                }
+              }}
+            >
+              {copied ? (
+                <IconCheck size={16} className="motion-pop text-ok" />
+              ) : (
+                <IconCopy size={16} />
+              )}
+              {copied ? M.phone.copiedShort : M.phone.copy}
+            </button>
+            <a
+              href={`https://zalo.me/${digits}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => act('zalo')}
+              className={`${btn} ${rise}`}
+              style={delay(3)}
+            >
+              <IconZalo size={16} />
+              {M.phone.zalo}
+            </a>
+          </div>
+          <span aria-live="polite" className="sr-only">
+            {copied ? M.company.copied : ''}
+          </span>
         </div>
-        <span aria-live="polite" className="sr-only">
-          {copied ? M.company.copied : ''}
-        </span>
-      </div>
+      </>
     );
   }
 
@@ -174,86 +200,93 @@ function PhoneUnlocker({ mst, masked }) {
     icon = <IconClock size={18} />;
     note = M.phone.rateLimited(minutesLeft);
   }
-  const enabled = ['idle', 'closed', 'error', 'blocked'].includes(state);
 
   return (
-    <div>
-      {/* Số che ở cột giá trị; nút «▶ Xem số điện thoại» (màu cam — hành động chính như nút «Tìm»)
+    <>
+      {live}
+      <div>
+        {/* Số che ở cột giá trị; nút «▶ Xem số điện thoại» (màu cam — hành động chính như nút «Tìm»)
           + dòng nhỏ (spec mục 4.1) ở cột thao tác
           bên phải như «Xem bản đồ». Điện thoại: nút viền rộng hết chiều ngang dưới số (spec mục 7.3). */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-4">
-        <span
-          className="font-semibold tracking-[0.04em] text-ink tabular-nums"
-          aria-label={M.phone.maskedLabel(masked)}
-        >
-          {masked}
-        </span>
-        <div className="flex flex-col gap-1 md:items-end">
-          <button
-            type="button"
-            onClick={onClick}
-            disabled={!enabled}
-            aria-describedby={`phone-note-${mst}`}
-            aria-busy={busy}
-            className="inline-flex h-11 w-full flex-none items-center justify-center gap-1.5 rounded-md border-[1.5px] border-cta px-3 text-sm font-semibold text-cta hover:bg-cta-50 disabled:cursor-not-allowed disabled:border-line disabled:text-muted disabled:hover:bg-transparent md:-my-1 md:w-auto md:border-0 md:px-2"
-          >
-            {icon}
-            {label}
-          </button>
-          <span
-            id={`phone-note-${mst}`}
-            aria-live="polite"
-            className={`text-[13px] md:max-w-[420px] md:px-2 md:text-right ${noteTone}`}
-          >
-            {note}
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-4">
+          <span className="font-semibold tracking-[0.02em] text-ink tabular-nums">
+            <span aria-hidden="true">{masked}</span>
+            <span className="sr-only">{M.phone.maskedLabel(masked)}</span>
           </span>
-        </div>
-      </div>
-
-      {/* Chặn quảng cáo: hướng dẫn ngắn (spec mục 4.2) thu gọn, bấm mới mở. */}
-      {state === 'blocked' && (
-        <details className="mt-2 text-[13px] text-ink-2 md:ml-auto md:max-w-[420px] md:px-2 md:text-right">
-          <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-brand md:min-h-8">
-            {M.phone.adBlockedHow}
-          </summary>
-          <ol className="list-decimal space-y-1 pl-5 text-left">
-            {M.phone.adBlockedSteps.map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
-        </details>
-      )}
-
-      <Modal
-        open={state === 'confirm'}
-        onClose={cancel}
-        title={M.phone.confirmTitle}
-        initialFocusRef={confirmBtnRef}
-        footer={
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-col gap-1 md:items-end">
             <button
               type="button"
-              onClick={cancel}
-              className="h-11 rounded-md border-[1.5px] border-line bg-white px-4 text-[15px] font-semibold text-ink-2 hover:bg-page"
+              // Đang bận: aria-disabled (vẫn nhận focus — hộp thoại đóng trả focus về đây được) và giữ màu
+              // cam + con trỏ «đang xử lý»; chỉ khi bị khoá thật (429) mới dùng disabled, màu xám.
+              onClick={busy ? undefined : onClick}
+              disabled={locked}
+              aria-disabled={busy || undefined}
+              aria-describedby={`phone-note-${mst}`}
+              aria-busy={busy}
+              className="inline-flex h-11 w-full flex-none items-center justify-center gap-1.5 rounded-md border-[1.5px] border-cta px-3 text-sm font-semibold text-cta hover:bg-cta-50 aria-busy:cursor-progress aria-busy:hover:bg-transparent disabled:cursor-not-allowed disabled:border-line disabled:text-muted disabled:hover:bg-transparent md:w-auto md:px-4"
             >
-              {M.phone.confirmCancel}
+              {icon}
+              {label}
             </button>
-            <button
-              ref={confirmBtnRef}
-              type="button"
-              onClick={confirm}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-cta px-4 text-[15px] font-semibold text-white hover:bg-cta-hover"
+            <span
+              id={`phone-note-${mst}`}
+              aria-live="polite"
+              className={`text-meta md:max-w-[420px] md:px-2 md:text-right ${noteTone}`}
             >
-              <IconPlay size={14} />
-              {M.phone.confirmOk}
-            </button>
+              {note}
+            </span>
           </div>
-        }
-      >
-        <p className="text-[15px] leading-6 text-ink-2">{M.phone.confirmBody}</p>
-      </Modal>
+        </div>
 
-      <AdOverlayHost />
-    </div>
+        {/* Chặn quảng cáo: hướng dẫn ngắn (spec mục 4.2) thu gọn, bấm mới mở. */}
+        {state === 'blocked' && (
+          <details className="mt-2 text-meta text-ink-2 md:ml-auto md:max-w-[420px] md:px-2 md:text-right">
+            <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-brand md:min-h-8">
+              {M.phone.adBlockedHow}
+            </summary>
+            <ol className="list-decimal space-y-1 pl-5 text-left">
+              {M.phone.adBlockedSteps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          </details>
+        )}
+
+        <Modal
+          open={state === 'confirm'}
+          onClose={cancel}
+          title={M.phone.confirmTitle}
+          describedBy={`phone-confirm-${mst}`}
+          initialFocusRef={confirmBtnRef}
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={cancel}
+                className="h-11 rounded-md border-[1.5px] border-line bg-white px-4 text-body font-semibold text-ink-2 hover:bg-page"
+              >
+                {M.phone.confirmCancel}
+              </button>
+              <button
+                ref={confirmBtnRef}
+                type="button"
+                onClick={confirm}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-cta px-4 text-body font-semibold text-white hover:bg-cta-hover"
+              >
+                <IconPlay size={14} />
+                {M.phone.confirmOk}
+              </button>
+            </div>
+          }
+        >
+          <p id={`phone-confirm-${mst}`} className="text-body leading-6 text-ink-2">
+            {M.phone.confirmBody}
+          </p>
+        </Modal>
+
+        {/* Nạp lớp hiển thị quảng cáo từ lần bấm đầu (hộp thoại xác nhận cho đủ thời gian tải xong). */}
+        {armed && <AdOverlayHost />}
+      </div>
+    </>
   );
 }

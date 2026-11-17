@@ -42,7 +42,7 @@ function MockVideo({ req, done }) {
       onClose={() => done({ status: 'closed' })}
       initialFocusRef={closeRef}
     >
-      <div className="relative flex h-full flex-col items-center justify-center gap-5 bg-[#0b0f17] px-6 text-white">
+      <div className="on-dark relative flex h-full flex-col items-center justify-center gap-5 bg-[#0b0f17] px-6 text-white">
         {/* Nút đóng mô phỏng giao diện của mạng quảng cáo — FE thật không tự vẽ nút bỏ qua. */}
         <button
           ref={closeRef}
@@ -68,9 +68,10 @@ function MockVideo({ req, done }) {
           aria-valuemax={100}
           aria-valuenow={Math.round(pct)}
         >
+          {/* Chạy bằng animation CSS (scaleX, mượt) thay vì đổi width mỗi 100 ms. */}
           <div
-            className="h-full bg-white transition-[width] duration-100"
-            style={{ width: `${pct}%` }}
+            className="h-full origin-left bg-white"
+            style={{ animation: `motion-progress ${total}ms linear forwards` }}
           />
         </div>
       </div>
@@ -114,7 +115,7 @@ function FallbackAd({ req, done }) {
           />
         </div>
         <p
-          className="text-center text-[15px] font-semibold text-navy"
+          className="text-center text-body font-semibold text-navy"
           aria-live="polite"
           data-testid="fallback-countdown"
         >

@@ -3,6 +3,7 @@ import { getProvinces, getSitemapCompanies } from '@/lib/api';
 import { POPULAR_INDUSTRIES } from '@/lib/popular-industries';
 import { absoluteUrl } from '@/lib/site';
 import { urlSet, xmlResponse } from '@/lib/sitemap';
+import { companyPath } from '@/lib/mst';
 
 export const revalidate = 3600;
 
@@ -30,8 +31,6 @@ export async function GET(_request, { params }) {
   const data = await getSitemapCompanies(Number(m[1])).catch(() => null);
   if (!data?.items?.length) return new Response('Not found', { status: 404 });
   return xmlResponse(
-    urlSet(
-      data.items.map((c) => ({ loc: absoluteUrl(`/${c.mst}-${c.slug}`), lastmod: c.updated_at })),
-    ),
+    urlSet(data.items.map((c) => ({ loc: absoluteUrl(companyPath(c)), lastmod: c.updated_at }))),
   );
 }

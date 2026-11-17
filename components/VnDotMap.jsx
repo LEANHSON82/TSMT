@@ -1,3 +1,5 @@
+// Import tĩnh: Next gắn mã băm vào tên tệp (/_next/static/media/…) → trình duyệt lưu lâu dài.
+import dots from '@/assets/vn-dots-plain.svg';
 import { MAP_HEIGHT, MAP_WIDTH, PROVINCE_POINTS } from '@/lib/vn-map-points';
 
 // Bản đồ Việt Nam dạng chấm (có Hoàng Sa, Trường Sa) với chấm đánh dấu tỉnh/thành. Chỉ trang trí.
@@ -15,7 +17,7 @@ export default function VnDotMap({ highlight, showAll = false, className = '' })
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/vn-dots-plain.svg"
+        src={dots.src}
         alt=""
         width={MAP_WIDTH}
         height={MAP_HEIGHT}

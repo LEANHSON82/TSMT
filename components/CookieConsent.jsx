@@ -29,7 +29,7 @@ function Switch({ id, checked, onChange, disabled, label, desc }) {
   return (
     <div className="flex items-start justify-between gap-4 border-t border-line-soft py-4 first:border-t-0">
       <div>
-        <p id={`${id}-label`} className="text-[15px] font-semibold text-ink">
+        <p id={`${id}-label`} className="text-body font-semibold text-ink">
           {label}
         </p>
         <p id={`${id}-desc`} className="mt-0.5 text-sm text-muted">
@@ -99,20 +99,24 @@ export default function CookieConsent() {
         >
           <div className="mx-auto flex max-w-[1200px] flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:gap-8 md:px-6">
             <p className="flex-1 text-sm leading-5 text-ink-2">
-              {M.cookie.banner} <Link href="/chinh-sach-bao-mat#cookie">{M.footer.privacy}</Link>.
+              {M.cookie.banner}{' '}
+              <Link href="/chinh-sach-bao-mat#cookie" prefetch={false}>
+                {M.footer.privacy}
+              </Link>
+              .
             </p>
             <div className="grid grid-cols-2 gap-2 md:flex md:flex-none">
               <button
                 type="button"
                 onClick={() => setShowPrefs(true)}
-                className="h-11 rounded-md border-[1.5px] border-brand bg-white px-5 text-[15px] font-semibold text-brand md:min-w-36"
+                className="h-11 rounded-md border-[1.5px] border-brand bg-white px-5 text-body font-semibold text-brand md:min-w-36"
               >
                 {M.cookie.customize}
               </button>
               <button
                 type="button"
                 onClick={acceptAll}
-                className="h-11 rounded-md border-[1.5px] border-brand bg-brand px-5 text-[15px] font-semibold text-white hover:bg-brand-hover md:min-w-36"
+                className="h-11 rounded-md border-[1.5px] border-brand bg-brand px-5 text-body font-semibold text-white hover:bg-brand-hover md:min-w-36"
               >
                 {M.cookie.accept}
               </button>
@@ -130,14 +134,14 @@ export default function CookieConsent() {
             <button
               type="button"
               onClick={savePrefs}
-              className="h-11 rounded-md border-[1.5px] border-brand bg-white px-4 text-[15px] font-semibold text-brand"
+              className="h-11 rounded-md border-[1.5px] border-brand bg-white px-4 text-body font-semibold text-brand"
             >
               {M.cookie.save}
             </button>
             <button
               type="button"
               onClick={acceptAll}
-              className="h-11 rounded-md bg-brand px-4 text-[15px] font-semibold text-white hover:bg-brand-hover"
+              className="h-11 rounded-md bg-brand px-4 text-body font-semibold text-white hover:bg-brand-hover"
             >
               {M.cookie.acceptAll}
             </button>

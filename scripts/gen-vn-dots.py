@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tạo public/vn-dots-plain.svg (bản đồ Việt Nam dạng chấm) và lib/vn-map-points.js (vị trí 34 tỉnh/thành)
+"""Tạo assets/vn-dots-plain.svg (bản đồ Việt Nam dạng chấm) và lib/vn-map-points.js (vị trí 34 tỉnh/thành)
 cho components/VnDotMap.jsx.
 
 Nguồn đường viền: Natural Earth 1:50m (public domain) qua gói world-atlas:
@@ -79,8 +79,8 @@ plain = (
     + f'<path d="{d_main}" stroke="#1446a0" stroke-width="{R*2}" stroke-linecap="round" opacity=".3"/>'
     + '</svg>\n'
 )
-(root / 'public' / 'vn-dots-plain.svg').write_text(plain)
-print(f'{len(dots)} chấm, {W}x{H}, {len(plain)} byte → public/vn-dots-plain.svg')
+(root / 'assets' / 'vn-dots-plain.svg').write_text(plain)
+print(f'{len(dots)} chấm, {W}x{H}, {len(plain)} byte → assets/vn-dots-plain.svg')
 
 # Trung tâm hành chính 34 tỉnh/thành (đơn vị hành chính từ 7/2025) — (kinh độ, vĩ độ), mã theo danh mục.
 PROVINCES = {

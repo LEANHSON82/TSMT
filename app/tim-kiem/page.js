@@ -13,6 +13,7 @@ import { M, STATUS_FILTER_OPTIONS } from '@/lib/messages';
 import { POPULAR_INDUSTRIES } from '@/lib/popular-industries';
 import { provinceOptions } from '@/lib/provinces';
 import { findProvinceInQuery } from '@/lib/search-intent';
+import { searchQueryType } from '@/lib/mst';
 import { buildHref, firstParam, pageNumber } from '@/lib/url';
 
 export const dynamic = 'force-dynamic';
@@ -65,7 +66,7 @@ export default async function SearchPage({ searchParams }) {
     sort: SORTS[sapxep],
     page,
   });
-  const queryType = /^\d[\d\s.-]*$/.test(q) ? 'mst' : 'text';
+  const queryType = searchQueryType(q);
   const params = {
     q,
     tinh: province?.slug,
@@ -76,6 +77,7 @@ export default async function SearchPage({ searchParams }) {
   };
   // «xây dựng hà nội» → gợi ý lọc tại Hà Nội với từ khoá «xây dựng» (chỉ có tên tỉnh → sang trang tỉnh).
   const intent = !province && queryType === 'text' ? findProvinceInQuery(q, provinces) : null;
+  const hasFilter = Boolean(province || status || industry);
   const intentHref = intent
     ? intent.rest
       ? buildHref('/tim-kiem', {
@@ -87,6 +89,15 @@ export default async function SearchPage({ searchParams }) {
       : `/tinh/${intent.province.slug}`
     : null;
 
+  const intentBox = intent ? (
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-brand/20 bg-brand-50 px-4 py-2 text-body text-ink-2">
+      {M.search.provinceIntent(intent.province.name)}
+      <a href={intentHref} className="inline-flex min-h-11 items-center font-semibold">
+        {M.search.provinceIntentAction(intent.province.name)} →
+      </a>
+    </p>
+  ) : null;
+
   return (
     <>
       <TrackOnMount name="search" params={{ query_type: queryType, result_count: data.total }} />
@@ -96,63 +107,61 @@ export default async function SearchPage({ searchParams }) {
         title={M.search.resultsFor(formatNumber(data.total), q)}
         totalLabel={false}
         filters={
-          <div className="flex flex-col gap-4">
-            {intent && (
-              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-brand/20 bg-brand-50 px-4 py-2 text-[15px] text-ink-2">
-                {M.search.provinceIntent(intent.province.name)}
-                <a href={intentHref} className="inline-flex min-h-11 items-center font-semibold">
-                  {M.search.provinceIntentAction(intent.province.name)} →
-                </a>
-              </p>
-            )}
-            <SearchFieldTabs
-              active={tab.value}
-              counts={data.counts}
-              hrefFor={(theo) => buildHref('/tim-kiem', { ...params, theo, page: undefined })}
-            />
-            <ListFilters
-              key={`${tinh}|${status}|${industry?.code || ''}|${sapxep}`}
-              action="/tim-kiem"
-              hidden={{ q, theo: tab.value }}
-              fields={[
-                {
-                  name: 'tinh',
-                  label: M.list.provinceFilter,
-                  value: province?.slug || '',
-                  allLabel: M.list.allProvinces,
-                  options,
-                },
-                {
-                  name: 'trangthai',
-                  label: M.list.statusFilter,
-                  value: status,
-                  allLabel: M.list.allStatuses,
-                  options: STATUS_FILTER_OPTIONS,
-                },
-                {
-                  name: 'nganh',
-                  label: M.search.industryFilter,
-                  value: industry?.code || '',
-                  allLabel: M.search.allIndustries,
-                  options: POPULAR_INDUSTRIES.map((i) => ({
-                    value: i.code,
-                    label: `${i.code} – ${i.name}`,
-                  })),
-                },
-                {
-                  name: 'sapxep',
-                  label: M.search.sortLabel,
-                  value: sapxep,
-                  allLabel: M.search.sortRelevance,
-                  filter: false,
-                  options: [
-                    { value: 'moi', label: M.search.sortNewest },
-                    { value: 'cu', label: M.search.sortOldest },
-                  ],
-                },
-              ]}
-            />
-          </div>
+          // 0 kết quả mà chưa bật bộ lọc nào: tab và bộ lọc không giúp gì, ẩn để thông báo + gợi ý hiện ngay.
+          data.total === 0 && !hasFilter && !tab.value ? (
+            intentBox
+          ) : (
+            <div className="flex flex-col gap-4">
+              {intentBox}
+              <SearchFieldTabs
+                active={tab.value}
+                counts={data.counts}
+                hrefFor={(theo) => buildHref('/tim-kiem', { ...params, theo, page: undefined })}
+              />
+              <ListFilters
+                key={`${tinh}|${status}|${industry?.code || ''}|${sapxep}`}
+                action="/tim-kiem"
+                hidden={{ q, theo: tab.value }}
+                fields={[
+                  {
+                    name: 'tinh',
+                    label: M.list.provinceFilter,
+                    value: province?.slug || '',
+                    allLabel: M.list.allProvinces,
+                    options,
+                  },
+                  {
+                    name: 'trangthai',
+                    label: M.list.statusFilter,
+                    value: status,
+                    allLabel: M.list.allStatuses,
+                    options: STATUS_FILTER_OPTIONS,
+                  },
+                  {
+                    name: 'nganh',
+                    label: M.search.industryFilter,
+                    value: industry?.code || '',
+                    allLabel: M.search.allIndustries,
+                    options: POPULAR_INDUSTRIES.map((i) => ({
+                      value: i.code,
+                      label: `${i.code} – ${i.name}`,
+                    })),
+                  },
+                  {
+                    name: 'sapxep',
+                    label: M.search.sortLabel,
+                    value: sapxep,
+                    allLabel: M.search.sortRelevance,
+                    filter: false,
+                    options: [
+                      { value: 'moi', label: M.search.sortNewest },
+                      { value: 'cu', label: M.search.sortOldest },
+                    ],
+                  },
+                ]}
+              />
+            </div>
+          )
         }
         data={data}
         basePath="/tim-kiem"

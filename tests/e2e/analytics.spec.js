@@ -70,7 +70,7 @@ test('đủ 11 sự kiện mục 8.1 với đúng tham số, không sự kiện 
     const revealed = page.getByTestId('phone-revealed');
     await expect(revealed).toContainText(FULL_PHONE, { timeout: 10_000 });
     await revealed.getByRole('button', { name: 'Sao chép' }).click();
-    await expect(revealed.getByText('Đã chép')).toBeVisible(); // sự kiện gửi sau khi chép xong
+    await expect(revealed.getByRole('button', { name: 'Đã sao chép' })).toBeVisible(); // sự kiện gửi sau khi chép xong
   });
 
   await step(`${DETAIL}?ad=closed`, async (page) => {

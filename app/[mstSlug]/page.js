@@ -13,7 +13,7 @@ import JsonLd from '@/components/JsonLd';
 import TrackOnMount from '@/components/TrackOnMount';
 import { IconEyeOff } from '@/components/Icons';
 import { getCompany, getRelatedCompanies } from '@/lib/api';
-import { formatDate, formatDateTime, truncate } from '@/lib/format';
+import { areaAddress, formatDate, formatDateTime, truncate } from '@/lib/format';
 import { M } from '@/lib/messages';
 import { companyPath, parseMstSlug } from '@/lib/mst';
 import { SITE_NAME, absoluteUrl } from '@/lib/site';
@@ -35,14 +35,15 @@ async function resolve(params) {
   return { parsed, company };
 }
 
-/** <title>: «{Tên DN} - MST {mst} | [TênSite]», tối đa ~65 ký tự (cắt bớt tên nếu dài). */
+/** <title>: «{Tên DN} - MST {mst} | [TênSite]», khoảng 65 ký tự (dư ~5 để không cắt tên chỉ vì vài ký tự). */
 function pageTitle(c) {
   const suffix = ` - MST ${c.mst} | ${SITE_NAME}`;
-  return `${truncate(c.name, Math.max(20, 65 - suffix.length))}${suffix}`;
+  return `${truncate(c.name, Math.max(20, 70 - suffix.length))}${suffix}`;
 }
 
 function pageDescription(c) {
-  return truncate(M.company.metaDescription(c, formatDate(c.founded_date)), 155);
+  const address = areaAddress(c.address, c.province?.name);
+  return truncate(M.company.metaDescription(c, formatDate(c.founded_date), address), 155);
 }
 
 export async function generateMetadata({ params }) {
@@ -58,6 +59,9 @@ export async function generateMetadata({ params }) {
       description: pageDescription(c),
       url: path,
       siteName: SITE_NAME,
+      locale: 'vi_VN',
+      // Khai openGraph ở trang thì Next thay cả khối → ghi lại ảnh chung (app/opengraph-image.png).
+      images: [{ url: '/opengraph-image.png', width: 1200, height: 630 }],
     },
   };
 }
@@ -112,11 +116,11 @@ export default async function CompanyPage({ params }) {
       <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
         <main className="flex min-w-0 flex-col gap-6">
           <section className="flex flex-col gap-2.5">
-            <h1 className="text-[22px] leading-[30px] font-semibold break-words text-navy md:text-[28px] md:leading-9">
+            <h1 className="text-2xl leading-[30px] font-semibold text-pretty break-words text-navy md:text-3xl md:leading-9">
               {c.name}
             </h1>
             {(c.name_en || c.name_short) && (
-              <dl className="flex flex-col gap-0.5 text-sm text-ink-2 md:text-[15px]">
+              <dl className="flex flex-col gap-0.5 text-sm text-ink-2 md:text-body">
                 {c.name_en && (
                   <div>
                     <dt className="inline text-muted">{M.company.nameEn}: </dt>

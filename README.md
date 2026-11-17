@@ -140,21 +140,21 @@ number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
 ## Đã làm theo spec
 
 - **Trang:** đủ các trang ở mục 2. Header dính đầu trang: logo, ô tìm (máy tính trùng khít ô nhập của ô tìm lớn trang chủ; trang chủ chỉ hiện khi cuộn qua ô lớn), menu Tỉnh/thành · Ngành nghề · DN mới (≥ 1280px; nhỏ hơn dùng nút ☰). Có footer và banner cookie.
-- **Logo «TMST»** là SVG từ nét chữ Be Vietnam Pro (`components/Logo.jsx`); sinh lại bằng `python3 scripts/gen-logo.py <font SemiBold .woff2>`. Tên site mặc định `TMST` (`NEXT_PUBLIC_SITE_NAME`).
+- **Logo TMST** (`components/Logo.jsx`): biểu tượng ô vuông xanh chữ T + kính lúp cam (vẽ tay trên lưới 48×48, cũng là favicon `app/icon.svg`) + chữ «TMST» một màu xanh đậm, là nét Be Vietnam Pro đã chuyển thành path (in lại path bằng `python3 scripts/gen-logo.py <font SemiBold .woff2>`). Tên site mặc định `TMST` (`NEXT_PUBLIC_SITE_NAME`).
 - **Màu sắc, hình ảnh** (spec không quy định bảng màu; mục 7.2 yêu cầu ảnh/icon SVG):
-  - Nhãn mã ngành tô màu theo nhóm ngành VSIC cấp 1 (`lib/vsic.js`, 21 cặp màu đạt tương phản AA).
   - Thẻ DN ghi địa chỉ rút gọn: phường/xã, tỉnh/thành (trang theo tỉnh chỉ ghi phường/xã) — `areaAddress` trong `lib/format.js`.
   - Nhãn «Mới» cho DN thành lập trong 7 ngày (tắt ở khối/trang DN mới thành lập).
   - Trang chủ: khối tỉnh/thành đặt trước khối DN mới, trên dải nền xanh nhạt. Bản đồ chấm Việt Nam (có Hoàng Sa, Trường Sa) sinh lại bằng `python3 scripts/gen-vn-dots.py countries-50m.json` (dữ liệu Natural Earth, xem đầu script).
   - Hình minh hoạ SVG cho không có kết quả, trang 404, gửi yêu cầu thành công (`components/Illustrations.jsx`).
   - Bản đồ chấm đánh dấu tỉnh (`components/VnDotMap.jsx`, toạ độ trung tâm hành chính 34 tỉnh/thành trong `lib/vn-map-points.js`, sinh cùng script bản đồ): trang tỉnh đánh dấu tỉnh đang xem; khối tỉnh/thành trang chủ (≥ 1024px) rê chuột tên tỉnh thì chấm tỉnh sáng lên (CSS `:has`, không JS).
-  - Minh hoạ đầu trang: DN mới, ngành nghề (tô theo màu nhóm ngành), giới thiệu, liên hệ, điều khoản, chính sách, form yêu cầu. Ẩn trên điện thoại.
+  - Minh hoạ đầu trang: DN mới, ngành nghề, giới thiệu, liên hệ, điều khoản, chính sách, form yêu cầu. Ẩn trên điện thoại.
 - **Chuyển động** (CSS thuần, không thư viện; chỉ transform/opacity nên CLS 0; tắt hết khi máy bật «giảm chuyển động»):
   - Khối/thẻ nằm dưới màn hình đầu trượt lên khi cuộn tới (`.reveal`, CSS scroll-driven animation — trình duyệt chưa hỗ trợ thì hiện bình thường). Không làm mờ để chữ luôn đủ tương phản.
   - Thẻ DN trong danh sách nhấc nhẹ khi rê chuột; mũi tên «Xem tất cả» trượt; gợi ý tìm kiếm hiện lần lượt.
   - Số điện thoại «chạy số» rồi dừng ở số thật sau khi xem quảng cáo (`components/RollingNumber.jsx`); khôi phục từ sessionStorage thì không chạy.
   - Chuyển trang: nội dung trang mới hiện mờ dần + trượt lên 6px (0,22 s; không chạy ở lần tải đầu). Trang DN chưa có trong bộ đệm hiện khung chờ (`app/[mstSlug]/loading.js`); gợi ý tìm kiếm đang chọn được tải trước.
   - Header có bóng đổ khi cuộn khỏi đầu trang (scroll-driven); viền focus khép vào nút; ô form báo lỗi rung nhẹ khi bấm gửi.
+- **SEO bổ sung:** URL viết hoa → 301 chữ thường; `/{mst}-{slug}.html` → 301; đường dẫn có dấu chấm khác → 404 thật; «DN mới» lọc tỉnh canonical về `/tinh/{slug}`; ngành × tỉnh không có DN → noindex; trang 2+ có «– Trang N» trong H1; Open Graph cho mọi trang, ảnh `app/opengraph-image.png` (1200×630 — **đổi tên site thì chụp lại ảnh này**).
 - **Tìm kiếm:** gợi ý chia nhóm Doanh nghiệp / Người đại diện / Tỉnh/thành (ghi rõ khớp ở đâu, khớp SĐT không hiện số) + dòng «Xem tất cả kết quả»; trạng thái đang tải / không có gợi ý. Trang kết quả có tab «Tìm theo» kèm số đếm, lọc tỉnh/tình trạng/ngành, sắp xếp, thẻ bộ lọc bỏ được từng cái, gợi ý «Lọc tại [tỉnh]» khi từ khoá có tên tỉnh. Tô sáng từng từ khoá ở đầu chữ (không phân biệt hoa/thường, dấu — `lib/highlight.js`).
 - **Chi tiết DN:**
   - Bảng thông tin ẩn dòng trống, ngành nghề thu gọn khi quá 10 ngành, khối DN cùng ngành.

@@ -3,15 +3,17 @@ import { M } from '@/lib/messages';
 import { formatNumber } from '@/lib/format';
 
 // Tab «Tìm theo» trên trang kết quả: Tất cả · Tên DN · Người đại diện · MST/SĐT, kèm số kết quả từng mục
-// (khi API trả counts). Mục không có kết quả thì không bấm được. Là link thường (giữ trên URL, Back được).
+// (khi API trả counts). Mục không có kết quả thì ẩn (trừ «Tất cả» và mục đang chọn). Điện thoại dùng nhãn
+// ngắn để cả dải tab vừa màn hình. Là link thường (giữ trên URL, Back được).
 export const FIELD_TABS = [
   { value: '', field: undefined, countKey: 'all', label: 'fieldAll' },
-  { value: 'ten', field: 'name', countKey: 'name', label: 'fieldName' },
+  { value: 'ten', field: 'name', countKey: 'name', label: 'fieldName', short: 'fieldNameShort' },
   {
     value: 'dai-dien',
     field: 'representative',
     countKey: 'representative',
     label: 'fieldRepresentative',
+    short: 'fieldRepresentativeShort',
   },
   { value: 'so', field: 'number', countKey: 'number', label: 'fieldNumber' },
 ];
@@ -23,9 +25,17 @@ export default function SearchFieldTabs({ active, counts, hrefFor }) {
         {FIELD_TABS.map((t) => {
           const n = counts?.[t.countKey];
           const current = t.value === active;
+          if (n === 0 && !current && t.value) return null;
           const inner = (
             <>
-              {M.search[t.label]}
+              {t.short ? (
+                <>
+                  <span className="sm:hidden">{M.search[t.short]}</span>
+                  <span className="max-sm:hidden">{M.search[t.label]}</span>
+                </>
+              ) : (
+                M.search[t.label]
+              )}
               {n != null && (
                 <span
                   className={`rounded-full px-1.5 text-xs tabular-nums ${current ? 'bg-brand-50 text-brand-hover' : 'bg-line-soft text-muted'}`}
@@ -35,15 +45,12 @@ export default function SearchFieldTabs({ active, counts, hrefFor }) {
               )}
             </>
           );
-          const cls = `-mb-px inline-flex min-h-11 items-center gap-1.5 border-b-2 px-3 text-[15px] font-semibold whitespace-nowrap no-underline`;
+          const cls =
+            '-mb-px inline-flex min-h-11 items-center gap-1.5 border-b-2 px-3 text-body font-semibold whitespace-nowrap no-underline';
           return (
             <li key={t.countKey}>
               {current ? (
                 <span aria-current="page" className={`${cls} border-brand text-brand`}>
-                  {inner}
-                </span>
-              ) : n === 0 ? (
-                <span aria-disabled="true" className={`${cls} border-transparent text-muted/70`}>
                   {inner}
                 </span>
               ) : (

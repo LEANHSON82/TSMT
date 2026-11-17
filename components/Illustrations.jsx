@@ -253,7 +253,7 @@ function Gear({ cx, cy, r, teeth, fg, bg }) {
   );
 }
 
-/** Ngành nghề: bánh răng + biểu đồ cột, tô theo màu nhóm ngành ({fg, bg} từ lib/vsic.js). */
+/** Ngành nghề: bánh răng + biểu đồ cột. */
 export function IllusIndustry({ fg = C.brand, bg = C.tint, className }) {
   return (
     <Frame className={className}>

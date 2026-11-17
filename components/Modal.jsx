@@ -3,11 +3,9 @@
 // Modal dùng chung (spec mục 7.3): giữ focus trong modal, Esc đóng, aria-modal + tiêu đề.
 import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { FOCUSABLE, trapTab } from './focusTrap';
 import { IconClose } from './Icons';
 import { M } from '@/lib/messages';
-
-const FOCUSABLE =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export default function Modal({
   open,
@@ -19,6 +17,7 @@ export default function Modal({
   dismissible = true,
   variant = 'dialog', // 'dialog' | 'fullscreen'
   labelClose = M.common.close,
+  describedBy, // id phần tử mô tả (trình đọc màn hình đọc kèm tiêu đề khi mở)
   className = '',
 }) {
   const titleId = useId();
@@ -39,21 +38,7 @@ export default function Modal({
         onCloseRef.current?.();
         return;
       }
-      if (e.key !== 'Tab' || !panel) return;
-      const items = [...panel.querySelectorAll(FOCUSABLE)];
-      if (!items.length) {
-        e.preventDefault();
-        return;
-      }
-      const firstEl = items[0];
-      const lastEl = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === firstEl) {
-        e.preventDefault();
-        lastEl.focus();
-      } else if (!e.shiftKey && document.activeElement === lastEl) {
-        e.preventDefault();
-        firstEl.focus();
-      }
+      trapTab(e, panel);
     };
     document.addEventListener('keydown', onKey, true);
     const prevOverflow = document.body.style.overflow;
@@ -80,6 +65,7 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        aria-describedby={describedBy}
         tabIndex={-1}
         className={
           full

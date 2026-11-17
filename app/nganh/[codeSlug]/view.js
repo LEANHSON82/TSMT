@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import ListFilters from '@/components/ListFilters';
 import ListPageShell from '@/components/ListPageShell';
 import { IllusIndustry } from '@/components/Illustrations';
-import { industryColor } from '@/lib/vsic';
 import { listCompanies } from '@/lib/api';
 import { resolveIndustry } from '@/lib/industry';
 import { M } from '@/lib/messages';
@@ -22,7 +21,20 @@ async function load(params, searchParams) {
 export async function industryListMetadata({ params, searchParams }) {
   const { industry, slug, province, page } = await load(params, searchParams);
   const where = M.common.inProvince(province?.name);
+  // Ngành × tỉnh không có DN nào: trang mỏng (soft-404) → không cho index, vẫn cho đi theo link.
+  // Cùng tham số với trang (fetch được Next nhớ, không gọi API thêm).
+  const empty =
+    province &&
+    !(
+      await listCompanies({
+        industry: industry.code,
+        province: province.code,
+        sort: 'founded_desc',
+        page,
+      }).catch(() => ({ total: 1 }))
+    ).total;
   return {
+    ...(empty ? { robots: { index: false, follow: true } } : {}),
     title: `${M.list.industry.title(industry.code, industry.name)}${where}${M.common.pageSuffix(page)}`,
     description: M.list.industry.metaDescription(industry.code, industry.name, where),
     alternates: {
@@ -45,7 +57,7 @@ export async function IndustryList({ params, searchParams }) {
 
   return (
     <ListPageShell
-      aside={<IllusIndustry {...industryColor(industry.code)} className="w-[150px]" />}
+      aside={<IllusIndustry className="w-[150px]" />}
       breadcrumb={[{ name: M.list.industry.crumb(industry.code) }]}
       title={M.list.industry.title(industry.code, industry.name)}
       description={M.list.industry.lead(where)}

@@ -21,7 +21,7 @@ export default function SiteFooter() {
     <footer className="mt-auto border-t border-line bg-white">
       <div className="mx-auto grid max-w-[1200px] gap-8 px-4 pt-10 pb-8 md:grid-cols-[1.5fr_1fr_1.2fr] md:gap-10 md:px-6">
         <div className="flex flex-col gap-3">
-          <Logo title={SITE_NAME} className="h-6 w-auto self-start" />
+          <Logo title={SITE_NAME} className="h-8 w-auto self-start" />
           <p className="max-w-xs text-sm leading-6 text-ink-2">{M.footer.tagline}</p>
         </div>
         <nav aria-label={M.footer.navLabel} className="flex flex-col">
@@ -29,7 +29,7 @@ export default function SiteFooter() {
             {M.footer.linksTitle}
           </p>
           {LINKS.map(([href, label]) => (
-            <Link key={href} href={href} className={linkCls}>
+            <Link key={href} href={href} prefetch={false} className={linkCls}>
               {label}
             </Link>
           ))}
@@ -41,6 +41,7 @@ export default function SiteFooter() {
           </p>
           <p className="text-sm leading-6 text-ink-2">{M.footer.dataSource}</p>
           <Link
+            prefetch={false}
             href="/yeu-cau-cap-nhat"
             className="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold no-underline"
           >
@@ -50,7 +51,7 @@ export default function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-line-soft">
-        <p className="mx-auto max-w-[1200px] px-4 py-4 text-[13px] text-muted md:px-6">
+        <p className="mx-auto max-w-[1200px] px-4 py-4 text-meta text-muted md:px-6">
           © {new Date().getFullYear()} {SITE_NAME}
         </p>
       </div>

@@ -30,9 +30,12 @@ export default function RollingNumber({ value }) {
           // 10 số liên tiếp, kết thúc ở chữ số thật
           const column = Array.from({ length: 10 }, (_, k) => (d + 1 + k) % 10);
           return (
-            <span key={i} className="h-[1lh] overflow-hidden">
+            // Chữ số thật ẩn giữ đúng chiều rộng (font không có chữ số đều độ rộng — «1» hẹp hơn «0»),
+            // cột chạy số nằm đè lên → chạy xong đổi sang chữ thường không bị giật ngang.
+            <span key={i} className="relative h-[1lh] overflow-hidden">
+              <span className="invisible">{ch}</span>
               <span
-                className="motion-roll flex flex-col"
+                className="motion-roll absolute inset-x-0 top-0 flex flex-col items-center"
                 style={{ '--to': '-90%', animationDelay: `${i * STEP_MS}ms` }}
                 onAnimationEnd={i === lastDigit ? () => setDone(true) : undefined}
               >

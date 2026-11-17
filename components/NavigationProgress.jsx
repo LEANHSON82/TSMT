@@ -21,7 +21,28 @@ function setNavigating(on) {
   else el.removeAttribute('data-navigating');
 }
 
+// Một bộ hẹn giờ dự phòng dùng chung cho cả trang (link, bộ lọc): đặt cái mới thì huỷ cái cũ; có điều hướng
+// mới (startNavigation), bấm Back/Forward thì huỷ; chỉ tự tải lại khi người dùng vẫn ở đúng đường dẫn đó.
+let fallbackTimer;
+
+export function cancelNavFallback() {
+  clearTimeout(fallbackTimer);
+}
+
+/** Gọi sau router.push(href) khi href cùng đường dẫn với trang hiện tại (chỉ khác tham số). */
+export function armNavFallback(href) {
+  clearTimeout(fallbackTimer);
+  const url = new URL(href, window.location.href);
+  if (url.pathname !== window.location.pathname) return;
+  fallbackTimer = setTimeout(() => {
+    const now = new URL(window.location.href);
+    if (now.pathname === url.pathname && urlKey(now) !== urlKey(url))
+      window.location.assign(url.href);
+  }, FALLBACK_MS);
+}
+
 export function startNavigation() {
+  cancelNavFallback();
   window.dispatchEvent(new Event(NAV_START));
 }
 
@@ -49,6 +70,7 @@ export default function NavigationProgress() {
   useEffect(() => {
     let timer;
     const start = () => {
+      cancelNavFallback();
       setNavigating(true);
       clearTimeout(timer);
       timer = setTimeout(() => setNavigating(false), SAFETY_MS);
@@ -56,7 +78,6 @@ export default function NavigationProgress() {
     // Không bắt popstate (Back/Forward): sự kiện đến sau khi trang đã đổi nên sẽ kẹt thanh tiến độ;
     // Back thường tức thì vì trang có sẵn trong cache.
     // Pha capture: next/link gọi preventDefault ở pha bubble nên không dựa vào defaultPrevented.
-    let fallback;
     const onClick = (e) => {
       if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = e.target instanceof Element ? e.target.closest('a[href]') : null;
@@ -65,26 +86,18 @@ export default function NavigationProgress() {
       if (url.origin !== window.location.origin) return;
       if (url.pathname === window.location.pathname && url.search === window.location.search)
         return;
-      clearTimeout(fallback); // bấm link khác thì bỏ dự phòng của lần bấm trước
       start();
-      if (url.pathname === window.location.pathname) {
-        fallback = setTimeout(() => {
-          const now = new URL(window.location.href);
-          if (now.pathname === url.pathname && urlKey(now) !== urlKey(url))
-            window.location.assign(url.href);
-        }, FALLBACK_MS);
-      }
+      armNavFallback(url.href); // tự bỏ qua nếu khác đường dẫn
     };
-    // Back/Forward trong lúc chờ: người dùng đã đổi ý, không tự chuyển nữa.
-    const cancelFallback = () => clearTimeout(fallback);
     document.addEventListener('click', onClick, true);
-    window.addEventListener('popstate', cancelFallback);
+    // Back/Forward trong lúc chờ: người dùng đã đổi ý, không tự chuyển nữa.
+    window.addEventListener('popstate', cancelNavFallback);
     window.addEventListener(NAV_START, start);
     return () => {
       clearTimeout(timer);
-      clearTimeout(fallback);
+      cancelNavFallback();
       document.removeEventListener('click', onClick, true);
-      window.removeEventListener('popstate', cancelFallback);
+      window.removeEventListener('popstate', cancelNavFallback);
       window.removeEventListener(NAV_START, start);
     };
   }, []);

@@ -1,5 +1,5 @@
 // DN theo tỉnh /tinh/{slug-tinh} — trang 1, ISR 1 giờ (spec mục 2, 3.5).
-// ?page=N (N > 1): middleware.js chuyển vào route nội bộ q/[page] (cũng ISR), URL vẫn giữ ?page=.
+// ?page=N (N > 1): rewrites() trong next.config.mjs chuyển vào route nội bộ q/[page] (cũng ISR), URL vẫn giữ ?page=.
 import { ProvinceList, provinceListMetadata } from './view';
 
 export const revalidate = 3600;

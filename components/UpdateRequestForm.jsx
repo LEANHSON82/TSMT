@@ -3,13 +3,14 @@
 // Form yêu cầu ẩn/sửa thông tin (spec mục 3.6). Kiểm tra dữ liệu ngay khi nhập (MST, email, file).
 // FE kiểm tra để báo lỗi sớm; BE vẫn phải kiểm lại (spec mục 8.2).
 import Link from 'next/link';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { submitUpdateRequest } from '@/lib/api';
 import { track } from '@/lib/analytics';
 import { isValidMst, normalizeMst } from '@/lib/mst';
 import { M } from '@/lib/messages';
 import { getTurnstileToken, TURNSTILE_SITE_KEY } from '@/lib/turnstile';
 import { IconAlert, IconFile, IconShield, IconUpload } from './Icons';
+import CopyButton from './CopyButton';
 import { IllusSent } from './Illustrations';
 
 const REQUEST_TYPES = M.updateRequest.types;
@@ -37,27 +38,33 @@ function validate(values, file) {
   return e;
 }
 
+// Ô bắt buộc — aria-required cho trình đọc màn hình (dấu * chỉ để nhìn).
+const REQUIRED = new Set(['mst', 'request_type', 'full_name', 'email', 'content']);
+
 function Field({ id, label, required, hint, error, children }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[15px] font-semibold text-ink">
+      <label htmlFor={id} className="text-body font-semibold text-ink">
         {label}
         {required ? (
-          <span className="text-danger"> *</span>
+          <span aria-hidden="true" className="text-danger">
+            {' '}
+            *
+          </span>
         ) : (
           <span className="font-normal text-muted"> {M.common.optional}</span>
         )}
       </label>
       {children}
       {hint && !error && (
-        <p id={`${id}-hint`} className="text-[13px] text-muted">
+        <p id={`${id}-hint`} className="text-meta text-muted">
           {hint}
         </p>
       )}
       {error && (
         <p
           id={`${id}-error`}
-          className="flex items-start gap-1.5 text-[13px] font-semibold text-danger"
+          className="flex items-start gap-1.5 text-meta font-semibold text-danger"
         >
           <IconAlert size={16} className="mt-px flex-none" />
           {error}
@@ -70,7 +77,9 @@ function Field({ id, label, required, hint, error, children }) {
 const inputCls = (err) =>
   `h-12 w-full rounded-md border bg-white px-3 text-base text-ink ${err ? 'border-danger ring-1 ring-danger' : 'border-field hover:border-ink-2'}`;
 
-export default function UpdateRequestForm({ initialMst = '' }) {
+// initialCompany: { mst, name, path } khi mở từ trang DN — hiện tên DN dưới ô MST để chủ DN xác nhận đúng
+// công ty, và link quay lại trang DN ở màn cảm ơn.
+export default function UpdateRequestForm({ initialMst = '', initialCompany = null }) {
   const [values, setValues] = useState({
     mst: initialMst,
     request_type: '',
@@ -82,8 +91,13 @@ export default function UpdateRequestForm({ initialMst = '' }) {
   const [file, setFile] = useState(null);
   const [touched, setTouched] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  // Gửi xong: focus vào màn cảm ơn (form đã biến mất, không để focus rơi về <body>).
+  const doneRef = useRef(null);
   const [serverError, setServerError] = useState('');
   const [done, setDone] = useState(null);
+  useEffect(() => {
+    if (done) doneRef.current?.focus();
+  }, [done]);
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef(null);
   const formRef = useRef(null);
@@ -93,6 +107,7 @@ export default function UpdateRequestForm({ initialMst = '' }) {
   const set = (name) => (e) => setValues((v) => ({ ...v, [name]: e.target.value }));
   const blur = (name) => () => setTouched((t) => ({ ...t, [name]: true }));
   const aria = (name, hasHint) => ({
+    'aria-required': REQUIRED.has(name) || undefined,
     'aria-invalid': Boolean(show(name)) || undefined,
     'aria-describedby': show(name) ? `f-${name}-error` : hasHint ? `f-${name}-hint` : undefined,
   });
@@ -145,7 +160,8 @@ export default function UpdateRequestForm({ initialMst = '' }) {
       const res = await submitUpdateRequest(fd);
       track('update_request_submit', { request_type: values.request_type });
       setDone(res.request_code);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
     } catch (err) {
       setServerError(err?.status === 422 ? E.invalid : E.network);
     } finally {
@@ -156,27 +172,42 @@ export default function UpdateRequestForm({ initialMst = '' }) {
   if (done) {
     return (
       <div
+        ref={doneRef}
+        tabIndex={-1}
         role="status"
         className="motion-rise flex flex-col items-center gap-4 rounded-xl border border-line bg-white px-6 py-10 text-center"
       >
         <IllusSent className="w-[150px]" />
         <h2 className="text-xl font-semibold text-navy">{M.updateRequest.doneTitle}</h2>
-        <p className="max-w-md text-[15px] leading-6 text-ink-2">
+        <p className="max-w-md text-body leading-6 text-ink-2">
           {M.updateRequest.doneBody} <strong>{values.email.trim()}</strong>.{' '}
           {M.updateRequest.doneKeepCode}
         </p>
         <p className="rounded-lg bg-page px-5 py-3">
-          <span className="block text-[13px] text-muted">{M.updateRequest.requestCode}</span>
-          <span
-            className="text-2xl font-semibold tracking-wide text-navy tabular-nums"
-            data-testid="request-code"
-          >
-            {done}
+          <span className="block text-meta text-muted">{M.updateRequest.requestCode}</span>
+          <span className="flex items-center justify-center gap-1">
+            <span
+              className="text-2xl font-semibold tracking-wide text-navy tabular-nums"
+              data-testid="request-code"
+            >
+              {done}
+            </span>
+            <CopyButton text={done} label={M.updateRequest.copyCode} />
           </span>
         </p>
-        <Link href="/" className="inline-flex min-h-11 items-center font-semibold">
-          {M.notFound.home}
-        </Link>
+        <div className="flex flex-wrap justify-center gap-x-6">
+          {initialCompany && (
+            <Link
+              href={initialCompany.path}
+              className="inline-flex min-h-11 items-center font-semibold"
+            >
+              {M.updateRequest.backToCompany}
+            </Link>
+          )}
+          <Link href="/" className="inline-flex min-h-11 items-center font-semibold">
+            {M.notFound.home}
+          </Link>
+        </div>
       </div>
     );
   }
@@ -200,7 +231,17 @@ export default function UpdateRequestForm({ initialMst = '' }) {
       )}
 
       <div className="grid gap-5 md:grid-cols-2">
-        <Field id="f-mst" label={F.mst} required error={show('mst')} hint={F.mstHint}>
+        <Field
+          id="f-mst"
+          label={F.mst}
+          required
+          error={show('mst')}
+          hint={
+            initialCompany && normalizeMst(values.mst) === initialCompany.mst
+              ? initialCompany.name
+              : F.mstHint
+          }
+        >
           <input
             id="f-mst"
             inputMode="numeric"
@@ -280,15 +321,14 @@ export default function UpdateRequestForm({ initialMst = '' }) {
           {...aria('content')}
         />
         <p
-          className={`self-end text-[13px] tabular-nums ${values.content.length > MAX_CONTENT ? 'font-semibold text-danger' : 'text-muted'}`}
-          aria-live="polite"
+          className={`self-end text-meta tabular-nums ${values.content.length > MAX_CONTENT ? 'font-semibold text-danger' : 'text-muted'}`}
         >
           {values.content.length}/{MAX_CONTENT}
         </p>
       </Field>
 
       <div className="flex flex-col gap-1.5">
-        <span id="f-file-label" className="text-[15px] font-semibold text-ink">
+        <span id="f-file-label" className="text-body font-semibold text-ink">
           {F.file} <span className="font-normal text-muted">{M.common.optional}</span>
         </span>
         <div
@@ -337,14 +377,14 @@ export default function UpdateRequestForm({ initialMst = '' }) {
               <p className="text-sm text-ink-2">{F.fileDrop}</p>
             </>
           )}
-          <label className="inline-flex h-11 cursor-pointer items-center rounded-md border-[1.5px] border-brand bg-white px-4 text-[15px] font-semibold text-brand focus-within:outline-3 focus-within:outline-brand">
-            {file ? F.fileChooseOther : F.fileChoose}
+          <label className="inline-flex h-11 cursor-pointer items-center rounded-md border-[1.5px] border-brand bg-white px-4 text-body font-semibold text-brand hover:bg-brand-50 has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand">
+            <span id="f-file-btn">{file ? F.fileChooseOther : F.fileChoose}</span>
             <input
               ref={fileRef}
               type="file"
               accept=".pdf,image/jpeg,image/png,image/webp"
               className="sr-only"
-              aria-labelledby="f-file-label"
+              aria-labelledby="f-file-label f-file-btn"
               aria-describedby={fileError ? 'f-file-error' : 'f-file-hint'}
               onChange={(e) => pickFile(e.target.files?.[0])}
             />
@@ -353,13 +393,13 @@ export default function UpdateRequestForm({ initialMst = '' }) {
         {fileError ? (
           <p
             id="f-file-error"
-            className="flex items-start gap-1.5 text-[13px] font-semibold text-danger"
+            className="flex items-start gap-1.5 text-meta font-semibold text-danger"
           >
             <IconAlert size={16} className="mt-px flex-none" />
             {fileError}
           </p>
         ) : (
-          <p id="f-file-hint" className="text-[13px] text-muted">
+          <p id="f-file-hint" className="text-meta text-muted">
             {F.fileHint}
           </p>
         )}
@@ -373,7 +413,7 @@ export default function UpdateRequestForm({ initialMst = '' }) {
         </span>
       </div>
 
-      <p className="text-[13px] leading-5 text-muted">
+      <p className="text-meta leading-5 text-muted">
         {M.updateRequest.privacyNote} <Link href="/chinh-sach-bao-mat">{M.footer.privacy}</Link>.
       </p>
 

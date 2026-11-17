@@ -8,7 +8,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { suggestCompanies } from '@/lib/api';
-import { isValidMst, normalizeMst } from '@/lib/mst';
+import { companyPath, isValidMst, normalizeMst, searchQueryType } from '@/lib/mst';
 import { track } from '@/lib/analytics';
 import { M } from '@/lib/messages';
 import { suggestProvinces } from '@/lib/search-intent';
@@ -123,7 +123,7 @@ export default function SearchBox({
       ? `/tinh/${e.p.slug}`
       : e.kind === 'all'
         ? `/tim-kiem?q=${encodeURIComponent(lastQ)}`
-        : `/${e.item.mst}-${e.item.slug}`;
+        : companyPath(e.item);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -138,7 +138,7 @@ export default function SearchBox({
   function activate(e) {
     setOpen(false);
     if (e.kind === 'company' || e.kind === 'rep')
-      track('search', { query_type: 'mst', result_count: 1 });
+      track('search', { query_type: searchQueryType(lastQ), result_count: 1 });
     startNavigation();
     router.push(hrefOf(e));
   }
@@ -160,7 +160,7 @@ export default function SearchBox({
       const match = items.find((i) => i.mst === mst);
       track('search', { query_type: 'mst', result_count: match ? 1 : undefined });
       startNavigation();
-      router.push(match ? `/${match.mst}-${match.slug}` : `/${mst}`);
+      router.push(match ? companyPath(match) : `/${mst}`);
       return;
     }
     startNavigation();
@@ -268,9 +268,9 @@ export default function SearchBox({
             }
             className={
               lg
-                ? 'h-14 w-full rounded-md border border-field bg-white pr-4 pl-[50px] text-[17px] text-ink text-ellipsis placeholder:text-[#6B7280] hover:border-ink-2'
+                ? 'h-14 w-full rounded-md border border-field bg-white pr-4 pl-[50px] text-lg text-ink text-ellipsis placeholder:text-[#6B7280] hover:border-ink-2'
                 : nav
-                  ? 'h-11 w-full rounded-md border border-field bg-white pr-3 pl-11 text-base text-ink text-ellipsis placeholder:text-[#6B7280] hover:border-ink-2 lg:h-14 lg:pr-4 lg:pl-[50px] lg:text-[17px]'
+                  ? 'h-11 w-full rounded-md border border-field bg-white pr-3 pl-11 text-base text-ink text-ellipsis placeholder:text-[#6B7280] hover:border-ink-2 lg:h-14 lg:pr-4 lg:pl-[50px] lg:text-lg'
                   : 'h-11 w-full rounded-l-md border border-r-0 border-field bg-white px-3 text-base text-ink placeholder:text-[#6B7280]'
             }
           />
@@ -278,7 +278,7 @@ export default function SearchBox({
         {lg ? (
           <button
             type="submit"
-            className="inline-flex h-14 w-full flex-none items-center justify-center rounded-md bg-cta text-[17px] font-semibold text-white hover:bg-cta-hover sm:w-24"
+            className="inline-flex h-14 w-full flex-none items-center justify-center rounded-md bg-cta text-lg font-semibold text-white hover:bg-cta-hover sm:w-24"
           >
             {M.search.submit}
           </button>
@@ -303,42 +303,47 @@ export default function SearchBox({
         {GROUPS.map(({ kind, label }) => {
           const group = entries.map((e, i) => ({ e, i })).filter(({ e }) => e.kind === kind);
           if (!group.length) return null;
-          return [
-            label && (
-              <li
-                key={`h-${kind}`}
-                role="presentation"
-                className="px-4 pt-2.5 pb-1 text-xs font-semibold tracking-wide text-muted uppercase"
-              >
-                {M.search[label]}
-              </li>
-            ),
-            ...group.map(({ e, i }) => (
-              <li
-                key={
-                  e.kind === 'province'
-                    ? `p-${e.p.code}`
-                    : e.kind === 'all'
-                      ? 'all'
-                      : `${e.kind}-${e.item.mst}`
-                }
-                id={`${listId}-${i}`}
-                role="option"
-                aria-selected={i === active}
-                onMouseDown={(ev) => {
-                  ev.preventDefault();
-                  activate(e);
-                }}
-                onMouseEnter={() => setActive(i)}
-                style={{ animationDelay: `${i * 25}ms` }}
-                className={`motion-rise flex min-h-11 cursor-pointer flex-col justify-center gap-0.5 px-4 py-2 ${
-                  i === active ? 'bg-brand-50' : ''
-                } ${e.kind === 'all' ? 'mt-1 border-t border-line-soft' : ''}`}
-              >
-                <SuggestionRow entry={e} query={lastQ} />
-              </li>
-            )),
-          ];
+          const options = group.map(({ e, i }) => (
+            <li
+              key={
+                e.kind === 'province'
+                  ? `p-${e.p.code}`
+                  : e.kind === 'all'
+                    ? 'all'
+                    : `${e.kind}-${e.item.mst}`
+              }
+              id={`${listId}-${i}`}
+              role="option"
+              aria-selected={i === active}
+              onMouseDown={(ev) => {
+                ev.preventDefault();
+                activate(e);
+              }}
+              onMouseEnter={() => setActive(i)}
+              style={{ animationDelay: `${Math.min(i, 4) * 20}ms` }}
+              className={`motion-rise flex min-h-11 cursor-pointer flex-col justify-center gap-0.5 px-4 py-2 ${
+                i === active ? 'bg-brand-50' : ''
+              } ${e.kind === 'all' ? 'mt-1 border-t border-line-soft' : ''}`}
+            >
+              <SuggestionRow entry={e} query={lastQ} />
+            </li>
+          ));
+          if (!label) return options;
+          const hid = `${listId}-h-${kind}`;
+          return (
+            <li key={`g-${kind}`} role="none">
+              <ul role="group" aria-labelledby={hid}>
+                <li
+                  id={hid}
+                  role="presentation"
+                  className="px-4 pt-2.5 pb-1 text-xs font-semibold tracking-wide text-muted uppercase"
+                >
+                  {M.search[label]}
+                </li>
+                {options}
+              </ul>
+            </li>
+          );
         })}
       </ul>
       {/* Không có gợi ý: báo ngay dưới ô (aria-live để trình đọc màn hình đọc), Enter vẫn tìm được. */}
@@ -368,7 +373,7 @@ const GROUPS = [
 function SuggestionRow({ entry: e, query }) {
   if (e.kind === 'all') {
     return (
-      <span className="flex items-center gap-2 text-[15px] font-semibold text-brand">
+      <span className="flex items-center gap-2 text-body font-semibold text-brand">
         <IconSearch size={18} className="flex-none" />
         <span className="line-clamp-1">{M.search.seeAll(query)}</span>
       </span>
@@ -377,10 +382,10 @@ function SuggestionRow({ entry: e, query }) {
   if (e.kind === 'province') {
     return (
       <>
-        <span className="text-[15px] font-semibold text-navy">
+        <span className="text-body font-semibold text-navy">
           <Highlight text={e.p.name} query={query} />
         </span>
-        <span className="text-[13px] text-muted">
+        <span className="text-meta text-muted">
           {M.search.provinceCount(e.p.company_count ?? 0)}
         </span>
       </>
@@ -390,10 +395,10 @@ function SuggestionRow({ entry: e, query }) {
   if (e.kind === 'rep') {
     return (
       <>
-        <span className="line-clamp-1 text-[15px] font-semibold text-navy">
+        <span className="line-clamp-1 text-body font-semibold text-navy">
           <Highlight text={item.representative} query={query} />
         </span>
-        <span className="line-clamp-1 text-[13px] text-muted">
+        <span className="line-clamp-1 text-meta text-muted">
           {M.search.repOf} · {item.name}
         </span>
       </>
@@ -401,12 +406,12 @@ function SuggestionRow({ entry: e, query }) {
   }
   return (
     <>
-      <span className="line-clamp-1 text-[15px] font-semibold text-navy">
+      <span className="line-clamp-2 text-body font-semibold text-navy">
         <Highlight text={item.name} query={query} />
       </span>
-      <span className="flex flex-wrap items-center gap-x-1 text-[13px] text-muted">
+      <span className="flex flex-wrap items-center gap-x-1 text-meta text-muted">
         <span>
-          MST{' '}
+          {M.search.mstPrefix}{' '}
           <span className="tabular-nums">
             <Highlight text={item.mst} query={query} />
           </span>

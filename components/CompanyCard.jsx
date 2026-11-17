@@ -7,6 +7,8 @@ import Highlight from './Highlight';
 import { IconMapPin } from './Icons';
 
 // Thẻ doanh nghiệp dùng chung (spec mục 3.3). KHÔNG BAO GIỜ hiện SĐT.
+// Không tải trước trang DN (prefetch={false}): một trang danh sách có 20 thẻ → tải trước 20 trang mà
+// người dùng không mở (hàng trăm KB dữ liệu di động + render ISR ở máy chủ). Bấm vào vẫn có khung chờ.
 // Cả thẻ bấm được (link tên DN phủ cả thẻ bằng ::after); MST nằm trên lớp phủ để vẫn bôi đen/chép được.
 // variant="card": lưới (trang chủ, DN cùng ngành). variant="row": danh sách (dòng ngang trên máy tính).
 // highlight: từ khoá tìm kiếm để tô sáng trong tên DN và MST.
@@ -21,7 +23,7 @@ function isNew(foundedDate) {
 // Kết quả tìm khớp theo số điện thoại: chỉ ghi nhãn, KHÔNG hiện số (số chỉ mở sau khi xem quảng cáo).
 function PhoneMatchBadge() {
   return (
-    <span className="relative z-10 inline-flex h-5 flex-none items-center rounded bg-brand-50 px-1.5 text-[11px] font-semibold tracking-wide whitespace-nowrap text-brand-hover uppercase">
+    <span className="relative z-10 inline-flex h-5 flex-none items-center rounded bg-brand-50 px-1.5 text-xs font-semibold tracking-wide whitespace-nowrap text-brand-hover uppercase">
       {M.search.matchedPhoneBadge}
     </span>
   );
@@ -29,7 +31,7 @@ function PhoneMatchBadge() {
 
 function NewBadge() {
   return (
-    <span className="relative z-10 inline-flex h-5 flex-none items-center rounded bg-cta-50 px-1.5 text-[11px] font-semibold tracking-wide text-cta uppercase">
+    <span className="relative z-10 inline-flex h-5 flex-none items-center rounded bg-cta-50 px-1.5 text-xs font-semibold tracking-wide text-cta uppercase">
       {M.list.newBadge}
     </span>
   );
@@ -53,12 +55,13 @@ export default function CompanyCard({
 
   if (variant === 'row') {
     return (
-      <article className="group relative grid gap-x-5 gap-y-1.5 bg-white px-4 py-3.5 md:grid-cols-[minmax(0,1fr)_128px_200px_168px] md:items-center md:gap-y-2.5 md:px-5">
+      <article className="group relative grid gap-x-5 gap-y-1.5 bg-white px-4 py-3.5 lg:grid-cols-[minmax(0,1fr)_144px_200px_168px] lg:items-center lg:gap-y-2.5 lg:px-5">
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <H className="line-clamp-2 text-base leading-6 font-semibold">
               <Link
                 href={href}
+                prefetch={false}
                 title={c.name}
                 className="text-ink no-underline group-hover:text-brand after:absolute after:inset-0"
               >
@@ -76,30 +79,31 @@ export default function CompanyCard({
           {c.matched === 'phone' && <PhoneMatchBadge />}
           {fresh && <NewBadge />}
         </div>
-        {/* Điện thoại: «MST … · Đại diện …» chung một dòng; máy tính (md:contents): 2 cột riêng. */}
-        <div className="flex min-w-0 items-baseline gap-x-3 text-sm md:contents">
-          <div className="flex flex-none items-baseline gap-1.5 md:flex-col md:gap-0.5">
-            <span className="text-muted md:text-xs">MST</span>
-            <span className="relative z-10 font-semibold tracking-[0.02em] tabular-nums md:text-[15px]">
+        {/* Điện thoại, máy tính bảng: «MST …» và «Đại diện …» mỗi thứ một dòng (tên người đủ chỗ, không bị
+            cắt); từ 1024px (lg:contents): 2 cột riêng. */}
+        <div className="flex min-w-0 flex-col gap-0.5 text-sm lg:contents">
+          <div className="flex flex-none items-baseline gap-1.5 lg:flex-col lg:gap-0.5">
+            <span className="text-muted lg:text-xs">MST</span>
+            <span className="relative z-10 font-semibold tracking-[0.02em] whitespace-nowrap tabular-nums lg:text-body">
               <Highlight text={c.mst} query={highlight} />
             </span>
           </div>
-          <div className="flex min-w-0 items-baseline gap-1.5 md:flex-col md:gap-0.5">
-            <span className="flex-none text-muted md:text-xs">
-              <span className="md:hidden">· {M.company.repShort}</span>
-              <span className="hidden md:inline">{M.company.representative}</span>
+          <div className="flex min-w-0 items-baseline gap-1.5 lg:flex-col lg:gap-0.5">
+            <span className="flex-none text-muted lg:text-xs">
+              <span className="lg:hidden">{M.company.repShort}</span>
+              <span className="hidden lg:inline">{M.company.representative}</span>
             </span>
             <span className="truncate">
               <Highlight text={c.representative} query={highlight} />
             </span>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 md:flex-col md:items-start md:gap-1">
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 lg:flex-col lg:items-start lg:gap-1">
           <StatusBadge status={c.status} className="text-sm" />
           {date && (
-            <span className="text-[13px] text-muted md:text-xs">
-              <span className="md:hidden">· {M.list.since(date)}</span>
-              <span className="hidden md:inline">
+            <span className="text-meta text-muted lg:text-xs">
+              <span className="lg:hidden">· {M.list.since(date)}</span>
+              <span className="hidden lg:inline">
                 {M.list.activeFrom} {date}
               </span>
             </span>
@@ -113,14 +117,15 @@ export default function CompanyCard({
     <article
       className={`group relative flex h-full flex-col gap-2.5 bg-white p-4 ${
         cell
-          ? 'transition-colors duration-150 hover:bg-brand-50/50'
+          ? 'transition-colors duration-150 hover:bg-brand-50'
           : 'rounded-xl border border-line transition-[border-color,box-shadow] duration-150 hover:border-brand hover:shadow-[0_4px_16px_rgba(10,42,94,0.08)]'
       }`}
     >
       <div className="flex items-start gap-3">
-        <H className="line-clamp-2 min-h-12 flex-1 text-base leading-6 font-semibold">
+        <H className="line-clamp-2 flex-1 text-base leading-6 font-semibold sm:min-h-12">
           <Link
             href={href}
+            prefetch={false}
             title={c.name}
             className="text-ink no-underline group-hover:text-brand after:absolute after:inset-0"
           >
@@ -150,7 +155,7 @@ export default function CompanyCard({
       </dl>
       <p className="mt-auto flex flex-wrap items-baseline gap-x-1.5 border-t border-line-soft pt-2.5 text-sm">
         <StatusBadge status={c.status} />
-        {date && <span className="text-[13px] text-muted">· {M.list.since(date)}</span>}
+        {date && <span className="text-meta text-muted">· {M.list.since(date)}</span>}
       </p>
     </article>
   );

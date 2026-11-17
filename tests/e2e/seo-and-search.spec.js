@@ -132,7 +132,7 @@ test('trang danh sách tỉnh: 20 dòng/trang, phân trang số, banner sau dòn
     'Doanh nghiệp tại TP Hồ Chí Minh',
   );
   await expect(page.locator('main ol > li article')).toHaveCount(20);
-  await expect(page.locator('main ol aside[aria-label="Quảng cáo"]')).toHaveCount(2);
+  await expect(page.locator('main ol [data-ad-slot]')).toHaveCount(2);
   await page
     .getByRole('navigation', { name: 'Phân trang' })
     .getByRole('link', { name: 'Trang sau' })
@@ -300,7 +300,7 @@ test('trang kết quả: tab «Tìm theo» có số đếm, lọc người đạ
   await expect(tabs.getByText('Tất cả')).toBeVisible();
   // «Sơn» không kéo theo «Sông Hồng»
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Tìm thấy 7 kết quả/);
-  await tabs.getByRole('link', { name: /Người đại diện/ }).click();
+  await tabs.getByRole('link', { name: /đại diện/i }).click();
   await expect(page).toHaveURL(/theo=dai-dien/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Tìm thấy 6 kết quả/);
 

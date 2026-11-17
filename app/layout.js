@@ -14,7 +14,8 @@ import { M } from '@/lib/messages';
 
 // Một font đủ dấu tiếng Việt, tối đa 2 độ đậm (spec mục 7.2).
 const font = Be_Vietnam_Pro({
-  subsets: ['vietnamese', 'latin'],
+  // latin-ext chứa đ, ă, ơ, ư, ỳ–ỹ… — trang tiếng Việt nào cũng cần, khai để được preload sớm.
+  subsets: ['vietnamese', 'latin', 'latin-ext'],
   weight: ['400', '600'],
   display: 'swap',
   variable: '--font-be-vietnam',
@@ -22,6 +23,9 @@ const font = Be_Vietnam_Pro({
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
+  // Open Graph chung (chia sẻ Zalo/Facebook). Ảnh: app/opengraph-image.png. Trang nào tự khai openGraph
+  // (trang DN) phải tự ghi siteName/locale vì Next thay cả khối.
+  openGraph: { siteName: SITE_NAME, locale: 'vi_VN', type: 'website' },
   title: {
     default: M.site.defaultTitle,
     template: `%s | ${SITE_NAME}`,

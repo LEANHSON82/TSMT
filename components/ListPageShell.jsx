@@ -33,16 +33,16 @@ export default function ListPageShell({
       {/* aside: hình trang trí bên phải tiêu đề (≥ 768px), không chiếm chỗ trên điện thoại. */}
       <header className="flex items-center justify-between gap-6">
         <div className="flex min-w-0 flex-col gap-1.5">
-          <h1 className="text-2xl leading-8 font-semibold text-navy md:text-[28px] md:leading-9">
+          <h1 className="text-2xl leading-8 font-semibold text-pretty text-navy md:text-3xl md:leading-9">
             {title}
+            {data.page > 1 && (
+              <span className="font-normal text-muted"> – {M.pagination.page(data.page)}</span>
+            )}
           </h1>
-          {description && (
-            <p className="max-w-3xl text-[15px] leading-6 text-ink-2">{description}</p>
-          )}
+          {description && <p className="max-w-3xl text-body leading-6 text-ink-2">{description}</p>}
           {totalLabel !== false && (
             <p className="text-sm font-semibold text-muted">
               {totalLabel ?? M.list.total(formatNumber(data.total || 0))}
-              {data.page > 1 && ` · ${M.pagination.page(data.page)}/${totalPages}`}
             </p>
           )}
         </div>

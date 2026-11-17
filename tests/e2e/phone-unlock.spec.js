@@ -17,7 +17,7 @@ test('thành công: xem video giả lập → hiện SĐT + Gọi/Sao chép/Zalo
   page,
 }) => {
   await page.goto(DETAIL);
-  await expect(page.getByText('0916 *** ***')).toBeVisible();
+  await expect(page.getByText('0916 *** ***', { exact: true })).toBeVisible();
   await expect(page.getByText(FULL_PHONE)).toHaveCount(0);
   await startUnlock(page);
   await expect(page.getByTestId('mock-video')).toBeVisible();

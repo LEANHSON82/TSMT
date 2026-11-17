@@ -50,30 +50,30 @@ export default async function HomePage() {
           ],
         }}
       />
-      <section className="border-b border-line bg-white">
-        <div className="mx-auto flex max-w-[808px] flex-col items-center gap-2 px-4 pt-6 pb-6 text-center md:gap-3 md:px-6 md:pt-14 md:pb-[52px]">
-          <h1
-            id="home-title"
-            className="text-[22px] leading-7 font-semibold text-navy md:text-[30px] md:leading-[38px]"
-          >
-            {M.home.title}
-          </h1>
-          <p className="text-sm leading-[22px] text-ink-2 md:text-base">{M.home.lead}</p>
-          <div data-hero-search className="mt-3 w-full">
-            <SearchBox size="lg" autoFocusDesktop />
-          </div>
-        </div>
-      </section>
-
       {/* Thứ tự theo yêu cầu: tỉnh/thành (dải xanh nhạt) → ô quảng cáo → DN mới thành lập. Spec 3.1 liệt kê
           DN mới (mục 4) trước tỉnh/thành (mục 5); ô quảng cáo vẫn nằm giữa hai khối (mục 6). */}
       <main className="flex w-full flex-col">
+        <section className="border-b border-line bg-white">
+          <div className="mx-auto flex max-w-[808px] flex-col items-center gap-2 px-4 pt-6 pb-6 text-center md:gap-3 md:px-6 md:pt-14 md:pb-[52px]">
+            <h1
+              id="home-title"
+              className="text-2xl leading-8 font-semibold text-pretty text-navy md:text-3xl md:leading-[38px]"
+            >
+              {M.home.title}
+            </h1>
+            <p className="text-sm leading-[22px] text-ink-2 md:text-base">{M.home.lead}</p>
+            <div data-hero-search className="mt-3 w-full">
+              <SearchBox size="lg" autoFocusDesktop />
+            </div>
+          </div>
+        </section>
+
         <section aria-labelledby="prov-title" className="border-b border-line bg-brand-50/70">
           <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-4 py-8 md:px-6 md:py-12">
             <div className="flex flex-col gap-0.5">
               <h2
                 id="prov-title"
-                className="min-w-0 text-[17px] leading-7 font-semibold text-navy md:text-2xl md:leading-8"
+                className="min-w-0 text-lg leading-7 font-semibold text-navy md:text-xl md:leading-7"
               >
                 {M.home.provincesTitle}
               </h2>
@@ -82,18 +82,19 @@ export default async function HomePage() {
             {/* Bản đồ (≥ 1024px): rê chuột / focus tên tỉnh → chấm tỉnh đó sáng lên (CSS .prov-map-scope, không JS). */}
             <div className="prov-map-scope grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-center">
               <VnDotMap showAll className="hidden w-[240px] lg:block" />
-              <ul className="columns-2 gap-x-6 rounded-xl border border-line bg-white p-2 md:columns-3 md:p-3">
+              <ul className="columns-2 gap-x-3 rounded-xl border border-line bg-white p-1.5 md:columns-3 md:gap-x-6 md:p-3">
                 {byCount.map((p) => (
                   <li key={p.code} className="break-inside-avoid">
                     <Link
                       href={`/tinh/${p.slug}`}
+                      prefetch={false}
                       data-prov={p.code}
-                      className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-md px-2.5 text-ink no-underline hover:bg-page hover:text-brand md:px-3"
+                      className="flex min-h-11 min-w-0 items-center justify-between gap-2 rounded-md px-2 text-ink no-underline hover:bg-page hover:text-brand md:gap-3 md:px-3"
                     >
-                      <span className="truncate text-[15px]">{p.name}</span>
+                      <span className="truncate text-body">{p.name}</span>
                       <span className="flex-none text-sm text-muted tabular-nums">
                         {formatNumber(p.company_count)}
-                        <span className="sr-only"> doanh nghiệp</span>
+                        <span className="sr-only">{M.home.companiesSr}</span>
                       </span>
                     </Link>
                   </li>
@@ -111,14 +112,14 @@ export default async function HomePage() {
               <div className="flex flex-col gap-0.5">
                 <h2
                   id="new-title"
-                  className="min-w-0 text-[17px] leading-7 font-semibold text-navy md:text-2xl md:leading-8"
+                  className="min-w-0 text-lg leading-7 font-semibold text-navy md:text-xl md:leading-7"
                 >
                   {M.home.newTitle}
                 </h2>
               </div>
               <Link
                 href="/doanh-nghiep-moi-thanh-lap"
-                className="group inline-flex min-h-11 flex-none items-center gap-1 text-sm font-semibold whitespace-nowrap no-underline md:text-[15px]"
+                className="press group inline-flex min-h-11 flex-none items-center gap-1 text-sm font-semibold whitespace-nowrap no-underline md:text-body"
               >
                 {/* Màn hình rất hẹp (≤ 380px): rút gọn để tiêu đề khối vẫn nằm một dòng. */}
                 <span className="min-[381px]:hidden">{M.home.viewAllShort}</span>

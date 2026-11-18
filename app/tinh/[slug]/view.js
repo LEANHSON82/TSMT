@@ -2,6 +2,7 @@
 import { notFound } from 'next/navigation';
 import AdvancedFilterLink from '@/components/AdvancedFilterLink';
 import ListPageShell from '@/components/ListPageShell';
+import VnDotMap from '@/components/VnDotMap';
 import { listCompanies } from '@/lib/api';
 import { provinceOptions } from '@/lib/provinces';
 import { buildHref, pageNumber } from '@/lib/url';
@@ -39,6 +40,7 @@ export async function ProvinceList({ params, searchParams }) {
       params={{}}
       slotPrefix="province"
       showProvince={false}
+      aside={<VnDotMap highlight={province.code} className="w-[130px]" />}
     />
   );
 }

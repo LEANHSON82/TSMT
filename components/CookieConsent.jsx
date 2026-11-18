@@ -97,12 +97,11 @@ export default function CookieConsent() {
           aria-label={M.cookie.region}
           className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white shadow-[0_-8px_24px_rgba(10,42,94,0.12)]"
         >
-          {/* Điện thoại: gọn (2 dòng chữ + 1 hàng nút) để không che nội dung, nhất là nút xem SĐT. */}
-          <div className="mx-auto flex max-w-[1200px] flex-col gap-2 px-4 py-2.5 md:flex-row md:items-center md:gap-8 md:px-6 md:py-4">
-            <p className="flex-1 text-meta text-ink-2 md:text-sm md:leading-5">
+          <div className="mx-auto flex max-w-[1200px] flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:gap-8 md:px-6">
+            <p className="flex-1 text-sm leading-5 text-ink-2">
               {M.cookie.banner}{' '}
               <Link href="/chinh-sach-bao-mat#cookie" prefetch={false}>
-                {M.footer.privacy.toLowerCase()}
+                {M.footer.privacy}
               </Link>
               .
             </p>
@@ -110,14 +109,14 @@ export default function CookieConsent() {
               <button
                 type="button"
                 onClick={() => setShowPrefs(true)}
-                className="h-11 rounded-md border-[1.5px] border-brand bg-white px-4 text-body font-semibold text-brand md:min-w-36 md:px-5"
+                className="h-11 rounded-md border-[1.5px] border-brand bg-white px-5 text-body font-semibold text-brand md:min-w-36"
               >
                 {M.cookie.customize}
               </button>
               <button
                 type="button"
                 onClick={acceptAll}
-                className="h-11 rounded-md border-[1.5px] border-brand bg-brand px-4 text-body font-semibold text-white hover:bg-brand-hover md:min-w-36 md:px-5"
+                className="h-11 rounded-md border-[1.5px] border-brand bg-brand px-5 text-body font-semibold text-white hover:bg-brand-hover md:min-w-36"
               >
                 {M.cookie.accept}
               </button>

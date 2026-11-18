@@ -18,16 +18,6 @@ export const FIELD_TABS = [
   { value: 'so', field: 'number', countKey: 'number', label: 'fieldNumber' },
 ];
 
-/**
- * Có đáng hiện tab không: chỉ khi kết quả rơi vào ít nhất 2 nhóm (vd. vừa khớp tên DN vừa khớp người đại diện),
- * hoặc đang chọn một tab. Mọi kết quả cùng một nhóm thì «Tất cả 222 | Tên DN 222» không cho thêm thông tin.
- */
-export function tabsUseful(active, counts) {
-  if (active) return true;
-  if (!counts) return false;
-  return FIELD_TABS.filter((t) => t.value && counts[t.countKey] > 0).length >= 2;
-}
-
 export default function SearchFieldTabs({ active, counts, hrefFor }) {
   return (
     <nav aria-label={M.search.fieldTabs} className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">

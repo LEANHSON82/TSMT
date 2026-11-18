@@ -1,12 +1,14 @@
 import StaticPage from '@/components/StaticPage';
 import { SITE_NAME } from '@/lib/site';
 import { M } from '@/lib/messages';
+import { IllusLegal } from '@/components/Illustrations';
 
 export const metadata = { ...M.staticPage.meta.terms, alternates: { canonical: '/dieu-khoan' } };
 
 export default function TermsPage() {
   return (
     <StaticPage
+      illustration={<IllusLegal className="w-[130px]" />}
       title="Điều khoản sử dụng"
       sections={[
         {

@@ -55,6 +55,7 @@ export default function ListFilters({ action, fields, hidden = {} }) {
   const has = (f) => (f.multiple ? f.value?.length > 0 : Boolean(f.value));
   const urlValue = (f) => (f.multiple ? (f.value || []).join(',') : f.value || '');
   const optionOf = (f, v) => f.options.find((o) => o.value === v);
+  const activeCount = fields.filter((f) => has(f) && isFilter(f)).length;
   const current = Object.fromEntries(fields.map((f) => [f.name, urlValue(f)]));
   const keep = Object.fromEntries(
     fields.filter((f) => !isFilter(f)).map((f) => [f.name, urlValue(f)]),
@@ -72,8 +73,6 @@ export default function ListFilters({ action, fields, hidden = {} }) {
         }),
       })),
     );
-  // Số trên nút «Lọc» (điện thoại) = số thẻ bộ lọc bên dưới (2 tỉnh + thời gian = 3).
-  const activeCount = chips.length;
 
   /** overrides: { name: giá trị } — ô chọn nhiều gửi lựa chọn vừa áp dụng (mảng). */
   function apply(overrides = {}) {
@@ -168,6 +167,14 @@ export default function ListFilters({ action, fields, hidden = {} }) {
           {M.list.applyFilter}
         </button>
       </noscript>
+      {activeCount > 0 && (
+        <Link
+          href={buildHref(action, { ...hidden, ...keep })}
+          className="inline-flex min-h-11 items-center text-body font-semibold"
+        >
+          {M.list.clearFilter}
+        </Link>
+      )}
     </div>
   );
 
@@ -226,15 +233,6 @@ export default function ListFilters({ action, fields, hidden = {} }) {
               </Link>
             </li>
           ))}
-          {/* «Bỏ lọc» (bỏ hết, giữ sắp xếp) đứng cuối hàng thẻ. */}
-          <li>
-            <Link
-              href={buildHref(action, { ...hidden, ...keep })}
-              className="inline-flex min-h-11 items-center px-1 text-sm font-semibold"
-            >
-              {M.list.clearFilter}
-            </Link>
-          </li>
         </ul>
       )}
     </form>

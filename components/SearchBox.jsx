@@ -47,7 +47,6 @@ export default function SearchBox({
   const [status, setStatus] = useState('idle');
   const [focused, setFocused] = useState(false);
   const [wide, setWide] = useState(false);
-  const [narrow, setNarrow] = useState(false);
 
   useEffect(() => {
     if (!placeholderWide) return undefined;
@@ -57,16 +56,6 @@ export default function SearchBox({
     mq.addEventListener('change', update);
     return () => mq.removeEventListener('change', update);
   }, [placeholderWide]);
-
-  // Ô lớn trên màn hình hẹp (< 480px): câu spec dài bị cắt giữa chữ («tên doa…») → dùng câu ngắn cùng ý.
-  useEffect(() => {
-    if (size !== 'lg') return undefined;
-    const mq = window.matchMedia('(max-width: 479.98px)');
-    const update = () => setNarrow(mq.matches);
-    update();
-    mq.addEventListener('change', update);
-    return () => mq.removeEventListener('change', update);
-  }, [size]);
 
   // Tự focus trên máy tính, KHÔNG tự focus trên điện thoại (bàn phím che màn hình) — spec mục 3.1.
   useEffect(() => {
@@ -202,9 +191,6 @@ export default function SearchBox({
   // 'nav': ô tìm trong thanh nav — kính lúp bên trong ô, không có nút «Tìm» (bấm Enter để tìm).
   const nav = size === 'nav';
   const showList = open && entries.length > 0;
-  // Ô lớn trên điện thoại: nút «Tìm» xuống dòng dưới ô nhập → danh sách gợi ý neo ngay dưới ô nhập (đè lên nút),
-  // không nằm dưới nút (bàn phím bật thì gần như không còn thấy gợi ý).
-  const dropTop = lg ? 'max-sm:top-14' : '';
   const loading = status === 'loading';
   const showEmpty = status === 'empty' && focused;
   const spinner = (
@@ -265,11 +251,7 @@ export default function SearchBox({
             placeholder={
               (wide && placeholderWide) ||
               placeholder ||
-              (lg
-                ? narrow
-                  ? M.search.placeholderNarrow
-                  : M.search.placeholder
-                : M.search.placeholderShort)
+              (lg ? M.search.placeholder : M.search.placeholderShort)
             }
             value={value}
             onChange={(e) => setValue(e.target.value)}
@@ -316,7 +298,7 @@ export default function SearchBox({
         role="listbox"
         aria-label={M.search.suggestions}
         hidden={!showList}
-        className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1 max-h-[70vh] overflow-auto rounded-md border border-line bg-white py-1 text-left shadow-[0_8px_24px_rgba(10,42,94,0.14)] ${dropTop} ${listClassName}`}
+        className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1 max-h-[70vh] overflow-auto rounded-md border border-line bg-white py-1 text-left shadow-[0_8px_24px_rgba(10,42,94,0.14)] ${listClassName}`}
       >
         {GROUPS.map(({ kind, label }) => {
           const group = entries.map((e, i) => ({ e, i })).filter(({ e }) => e.kind === kind);
@@ -371,7 +353,7 @@ export default function SearchBox({
       {showEmpty && (
         <p
           aria-hidden="true"
-          className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1 rounded-md border border-line bg-white px-4 py-3 text-left text-sm text-ink-2 shadow-[0_8px_24px_rgba(10,42,94,0.14)] ${dropTop} ${listClassName}`}
+          className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1 rounded-md border border-line bg-white px-4 py-3 text-left text-sm text-ink-2 shadow-[0_8px_24px_rgba(10,42,94,0.14)] ${listClassName}`}
         >
           {M.search.noSuggestions(value.trim())}
         </p>

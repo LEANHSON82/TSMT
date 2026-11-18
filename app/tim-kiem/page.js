@@ -7,8 +7,7 @@ import ListFilters from '@/components/ListFilters';
 import Breadcrumb from '@/components/Breadcrumb';
 import ListPageShell from '@/components/ListPageShell';
 import SearchBox from '@/components/SearchBox';
-import SearchFieldTabs, { FIELD_TABS, tabsUseful } from '@/components/SearchFieldTabs';
-import Link from 'next/link';
+import SearchFieldTabs, { FIELD_TABS } from '@/components/SearchFieldTabs';
 import TrackOnMount from '@/components/TrackOnMount';
 import { searchCompanies } from '@/lib/api';
 import { FOUNDED_WITHIN, MAX_MULTI, foundedFrom, foundedOption, listParam } from '@/lib/filters';
@@ -141,20 +140,16 @@ export default async function SearchPage({ searchParams }) {
 
   if (!q && !f.hasFilter) {
     return (
-      <main className="flex w-full flex-col">
-        <div className="border-b border-line bg-white">
-          <header className="mx-auto flex max-w-[1200px] flex-col gap-3 px-4 pt-4 pb-6 md:px-6 md:pt-6 md:pb-8">
-            <Breadcrumb items={[{ name: M.search.pageTitle }]} />
-            <h1 className="text-2xl leading-8 font-semibold text-navy md:text-[32px] md:leading-10">
-              {M.search.pageTitle}
-            </h1>
-            <p className="max-w-3xl text-body leading-6 text-ink-2">{M.search.noQuery}</p>
-            <div data-hero-search className="max-w-[760px]">
-              <SearchBox size="lg" autoFocusDesktop />
-            </div>
-          </header>
+      <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-5 px-4 pt-4 pb-12 md:px-6 md:pt-6">
+        <Breadcrumb items={[{ name: M.search.pageTitle }]} />
+        <h1 className="text-2xl leading-8 font-semibold text-navy md:text-3xl md:leading-9">
+          {M.search.pageTitle}
+        </h1>
+        <p className="max-w-3xl text-body leading-6 text-ink-2">{M.search.noQuery}</p>
+        <div data-hero-search className="max-w-[760px]">
+          <SearchBox size="lg" autoFocusDesktop />
         </div>
-        <div className="mx-auto w-full max-w-[1200px] px-4 pt-6 pb-12 md:px-6">{filterForm}</div>
+        {filterForm}
       </main>
     );
   }
@@ -206,13 +201,9 @@ export default async function SearchPage({ searchParams }) {
         breadcrumb={[{ name: q ? M.search.pageTitle : M.search.filterTitle }]}
         highlight={q}
         title={
-          data.total === 0
-            ? q
-              ? M.search.noResultsFor(q)
-              : M.search.noFilterResults
-            : q
-              ? M.search.resultsFor(formatNumber(data.total), q)
-              : M.search.filterResults(formatNumber(data.total))
+          q
+            ? M.search.resultsFor(formatNumber(data.total), q)
+            : M.search.filterResults(formatNumber(data.total))
         }
         totalLabel={false}
         filters={
@@ -222,7 +213,7 @@ export default async function SearchPage({ searchParams }) {
           ) : (
             <div className="flex flex-col gap-4">
               {intentBox}
-              {q && tabsUseful(tab.value, data.counts) && (
+              {q && (
                 <SearchFieldTabs
                   active={tab.value}
                   counts={data.counts}
@@ -237,26 +228,6 @@ export default async function SearchPage({ searchParams }) {
         basePath="/tim-kiem"
         params={params}
         emptyTitle={M.search.emptyTitle}
-        emptyActions={
-          <p className="flex flex-wrap justify-center gap-x-5">
-            <Link
-              href="/doanh-nghiep-moi-thanh-lap"
-              prefetch={false}
-              className="inline-flex min-h-11 items-center font-semibold"
-            >
-              {M.search.emptyActionNew}
-            </Link>
-            {q && (
-              <Link
-                href="/tim-kiem"
-                prefetch={false}
-                className="inline-flex min-h-11 items-center font-semibold"
-              >
-                {M.search.emptyActionFilter}
-              </Link>
-            )}
-          </p>
-        }
         emptyHints={
           !q ? M.search.emptyFilterHints : tab.value ? [M.search.emptyInField] : M.search.emptyHints
         }

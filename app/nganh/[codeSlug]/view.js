@@ -1,5 +1,6 @@
 // DN theo ngành /nganh/{ma-nganh}-{slug}?tinh=&page= (spec mục 2, 3.5). Mã ngành VSIC 4 số.
 import { notFound } from 'next/navigation';
+import AdvancedFilterLink from '@/components/AdvancedFilterLink';
 import ListFilters from '@/components/ListFilters';
 import ListPageShell from '@/components/ListPageShell';
 import { IllusIndustry } from '@/components/Illustrations';
@@ -62,19 +63,22 @@ export async function IndustryList({ params, searchParams }) {
       title={M.list.industry.title(industry.code, industry.name)}
       description={M.list.industry.lead(where)}
       filters={
-        <ListFilters
-          key={province?.slug || ''}
-          action={basePath}
-          fields={[
-            {
-              name: 'tinh',
-              label: M.list.provinceFilter,
-              value: province?.slug || '',
-              allLabel: M.list.allProvinces,
-              options,
-            },
-          ]}
-        />
+        <div className="flex flex-col gap-1">
+          <ListFilters
+            key={province?.slug || ''}
+            action={basePath}
+            fields={[
+              {
+                name: 'tinh',
+                label: M.list.provinceFilter,
+                value: province?.slug || '',
+                allLabel: M.list.allProvinces,
+                options,
+              },
+            ]}
+          />
+          <AdvancedFilterLink params={{ nganh: industry.code, tinh: province?.slug }} />
+        </div>
       }
       data={data}
       basePath={basePath}

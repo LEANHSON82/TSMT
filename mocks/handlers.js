@@ -54,15 +54,25 @@ function summary(c) {
   };
 }
 
+// province, industry: một mã hoặc nhiều mã cách nhau dấu phẩy (đề xuất mở rộng, README).
+// founded_from=YYYY-MM-DD: chỉ DN thành lập từ ngày đó.
+const csv = (v) => (v ? v.split(',').filter(Boolean) : []);
+
+function hasFilters(url) {
+  return ['province', 'status', 'industry', 'founded_from'].some((k) => url.searchParams.get(k));
+}
+
 function applyFilters(items, url) {
-  const province = url.searchParams.get('province');
+  const provinces = csv(url.searchParams.get('province'));
   const status = url.searchParams.get('status');
-  const industry = url.searchParams.get('industry');
+  const industries = csv(url.searchParams.get('industry'));
+  const from = url.searchParams.get('founded_from');
   return items.filter(
     (c) =>
-      (!province || c.province.code === province) &&
+      (!provinces.length || provinces.includes(c.province.code)) &&
       (!status || c.status.code === status) &&
-      (!industry || c.industries.some((i) => i.code === industry)),
+      (!industries.length || c.industries.some((i) => industries.includes(i.code))) &&
+      (!from || (c.founded_date || '') >= from),
   );
 }
 
@@ -70,6 +80,12 @@ const scenario = (request) => request.headers.get('x-mock-scenario') || '';
 
 export const handlers = [
   http.get('*/v1/provinces', () => HttpResponse.json({ items: provincesData })),
+
+  http.get('*/v1/industries', () =>
+    HttpResponse.json({
+      items: [...industriesData].sort((a, b) => a.code.localeCompare(b.code)),
+    }),
+  ),
 
   http.get('*/v1/industries/:code', ({ params }) => {
     const ind = industriesData.find((i) => i.code === params.code);
@@ -97,10 +113,14 @@ export const handlers = [
   // industry=; trả thêm matched từng DN và counts (số kết quả theo từng nhóm «Tìm theo»).
   http.get('*/v1/search', ({ request }) => {
     const url = new URL(request.url);
-    const found = search(searchIndex, url.searchParams.get('q')).filter(
-      (r) => applyFilters([r.c], url).length,
-    );
-    const counts = countByField(found);
+    const q = (url.searchParams.get('q') || '').trim();
+    // Không từ khoá nhưng có bộ lọc: lọc toàn bộ DN (mới thành lập trước); không có gì → rỗng.
+    const found = q
+      ? search(searchIndex, q).filter((r) => applyFilters([r.c], url).length)
+      : hasFilters(url)
+        ? applyFilters(companiesData, url).map((c) => ({ c, matched: null }))
+        : [];
+    const counts = q ? countByField(found) : undefined;
     const field = url.searchParams.get('field');
     let list = FIELD_GROUPS[field]
       ? found.filter((r) => FIELD_GROUPS[field].includes(r.matched))

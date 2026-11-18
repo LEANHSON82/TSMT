@@ -1,6 +1,8 @@
 // Kết quả tìm /tim-kiem?q=...&tinh=...&trangthai=...&page=2 (spec mục 3.2). SSR, noindex.
-// Thêm (đề xuất mở rộng API, README): &theo=ten|dai-dien|so (tab «Tìm theo»), &nganh=mã ngành,
-// &sapxep=moi|cu (bỏ trống = phù hợp nhất). Từ khoá có tên tỉnh mà chưa lọc tỉnh → gợi ý «Lọc tại …».
+// Thêm (đề xuất mở rộng API, README): &theo=ten|dai-dien|so (tab «Tìm theo»), &sapxep=moi|cu (bỏ trống = phù hợp
+// nhất), lọc nâng cao &tinh=ha-noi,ho-chi-minh (nhiều tỉnh), &nganh=6201,4330 (nhiều ngành), &thanhlap=30-ngay.
+// Không có từ khoá nhưng có bộ lọc → danh sách DN theo bộ lọc, mới thành lập trước.
+// Từ khoá có tên tỉnh mà chưa lọc tỉnh → gợi ý «Lọc tại …».
 import ListFilters from '@/components/ListFilters';
 import Breadcrumb from '@/components/Breadcrumb';
 import ListPageShell from '@/components/ListPageShell';
@@ -8,9 +10,10 @@ import SearchBox from '@/components/SearchBox';
 import SearchFieldTabs, { FIELD_TABS } from '@/components/SearchFieldTabs';
 import TrackOnMount from '@/components/TrackOnMount';
 import { searchCompanies } from '@/lib/api';
+import { FOUNDED_WITHIN, MAX_MULTI, foundedFrom, foundedOption, listParam } from '@/lib/filters';
 import { formatNumber } from '@/lib/format';
+import { industryOptions } from '@/lib/industry';
 import { M, STATUS_FILTER_OPTIONS } from '@/lib/messages';
-import { POPULAR_INDUSTRIES } from '@/lib/popular-industries';
 import { provinceOptions } from '@/lib/provinces';
 import { findProvinceInQuery } from '@/lib/search-intent';
 import { searchQueryType } from '@/lib/mst';
@@ -25,59 +28,149 @@ export async function generateMetadata({ searchParams }) {
   const sp = await searchParams;
   const q = firstParam(sp.q).trim();
   return {
-    title: q ? M.search.resultsTitle(q) : M.search.pageTitle,
+    title: q ? M.search.resultsTitle(q) : M.search.filterTitle,
     robots: { index: false, follow: true },
     alternates: { canonical: buildHref('/tim-kiem', { q, page: pageNumber(sp.page) }) },
+  };
+}
+
+/** Đọc bộ lọc từ URL; bỏ giá trị không hợp lệ (tỉnh / ngành không có, quá nhiều lựa chọn). */
+async function readFilters(sp, q) {
+  const [{ provinces, options: provinceOpts, bySlug }, { options: industryOpts, byCode }] =
+    await Promise.all([provinceOptions(), industryOptions()]);
+  const selProvinces = listParam(sp.tinh).map(bySlug).filter(Boolean).slice(0, MAX_MULTI);
+  const selIndustries = listParam(sp.nganh).map(byCode).filter(Boolean).slice(0, MAX_MULTI);
+  const founded = foundedOption(firstParam(sp.thanhlap));
+  const trangthai = firstParam(sp.trangthai);
+  const status = STATUS_FILTER_OPTIONS.some((o) => o.value === trangthai) ? trangthai : '';
+  const tab = (q && FIELD_TABS.find((t) => t.value === firstParam(sp.theo))) || FIELD_TABS[0];
+  const sapxep = SORTS[firstParam(sp.sapxep)] ? firstParam(sp.sapxep) : '';
+  // Không từ khoá: không có «phù hợp nhất» → mặc định mới thành lập trước («moi» trùng mặc định nên bỏ).
+  const sort = q ? sapxep : sapxep === 'cu' ? 'cu' : '';
+
+  const fields = [
+    {
+      name: 'tinh',
+      multiple: true,
+      label: M.list.provinceFilter,
+      value: selProvinces.map((p) => p.slug),
+      allLabel: M.list.allProvinces,
+      searchLabel: M.search.searchProvince,
+      options: provinceOpts,
+    },
+    {
+      name: 'nganh',
+      multiple: true,
+      label: M.search.industryFilter,
+      value: selIndustries.map((i) => i.code),
+      allLabel: M.search.allIndustries,
+      searchLabel: M.search.searchIndustry,
+      options: industryOpts,
+    },
+    {
+      name: 'thanhlap',
+      label: M.search.foundedFilter,
+      value: founded?.value || '',
+      allLabel: M.search.foundedAll,
+      options: FOUNDED_WITHIN.map((o) => ({
+        value: o.value,
+        label: M.search.founded[o.value],
+        chip: M.search.foundedChip(M.search.founded[o.value]),
+      })),
+    },
+    {
+      name: 'trangthai',
+      label: M.list.statusFilter,
+      value: status,
+      allLabel: M.list.allStatuses,
+      options: STATUS_FILTER_OPTIONS,
+    },
+    {
+      name: 'sapxep',
+      label: M.search.sortLabel,
+      value: sort,
+      allLabel: q ? M.search.sortRelevance : M.search.sortNewest,
+      filter: false,
+      options: q
+        ? [
+            { value: 'moi', label: M.search.sortNewest },
+            { value: 'cu', label: M.search.sortOldest },
+          ]
+        : [{ value: 'cu', label: M.search.sortOldest }],
+    },
+  ];
+
+  return {
+    provinces,
+    selProvinces,
+    selIndustries,
+    founded,
+    status,
+    tab,
+    sort,
+    fields,
+    hasFilter: Boolean(selProvinces.length || selIndustries.length || founded || status),
+    params: {
+      q,
+      tinh: selProvinces.map((p) => p.slug).join(','),
+      nganh: selIndustries.map((i) => i.code).join(','),
+      thanhlap: founded?.value,
+      trangthai: status,
+      sapxep: sort,
+      theo: tab.value,
+    },
   };
 }
 
 export default async function SearchPage({ searchParams }) {
   const sp = await searchParams;
   const q = firstParam(sp.q).trim();
-  const tinh = firstParam(sp.tinh);
-  const trangthai = firstParam(sp.trangthai);
   const page = pageNumber(sp.page);
-  const tab = FIELD_TABS.find((t) => t.value === firstParam(sp.theo)) || FIELD_TABS[0];
-  const industry = POPULAR_INDUSTRIES.find((i) => i.code === firstParam(sp.nganh));
-  const sapxep = SORTS[firstParam(sp.sapxep)] ? firstParam(sp.sapxep) : '';
+  const f = await readFilters(sp, q);
+  const { params, tab } = f;
+  const filterKey = Object.values(params).join('|');
+  const filterForm = (
+    <ListFilters
+      key={filterKey}
+      action="/tim-kiem"
+      hidden={{ q, theo: tab.value }}
+      fields={f.fields}
+    />
+  );
 
-  if (!q) {
+  if (!q && !f.hasFilter) {
     return (
-      <main className="mx-auto flex w-full max-w-[808px] flex-col gap-4 px-4 py-10 md:px-6">
+      <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-5 px-4 pt-4 pb-12 md:px-6 md:pt-6">
         <Breadcrumb items={[{ name: M.search.pageTitle }]} />
-        <h1 className="text-2xl font-semibold text-navy">{M.search.pageTitle}</h1>
-        <p className="text-ink-2">{M.search.noQuery}</p>
-        <div data-hero-search>
+        <h1 className="text-2xl leading-8 font-semibold text-navy md:text-3xl md:leading-9">
+          {M.search.pageTitle}
+        </h1>
+        <p className="max-w-3xl text-body leading-6 text-ink-2">{M.search.noQuery}</p>
+        <div data-hero-search className="max-w-[760px]">
           <SearchBox size="lg" autoFocusDesktop />
         </div>
+        {filterForm}
       </main>
     );
   }
 
-  const { provinces, options, bySlug } = await provinceOptions();
-  const province = bySlug(tinh);
-  const status = STATUS_FILTER_OPTIONS.some((o) => o.value === trangthai) ? trangthai : '';
   const data = await searchCompanies({
     q,
-    province: province?.code,
-    status,
-    industry: industry?.code,
+    province: f.selProvinces.map((p) => p.code),
+    status: f.status,
+    industry: f.selIndustries.map((i) => i.code),
+    foundedFrom: foundedFrom(f.founded?.value),
     field: tab.field,
-    sort: SORTS[sapxep],
+    sort: SORTS[f.sort] || (q ? undefined : 'founded_desc'),
     page,
   });
-  const queryType = searchQueryType(q);
-  const params = {
-    q,
-    tinh: province?.slug,
-    trangthai: status,
-    nganh: industry?.code,
-    sapxep,
-    theo: tab.value,
-  };
+  const queryType = q ? searchQueryType(q) : '';
   // «xây dựng hà nội» → gợi ý lọc tại Hà Nội với từ khoá «xây dựng» (chỉ có tên tỉnh → sang trang tỉnh).
-  const intent = !province && queryType === 'text' ? findProvinceInQuery(q, provinces) : null;
-  const hasFilter = Boolean(province || status || industry);
+  const intent =
+    q && !f.selProvinces.length && queryType === 'text'
+      ? findProvinceInQuery(q, f.provinces)
+      : null;
+  const hasFilter = f.hasFilter;
   const intentHref = intent
     ? intent.rest
       ? buildHref('/tim-kiem', {
@@ -100,11 +193,18 @@ export default async function SearchPage({ searchParams }) {
 
   return (
     <>
-      <TrackOnMount name="search" params={{ query_type: queryType, result_count: data.total }} />
+      {/* Sự kiện search (spec mục 7.4) chỉ khi có từ khoá; chỉ dùng bộ lọc thì không phải lượt tìm. */}
+      {q && (
+        <TrackOnMount name="search" params={{ query_type: queryType, result_count: data.total }} />
+      )}
       <ListPageShell
-        breadcrumb={[{ name: M.search.pageTitle }]}
+        breadcrumb={[{ name: q ? M.search.pageTitle : M.search.filterTitle }]}
         highlight={q}
-        title={M.search.resultsFor(formatNumber(data.total), q)}
+        title={
+          q
+            ? M.search.resultsFor(formatNumber(data.total), q)
+            : M.search.filterResults(formatNumber(data.total))
+        }
         totalLabel={false}
         filters={
           // 0 kết quả mà chưa bật bộ lọc nào: tab và bộ lọc không giúp gì, ẩn để thông báo + gợi ý hiện ngay.
@@ -113,53 +213,14 @@ export default async function SearchPage({ searchParams }) {
           ) : (
             <div className="flex flex-col gap-4">
               {intentBox}
-              <SearchFieldTabs
-                active={tab.value}
-                counts={data.counts}
-                hrefFor={(theo) => buildHref('/tim-kiem', { ...params, theo, page: undefined })}
-              />
-              <ListFilters
-                key={`${tinh}|${status}|${industry?.code || ''}|${sapxep}`}
-                action="/tim-kiem"
-                hidden={{ q, theo: tab.value }}
-                fields={[
-                  {
-                    name: 'tinh',
-                    label: M.list.provinceFilter,
-                    value: province?.slug || '',
-                    allLabel: M.list.allProvinces,
-                    options,
-                  },
-                  {
-                    name: 'trangthai',
-                    label: M.list.statusFilter,
-                    value: status,
-                    allLabel: M.list.allStatuses,
-                    options: STATUS_FILTER_OPTIONS,
-                  },
-                  {
-                    name: 'nganh',
-                    label: M.search.industryFilter,
-                    value: industry?.code || '',
-                    allLabel: M.search.allIndustries,
-                    options: POPULAR_INDUSTRIES.map((i) => ({
-                      value: i.code,
-                      label: `${i.code} – ${i.name}`,
-                    })),
-                  },
-                  {
-                    name: 'sapxep',
-                    label: M.search.sortLabel,
-                    value: sapxep,
-                    allLabel: M.search.sortRelevance,
-                    filter: false,
-                    options: [
-                      { value: 'moi', label: M.search.sortNewest },
-                      { value: 'cu', label: M.search.sortOldest },
-                    ],
-                  },
-                ]}
-              />
+              {q && (
+                <SearchFieldTabs
+                  active={tab.value}
+                  counts={data.counts}
+                  hrefFor={(theo) => buildHref('/tim-kiem', { ...params, theo, page: undefined })}
+                />
+              )}
+              {filterForm}
             </div>
           )
         }
@@ -167,7 +228,9 @@ export default async function SearchPage({ searchParams }) {
         basePath="/tim-kiem"
         params={params}
         emptyTitle={M.search.emptyTitle}
-        emptyHints={tab.value ? [M.search.emptyInField] : M.search.emptyHints}
+        emptyHints={
+          !q ? M.search.emptyFilterHints : tab.value ? [M.search.emptyInField] : M.search.emptyHints
+        }
         slotPrefix="search"
       />
     </>

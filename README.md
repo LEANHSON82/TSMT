@@ -145,6 +145,10 @@ hiện số).
 - `GET /v1/search` nhận thêm `field=name|representative|number`, `sort=founded_desc|founded_asc` (bỏ
   trống = phù hợp nhất), `industry=`; mỗi DN thêm `matched`; thêm `counts: {all, name, representative,
 number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
+- **Lọc nâng cao** (trang `/tim-kiem`): `province=01,79` và `industry=6201,4330` nhận nhiều mã cách nhau dấu
+  phẩy; `founded_from=YYYY-MM-DD` chỉ lấy DN thành lập từ ngày đó; `q` được để trống khi có ít nhất một bộ lọc
+  (khi đó sắp `founded_desc`, không có `counts`). Thêm `GET /v1/industries` → `{items: [{code, name, slug}]}`
+  (danh mục VSIC cấp 4) cho ô chọn ngành; chưa có thì giao diện dùng 15 ngành phổ biến.
 - Xếp hạng: khớp nguyên chữ trước khớp phần đầu; gõ có dấu thì đúng dấu xếp trên; mọi từ khoá khớp trong
   cùng một trường; khớp tên DN xếp trên khớp người đại diện khi điểm bằng nhau; bỏ qua cụm chữ chung
   («công ty», «TNHH», «cổ phần»…). Gợi ý (đang gõ) cho khớp phần đầu từ cuối; trang kết quả có kết quả
@@ -172,7 +176,7 @@ number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
   - Chuyển trang: nội dung trang mới hiện mờ dần + trượt lên 6px (0,22 s; không chạy ở lần tải đầu). Trang DN chưa có trong bộ đệm hiện khung chờ (`app/[mstSlug]/loading.js`); gợi ý tìm kiếm đang chọn được tải trước.
   - Header có bóng đổ khi cuộn khỏi đầu trang (scroll-driven); viền focus khép vào nút; ô form báo lỗi rung nhẹ khi bấm gửi.
 - **SEO bổ sung:** URL viết hoa → 301 chữ thường; `/{mst}-{slug}.html` → 301; đường dẫn có dấu chấm khác → 404 thật; «DN mới» lọc tỉnh canonical về `/tinh/{slug}`; ngành × tỉnh không có DN → noindex; trang 2+ có «– Trang N» trong H1; Open Graph cho mọi trang, ảnh `app/opengraph-image.png` (1200×630 — **đổi tên site thì chụp lại ảnh này**).
-- **Tìm kiếm:** gợi ý chia nhóm Doanh nghiệp / Người đại diện / Tỉnh/thành (ghi rõ khớp ở đâu, khớp SĐT không hiện số) + dòng «Xem tất cả kết quả»; trạng thái đang tải / không có gợi ý. Trang kết quả có tab «Tìm theo» kèm số đếm, lọc tỉnh/tình trạng/ngành, sắp xếp, thẻ bộ lọc bỏ được từng cái, gợi ý «Lọc tại [tỉnh]» khi từ khoá có tên tỉnh. Tô sáng từng từ khoá ở đầu chữ (không phân biệt hoa/thường, dấu — `lib/highlight.js`).
+- **Tìm kiếm:** gợi ý chia nhóm Doanh nghiệp / Người đại diện / Tỉnh/thành (ghi rõ khớp ở đâu, khớp SĐT không hiện số) + dòng «Xem tất cả kết quả»; trạng thái đang tải / không có gợi ý. Trang kết quả có tab «Tìm theo» kèm số đếm; lọc nâng cao chọn nhiều tỉnh/thành và nhiều ngành (ô tích có tìm nhanh, bấm «Áp dụng»), «Thành lập trong» 7 ngày → 3 năm, tình trạng, sắp xếp; lọc được cả khi không có từ khoá. Trang tỉnh / ngành / DN mới giữ một giá trị như spec, có link «Lọc nâng cao» sang `/tim-kiem`; thẻ bộ lọc bỏ được từng cái, gợi ý «Lọc tại [tỉnh]» khi từ khoá có tên tỉnh. Tô sáng từng từ khoá ở đầu chữ (không phân biệt hoa/thường, dấu — `lib/highlight.js`).
 - **Chi tiết DN:**
   - Bảng thông tin ẩn dòng trống, ngành nghề thu gọn khi quá 10 ngành, khối DN cùng ngành.
   - Banner dưới bảng thông tin và cột phải dính khi cuộn.

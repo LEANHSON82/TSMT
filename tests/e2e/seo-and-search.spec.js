@@ -324,3 +324,34 @@ test('không tìm được DN bằng số điện thoại đã bị chủ DN ẩ
   await page.goto('/tim-kiem?q=0901823874');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Tìm thấy 0 kết quả/);
 });
+
+test('lọc nâng cao: chọn nhiều tỉnh, thành lập trong 30 ngày, không cần từ khoá; thẻ bỏ từng tỉnh', async ({
+  page,
+}) => {
+  await page.goto('/tinh/ha-noi');
+  await page.getByRole('link', { name: /Lọc nâng cao/ }).click();
+  await expect(page).toHaveURL(/\/tim-kiem\?tinh=ha-noi$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Tìm thấy \d+ doanh nghiệp/);
+
+  const filterToggle = page.getByRole('button', { name: /^Lọc/ });
+  if (await filterToggle.isVisible()) await filterToggle.click();
+  await page.locator('summary', { hasText: 'Hà Nội' }).click();
+  const search = page.getByRole('searchbox', { name: 'Tìm tỉnh/thành' });
+  await search.fill('ho chi');
+  await page.getByRole('checkbox', { name: /Hồ Chí Minh/ }).check();
+  await page.getByRole('button', { name: 'Áp dụng (2)' }).click();
+  await expect(page).toHaveURL(/tinh=ha-noi%2Cho-chi-minh|tinh=ha-noi,ho-chi-minh/);
+
+  if (await filterToggle.isVisible()) await filterToggle.click();
+  await page.getByLabel('Thành lập trong').selectOption('30-ngay');
+  await expect(page).toHaveURL(/thanhlap=30-ngay/);
+  const cards = page.locator('main ol > li article');
+  await expect(cards.first()).toBeVisible();
+  for (const text of await cards.allInnerTexts()) expect(text).toMatch(/Hà Nội|Hồ Chí Minh/);
+
+  await page.getByRole('link', { name: 'Bỏ lọc Hà Nội' }).click();
+  await expect(page).toHaveURL(
+    /tinh=ho-chi-minh&thanhlap=30-ngay|thanhlap=30-ngay.*tinh=ho-chi-minh/,
+  );
+  await expect(page).not.toHaveURL(/ha-noi/);
+});

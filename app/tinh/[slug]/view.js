@@ -1,5 +1,6 @@
 // DN theo tỉnh /tinh/{slug-tinh}?page= (spec mục 2, 3.5).
 import { notFound } from 'next/navigation';
+import AdvancedFilterLink from '@/components/AdvancedFilterLink';
 import ListPageShell from '@/components/ListPageShell';
 import VnDotMap from '@/components/VnDotMap';
 import { listCompanies } from '@/lib/api';
@@ -33,6 +34,7 @@ export async function ProvinceList({ params, searchParams }) {
       breadcrumb={[{ name: province.name }]}
       title={M.list.province.title(province.name)}
       description={M.list.province.lead(province.name)}
+      filters={<AdvancedFilterLink params={{ tinh: province.slug }} />}
       data={data}
       basePath={`/tinh/${province.slug}`}
       params={{}}

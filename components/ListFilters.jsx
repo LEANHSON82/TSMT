@@ -8,10 +8,13 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { M } from '@/lib/messages';
 import { buildHref } from '@/lib/url';
 import { armNavFallback, startNavigation } from './NavigationProgress';
+import MultiSelectFilter from './MultiSelectFilter';
 
 /**
- * fields: [{ name, label, value, allLabel, options: [{ value, label }], filter? }]
+ * fields: [{ name, label, value, allLabel, options: [{ value, label, chip? }], filter?, multiple?, searchLabel? }]
  *   filter: false — không phải bộ lọc (vd. «Sắp xếp»): không đếm, không hiện thẻ, «Bỏ lọc» giữ nguyên.
+ *   multiple: true — chọn nhiều (MultiSelectFilter), value là mảng, URL dạng ?tinh=a,b; mỗi lựa chọn một thẻ ×.
+ *   chip: nhãn trên thẻ bộ lọc nếu khác nhãn trong danh sách (vd. «Thành lập trong 30 ngày qua»).
  * hidden: tham số giữ nguyên (vd. { q })
  * Bộ lọc đang bật hiện thành thẻ có nút × (bấm để bỏ riêng bộ lọc đó), cả trên điện thoại khi bảng lọc
  * đang thu gọn.
@@ -49,23 +52,37 @@ export default function ListFilters({ action, fields, hidden = {} }) {
   };
   const uid = useId();
   const isFilter = (f) => f.filter !== false;
-  const activeCount = fields.filter((f) => f.value && isFilter(f)).length;
-  const current = Object.fromEntries(fields.map((f) => [f.name, f.value || '']));
+  const has = (f) => (f.multiple ? f.value?.length > 0 : Boolean(f.value));
+  const urlValue = (f) => (f.multiple ? (f.value || []).join(',') : f.value || '');
+  const optionOf = (f, v) => f.options.find((o) => o.value === v);
+  const activeCount = fields.filter((f) => has(f) && isFilter(f)).length;
+  const current = Object.fromEntries(fields.map((f) => [f.name, urlValue(f)]));
   const keep = Object.fromEntries(
-    fields.filter((f) => !isFilter(f)).map((f) => [f.name, f.value || '']),
+    fields.filter((f) => !isFilter(f)).map((f) => [f.name, urlValue(f)]),
   );
   const chips = fields
-    .filter((f) => f.value && isFilter(f))
-    .map((f) => ({
-      name: f.name,
-      label: f.options.find((o) => o.value === f.value)?.label || f.value,
-      href: buildHref(action, { ...hidden, ...current, [f.name]: '' }),
-    }));
+    .filter((f) => has(f) && isFilter(f))
+    .flatMap((f) =>
+      (f.multiple ? f.value : [f.value]).map((v) => ({
+        key: `${f.name}:${v}`,
+        label: optionOf(f, v)?.chip || optionOf(f, v)?.label || v,
+        href: buildHref(action, {
+          ...hidden,
+          ...current,
+          [f.name]: f.multiple ? f.value.filter((x) => x !== v).join(',') : '',
+        }),
+      })),
+    );
 
-  function apply() {
+  /** overrides: { name: giá trị } — ô chọn nhiều gửi lựa chọn vừa áp dụng (mảng). */
+  function apply(overrides = {}) {
     const data = new FormData(formRef.current);
     const params = { ...hidden };
-    for (const f of fields) params[f.name] = data.get(f.name) || '';
+    for (const f of fields) {
+      // Ô chọn nhiều: lấy giá trị đã áp dụng (không lấy ô tích nháp đang mở trong form).
+      params[f.name] = f.multiple ? urlValue(f) : data.get(f.name) || '';
+    }
+    for (const [k, v] of Object.entries(overrides)) params[k] = Array.isArray(v) ? v.join(',') : v;
     const href = buildHref(action, params);
     startNavigation();
     router.push(href);
@@ -74,49 +91,77 @@ export default function ListFilters({ action, fields, hidden = {} }) {
   }
 
   const summary = fields
-    .map((f) => f.options.find((o) => o.value === f.value)?.label || f.allLabel)
+    .map((f) =>
+      f.multiple
+        ? f.value?.length
+          ? M.search.multiSummary(optionOf(f, f.value[0])?.label || f.value[0], f.value.length)
+          : f.allLabel
+        : optionOf(f, f.value)?.label || f.allLabel,
+    )
     .join(' · ');
 
+  const cols =
+    fields.length >= 5
+      ? 'lg:grid-cols-5'
+      : fields.length >= 4
+        ? 'lg:grid-cols-4'
+        : 'lg:grid-cols-3';
   const controls = (
-    <div className="grid gap-3 md:grid-cols-2 md:items-end md:gap-x-4 lg:grid-cols-4">
-      {fields.map((f) => (
-        <div key={f.name} className="flex min-w-0 flex-col gap-1">
-          <label htmlFor={`${uid}-${f.name}`} className="text-sm font-semibold text-ink-2">
-            {f.label}
-          </label>
-          <select
-            id={`${uid}-${f.name}`}
+    <div className={`grid gap-3 md:grid-cols-2 md:items-end md:gap-x-4 ${cols}`}>
+      {fields.map((f) =>
+        f.multiple ? (
+          <MultiSelectFilter
+            key={f.name}
             name={f.name}
-            defaultValue={f.value || ''}
-            onPointerDown={() => {
-              keyboardRef.current = false;
+            label={f.label}
+            allLabel={f.allLabel}
+            options={f.options}
+            value={f.value || []}
+            searchLabel={f.searchLabel}
+            onApply={(v) => {
+              refocusName = null;
+              apply({ [f.name]: v });
             }}
-            onKeyDown={(e) => {
-              if (KEY_NAV.includes(e.key) || e.key.length === 1) keyboardRef.current = true;
-              if (e.key === 'Enter' && pendingRef.current === f.name) {
-                e.preventDefault();
-                commit(f.name);
-              }
-            }}
-            onChange={() => {
-              if (keyboardRef.current) pendingRef.current = f.name;
-              else commit(f.name);
-            }}
-            onBlur={() => {
-              keyboardRef.current = false;
-              if (pendingRef.current === f.name) commit(f.name);
-            }}
-            className="select-chevron h-11 w-full cursor-pointer rounded-md border border-field bg-white px-3 text-body text-ink hover:border-ink-2"
-          >
-            <option value="">{f.allLabel}</option>
-            {f.options.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      ))}
+          />
+        ) : (
+          <div key={f.name} className="flex min-w-0 flex-col gap-1">
+            <label htmlFor={`${uid}-${f.name}`} className="text-sm font-semibold text-ink-2">
+              {f.label}
+            </label>
+            <select
+              id={`${uid}-${f.name}`}
+              name={f.name}
+              defaultValue={f.value || ''}
+              onPointerDown={() => {
+                keyboardRef.current = false;
+              }}
+              onKeyDown={(e) => {
+                if (KEY_NAV.includes(e.key) || e.key.length === 1) keyboardRef.current = true;
+                if (e.key === 'Enter' && pendingRef.current === f.name) {
+                  e.preventDefault();
+                  commit(f.name);
+                }
+              }}
+              onChange={() => {
+                if (keyboardRef.current) pendingRef.current = f.name;
+                else commit(f.name);
+              }}
+              onBlur={() => {
+                keyboardRef.current = false;
+                if (pendingRef.current === f.name) commit(f.name);
+              }}
+              className="select-chevron h-11 w-full cursor-pointer rounded-md border border-field bg-white px-3 text-body text-ink hover:border-ink-2"
+            >
+              <option value="">{f.allLabel}</option>
+              {f.options.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        ),
+      )}
       <noscript>
         <button type="submit" className="h-11 rounded-md bg-brand px-5 font-semibold text-white">
           {M.list.applyFilter}
@@ -172,7 +217,7 @@ export default function ListFilters({ action, fields, hidden = {} }) {
       {chips.length > 0 && (
         <ul aria-label={M.list.activeFilters} className="mt-1 flex flex-wrap gap-x-2">
           {chips.map((c) => (
-            <li key={c.name}>
+            <li key={c.key}>
               {/* Vùng bấm cao 44px (spec 7.3), phần nhìn thấy là viên thuốc gọn bên trong. */}
               <Link
                 href={c.href}

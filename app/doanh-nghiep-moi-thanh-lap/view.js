@@ -1,4 +1,5 @@
 // DN mới thành lập /doanh-nghiep-moi-thanh-lap?tinh=&page= (spec mục 2, 3.5): sắp ngày thành lập mới nhất.
+import AdvancedFilterLink from '@/components/AdvancedFilterLink';
 import ListFilters from '@/components/ListFilters';
 import ListPageShell from '@/components/ListPageShell';
 import { IllusNewCompany } from '@/components/Illustrations';
@@ -39,19 +40,22 @@ export async function NewCompaniesList({ searchParams }) {
       title={`${M.list.newCompanies.title}${where}`}
       description={M.list.newCompanies.lead(where)}
       filters={
-        <ListFilters
-          key={province?.slug || ''}
-          action="/doanh-nghiep-moi-thanh-lap"
-          fields={[
-            {
-              name: 'tinh',
-              label: M.list.provinceFilter,
-              value: province?.slug || '',
-              allLabel: M.list.allProvinces,
-              options,
-            },
-          ]}
-        />
+        <div className="flex flex-col gap-1">
+          <ListFilters
+            key={province?.slug || ''}
+            action="/doanh-nghiep-moi-thanh-lap"
+            fields={[
+              {
+                name: 'tinh',
+                label: M.list.provinceFilter,
+                value: province?.slug || '',
+                allLabel: M.list.allProvinces,
+                options,
+              },
+            ]}
+          />
+          <AdvancedFilterLink params={{ tinh: province?.slug, thanhlap: '30-ngay' }} />
+        </div>
       }
       data={data}
       basePath="/doanh-nghiep-moi-thanh-lap"

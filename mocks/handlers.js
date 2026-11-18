@@ -56,6 +56,10 @@ function summary(c) {
 
 // province, industry: một mã hoặc nhiều mã cách nhau dấu phẩy (đề xuất mở rộng, README).
 // founded_from=YYYY-MM-DD: chỉ DN thành lập từ ngày đó.
+// Ngày hôm nay theo giờ Việt Nam (YYYY-MM-DD).
+const todayVN = () =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date());
+
 const csv = (v) => (v ? v.split(',').filter(Boolean) : []);
 
 function hasFilters(url) {
@@ -80,6 +84,42 @@ const scenario = (request) => request.headers.get('x-mock-scenario') || '';
 
 export const handlers = [
   http.get('*/v1/provinces', () => HttpResponse.json({ items: provincesData })),
+
+  // Đề xuất mở rộng (README): số liệu trang chủ. new_7d / new_30d tính theo ngày Việt Nam; daily: 14 ngày gần
+  // nhất (cũ → mới, đủ cả ngày 0 DN); top_industries: ngành có nhiều DN nhất.
+  http.get('*/v1/stats', () => {
+    const today = todayVN();
+    const dayStr = (offset) => {
+      const [y, m, d] = today.split('-').map(Number);
+      return new Date(Date.UTC(y, m - 1, d - offset)).toISOString().slice(0, 10);
+    };
+    const since = (days) => companiesData.filter((c) => c.founded_date > dayStr(days)).length;
+    const perDay = new Map();
+    for (const c of companiesData)
+      perDay.set(c.founded_date, (perDay.get(c.founded_date) || 0) + 1);
+    const daily = Array.from({ length: 14 }, (_, i) => {
+      const date = dayStr(13 - i);
+      return { date, count: perDay.get(date) || 0 };
+    });
+    const byIndustry = new Map();
+    for (const c of companiesData)
+      for (const code of new Set(c.industries.map((i) => i.code)))
+        byIndustry.set(code, (byIndustry.get(code) || 0) + 1);
+    const top_industries = [...byIndustry]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 8)
+      .map(([code, count]) => {
+        const ind = industriesData.find((i) => i.code === code);
+        return { code, name: ind?.name || code, slug: ind?.slug, count };
+      });
+    return HttpResponse.json({
+      total: companiesData.length,
+      new_7d: since(7),
+      new_30d: since(30),
+      daily,
+      top_industries,
+    });
+  }),
 
   http.get('*/v1/industries', () =>
     HttpResponse.json({

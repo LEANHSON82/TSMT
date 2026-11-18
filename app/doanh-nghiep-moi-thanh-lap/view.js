@@ -2,7 +2,6 @@
 import AdvancedFilterLink from '@/components/AdvancedFilterLink';
 import ListFilters from '@/components/ListFilters';
 import ListPageShell from '@/components/ListPageShell';
-import { IllusNewCompany } from '@/components/Illustrations';
 import { listCompanies } from '@/lib/api';
 import { M } from '@/lib/messages';
 import { provinceOptions } from '@/lib/provinces';
@@ -35,7 +34,6 @@ export async function NewCompaniesList({ searchParams }) {
   const where = M.common.inProvince(province?.name);
   return (
     <ListPageShell
-      aside={<IllusNewCompany className="w-[150px]" />}
       breadcrumb={[{ name: M.list.newCompanies.title }]}
       title={`${M.list.newCompanies.title}${where}`}
       description={M.list.newCompanies.lead(where)}

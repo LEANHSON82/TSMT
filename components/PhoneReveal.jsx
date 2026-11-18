@@ -9,7 +9,6 @@ import { M } from '@/lib/messages';
 import dynamic from 'next/dynamic';
 import { copyText } from './CopyButton';
 import Modal from './Modal';
-import RollingNumber from './RollingNumber';
 import {
   IconCheck,
   IconClock,
@@ -115,7 +114,7 @@ function PhoneUnlocker({ mst, masked }) {
           <span
             className={`-mx-1.5 w-fit rounded px-1.5 text-lg font-semibold tracking-[0.02em] text-ink tabular-nums ${animate ? 'motion-highlight' : ''}`}
           >
-            {animate ? <RollingNumber value={phone} /> : phone}
+            {phone}
           </span>
           <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
             <a
@@ -205,15 +204,15 @@ function PhoneUnlocker({ mst, masked }) {
     <>
       {live}
       <div>
-        {/* Số che ở cột giá trị; nút «▶ Xem số điện thoại» (màu cam — hành động chính như nút «Tìm»)
-          + dòng nhỏ (spec mục 4.1) ở cột thao tác
-          bên phải như «Xem bản đồ». Điện thoại: nút viền rộng hết chiều ngang dưới số (spec mục 7.3). */}
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-4">
+        {/* Số che, ngay dưới là nút chính «▶ Xem số điện thoại» (spec 4.1: nút chính, cam đặc như nút «Tìm») +
+            dòng chữ nhỏ. Mọi khổ màn hình cùng một bố cục: nút sát con số đang che. Điện thoại: nút rộng hết
+            chiều ngang (spec 7.3). */}
+        <div className="flex flex-col items-start gap-2">
           <span className="font-semibold tracking-[0.02em] text-ink tabular-nums">
             <span aria-hidden="true">{masked}</span>
             <span className="sr-only">{M.phone.maskedLabel(masked)}</span>
           </span>
-          <div className="flex flex-col gap-1 md:items-end">
+          <div className="flex w-full flex-col gap-1 sm:w-auto">
             <button
               type="button"
               // Đang bận: aria-disabled (vẫn nhận focus — hộp thoại đóng trả focus về đây được) và giữ màu
@@ -223,16 +222,12 @@ function PhoneUnlocker({ mst, masked }) {
               aria-disabled={busy || undefined}
               aria-describedby={`phone-note-${mst}`}
               aria-busy={busy}
-              className="inline-flex h-11 w-full flex-none items-center justify-center gap-1.5 rounded-md border-[1.5px] border-cta px-3 text-sm font-semibold text-cta hover:bg-cta-50 aria-busy:cursor-progress aria-busy:hover:bg-transparent disabled:cursor-not-allowed disabled:border-line disabled:text-muted disabled:hover:bg-transparent md:w-auto md:px-4"
+              className="press inline-flex h-11 w-full flex-none items-center justify-center gap-2 rounded-md bg-cta px-5 text-body font-semibold text-white hover:bg-cta-hover aria-busy:cursor-progress aria-busy:hover:bg-cta disabled:cursor-not-allowed disabled:bg-field disabled:text-muted sm:w-auto"
             >
               {icon}
               {label}
             </button>
-            <span
-              id={`phone-note-${mst}`}
-              aria-live="polite"
-              className={`text-meta md:max-w-[420px] md:px-2 md:text-right ${noteTone}`}
-            >
+            <span id={`phone-note-${mst}`} aria-live="polite" className={`text-meta ${noteTone}`}>
               {note}
             </span>
           </div>
@@ -240,8 +235,8 @@ function PhoneUnlocker({ mst, masked }) {
 
         {/* Chặn quảng cáo: hướng dẫn ngắn (spec mục 4.2) thu gọn, bấm mới mở. */}
         {state === 'blocked' && (
-          <details className="mt-2 text-meta text-ink-2 md:ml-auto md:max-w-[420px] md:px-2 md:text-right">
-            <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-brand md:min-h-8">
+          <details className="mt-2 max-w-[480px] text-meta text-ink-2">
+            <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-brand">
               {M.phone.adBlockedHow}
             </summary>
             <ol className="list-decimal space-y-1 pl-5 text-left">

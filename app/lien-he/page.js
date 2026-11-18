@@ -1,26 +1,29 @@
 import Link from 'next/link';
 import StaticPage from '@/components/StaticPage';
 import { M } from '@/lib/messages';
-import { IllusContact } from '@/components/Illustrations';
+import { CONTACT_EMAIL } from '@/lib/site';
 
 export const metadata = { ...M.staticPage.meta.contact, alternates: { canonical: '/lien-he' } };
 
 export default function ContactPage() {
   return (
     <StaticPage
-      illustration={<IllusContact className="w-[130px]" />}
       title="Liên hệ"
       sections={[
-        {
-          id: 'thong-tin',
-          title: 'Thông tin liên hệ',
-          body: (
-            <ul>
-              <li>Email: [email liên hệ — owner cung cấp]</li>
-              <li>Hợp tác quảng cáo: [email — owner cung cấp]</li>
-            </ul>
-          ),
-        },
+        // Chưa có email chính thức (owner cung cấp qua NEXT_PUBLIC_CONTACT_EMAIL) thì không hiện chữ giữ chỗ.
+        ...(CONTACT_EMAIL
+          ? [
+              {
+                id: 'thong-tin',
+                title: 'Thông tin liên hệ',
+                body: (
+                  <p>
+                    Email: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+                  </p>
+                ),
+              },
+            ]
+          : []),
         {
           id: 'an-sua',
           title: 'Ẩn hoặc sửa thông tin doanh nghiệp',

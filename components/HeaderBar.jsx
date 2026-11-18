@@ -13,6 +13,7 @@ import { SITE_NAME } from '@/lib/site';
 import IndustryCode from './IndustryCode';
 import { trapTab } from './focusTrap';
 import Logo from './Logo';
+import IndustryIcon from './IndustryIcon';
 import SearchBox from './SearchBox';
 import {
   IconBriefcase,
@@ -224,6 +225,7 @@ function MobileMenu({ provinces, industries, pathname, onClose }) {
                           onClick={onClose}
                           className="flex min-h-[60px] items-center gap-3 border-t border-line-soft px-4 py-2 text-navy no-underline"
                         >
+                          <IndustryIcon code={n.code} className="flex-none text-brand" />
                           <IndustryCode code={n.code} />
                           <span className="flex-1 text-body leading-[21px]">{n.name}</span>
                           <IconChevronRight size={18} className="flex-none text-muted" />
@@ -409,6 +411,7 @@ export default function HeaderBar({ provinces, industries }) {
                     href={n.href}
                     className="flex min-h-12 items-center gap-3 rounded-md px-2.5 py-1 no-underline hover:bg-page"
                   >
+                    <IndustryIcon code={n.code} className="flex-none text-brand" />
                     <IndustryCode code={n.code} />
                     <span className="text-body leading-[21px]">{n.name}</span>
                   </Link>

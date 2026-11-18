@@ -11,7 +11,6 @@ import { M } from '@/lib/messages';
 import { getTurnstileToken, TURNSTILE_SITE_KEY } from '@/lib/turnstile';
 import { IconAlert, IconFile, IconShield, IconUpload } from './Icons';
 import CopyButton from './CopyButton';
-import { IllusSent } from './Illustrations';
 
 const REQUEST_TYPES = M.updateRequest.types;
 const E = M.updateRequest.errors;
@@ -129,17 +128,8 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
     });
     if (Object.keys(errors).length) {
       // Đưa focus tới ô lỗi đầu tiên sau khi React vẽ lại thông báo lỗi.
-      // Các ô lỗi rung nhẹ để người dùng thấy ngay chỗ cần sửa (tắt khi giảm chuyển động — globals.css).
       setTimeout(() => {
         const invalid = formRef.current?.querySelectorAll('[aria-invalid="true"]') || [];
-        invalid.forEach((el) => {
-          el.classList.remove('motion-shake');
-          void el.offsetWidth;
-          el.classList.add('motion-shake');
-          el.addEventListener('animationend', () => el.classList.remove('motion-shake'), {
-            once: true,
-          });
-        });
         const el = invalid[0] || fileRef.current;
         el?.focus();
       }, 0);
@@ -177,7 +167,21 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
         role="status"
         className="motion-rise flex flex-col items-center gap-4 rounded-xl border border-line bg-white px-6 py-10 text-center"
       >
-        <IllusSent className="w-[150px]" />
+        <svg
+          viewBox="0 0 48 48"
+          width="48"
+          height="48"
+          aria-hidden="true"
+          className="motion-draw text-ok"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="24" cy="24" r="21" pathLength="100" />
+          <path d="M15 24.5l6 6 12-13" pathLength="100" />
+        </svg>
         <h2 className="text-xl font-semibold text-navy">{M.updateRequest.doneTitle}</h2>
         <p className="max-w-md text-body leading-6 text-ink-2">
           {M.updateRequest.doneBody} <strong>{values.email.trim()}</strong>.{' '}

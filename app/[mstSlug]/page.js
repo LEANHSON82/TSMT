@@ -10,6 +10,7 @@ import CompanyCard from '@/components/CompanyCard';
 import CompanyInfoTable from '@/components/CompanyInfoTable';
 import IndustryTable from '@/components/IndustryTable';
 import JsonLd from '@/components/JsonLd';
+import StatusBadge from '@/components/StatusBadge';
 import TrackOnMount from '@/components/TrackOnMount';
 import { IconEyeOff } from '@/components/Icons';
 import { getCompany, getRelatedCompanies } from '@/lib/api';
@@ -103,42 +104,64 @@ export default async function CompanyPage({ params }) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4 pt-4 pb-12 md:px-6 md:pt-6">
+    <div className="flex w-full flex-col">
       <JsonLd data={orgLd} />
       <TrackOnMount name="view_company" params={{ mst: c.mst, province: c.province?.slug }} />
-      <Breadcrumb
-        items={[
-          ...(c.province ? [{ name: c.province.name, href: `/tinh/${c.province.slug}` }] : []),
-          { name: c.name },
-        ]}
-      />
-
-      <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <main className="flex min-w-0 flex-col gap-6">
-          <section className="flex flex-col gap-2.5">
-            <h1 className="text-2xl leading-[30px] font-semibold text-pretty break-words text-navy md:text-3xl md:leading-9">
-              {c.name}
-            </h1>
-            {(c.name_en || c.name_short) && (
-              <dl className="flex flex-col gap-0.5 text-sm text-ink-2 md:text-body">
-                {c.name_en && (
-                  <div>
-                    <dt className="inline text-muted">{M.company.nameEn}: </dt>
-                    <dd className="inline">{c.name_en}</dd>
-                  </div>
-                )}
-                {c.name_short && (
-                  <div>
-                    <dt className="inline text-muted">{M.company.nameShort}: </dt>
-                    <dd className="inline">{c.name_short}</dd>
-                  </div>
-                )}
-              </dl>
+      {/* Dải tiêu đề trắng: breadcrumb, tên DN, tên khác, một dòng tóm tắt để nắm nhanh trước khi đọc bảng. */}
+      <header className="border-b border-line bg-white">
+        <div className="mx-auto flex max-w-[1200px] flex-col gap-3 px-4 pt-4 pb-5 md:px-6 md:pt-6 md:pb-7">
+          <Breadcrumb
+            items={[
+              ...(c.province ? [{ name: c.province.name, href: `/tinh/${c.province.slug}` }] : []),
+              { name: c.name },
+            ]}
+          />
+          <h1 className="text-2xl leading-[30px] font-semibold text-pretty break-words text-navy md:text-[32px] md:leading-10">
+            {c.name}
+          </h1>
+          {(c.name_en || c.name_short) && (
+            <dl className="-mt-1 flex flex-col gap-0.5 text-sm text-ink-2 md:text-body">
+              {c.name_en && (
+                <div>
+                  <dt className="inline text-muted">{M.company.nameEn}: </dt>
+                  <dd className="inline">{c.name_en}</dd>
+                </div>
+              )}
+              {c.name_short && (
+                <div>
+                  <dt className="inline text-muted">{M.company.nameShort}: </dt>
+                  <dd className="inline">{c.name_short}</dd>
+                </div>
+              )}
+            </dl>
+          )}
+          {/* Không dùng vạch ngăn: xuống dòng trên điện thoại sẽ để vạch thừa ở cuối dòng. */}
+          <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2">
+            <StatusBadge status={c.status} className="font-semibold" />
+            <span>
+              MST <span className="font-semibold text-ink tabular-nums">{c.mst}</span>
+            </span>
+            {c.founded_date && (
+              <>
+                <span>{M.company.foundedShort(formatDate(c.founded_date))}</span>
+              </>
             )}
-          </section>
+            {c.province && (
+              <>
+                <Link href={`/tinh/${c.province.slug}`} className="font-semibold">
+                  {c.province.name}
+                </Link>
+              </>
+            )}
+          </p>
+        </div>
+      </header>
 
-          <section aria-labelledby="info-title" className="flex flex-col gap-3">
-            <h2 id="info-title" className="text-lg leading-7 font-semibold text-navy md:text-xl">
+      <div className="mx-auto grid w-full max-w-[1200px] gap-8 px-4 pt-6 pb-12 md:px-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <main className="flex min-w-0 flex-col gap-6">
+          <section aria-labelledby="info-title">
+            {/* Tiêu đề cho trình đọc màn hình; mắt thường đã thấy bảng ngay dưới tên DN. */}
+            <h2 id="info-title" className="sr-only">
               {M.company.info}
             </h2>
             <CompanyInfoTable company={c} parent={parent} />
@@ -147,8 +170,11 @@ export default async function CompanyPage({ params }) {
           <AdSlot slotId="detail-below-info" className="pt-2" />
 
           {c.industries?.length > 0 && (
-            <section aria-labelledby="ind-title" className="reveal flex flex-col gap-3">
-              <h2 id="ind-title" className="text-lg leading-7 font-semibold text-navy md:text-xl">
+            <section aria-labelledby="ind-title" className="flex flex-col gap-3">
+              <h2
+                id="ind-title"
+                className="text-xl leading-7 font-semibold text-navy md:text-2xl md:leading-8"
+              >
                 {M.company.industries}
               </h2>
               <IndustryTable industries={c.industries} />
@@ -170,11 +196,14 @@ export default async function CompanyPage({ params }) {
           </p>
 
           {related.length > 0 && (
-            <section aria-labelledby="rel-title" className="reveal flex flex-col gap-3">
-              <h2 id="rel-title" className="text-lg leading-7 font-semibold text-navy md:text-xl">
+            <section aria-labelledby="rel-title" className="flex flex-col gap-3">
+              <h2
+                id="rel-title"
+                className="text-xl leading-7 font-semibold text-navy md:text-2xl md:leading-8"
+              >
                 {M.company.related(c.province?.name || '')}
               </h2>
-              <div className="overflow-hidden rounded-xl border border-line bg-white">
+              <div className="overflow-hidden rounded-xl border border-line bg-white shadow-[0_1px_2px_rgba(10,42,94,0.05)]">
                 <ul className="-mr-px -mb-px grid grid-cols-1 sm:grid-cols-2">
                   {related.map((r) => (
                     <li key={r.mst} className="border-r border-b border-line">

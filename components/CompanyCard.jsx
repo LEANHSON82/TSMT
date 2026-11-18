@@ -12,9 +12,9 @@ import { IconMapPin } from './Icons';
 // Cả thẻ bấm được (link tên DN phủ cả thẻ bằng ::after); MST nằm trên lớp phủ để vẫn bôi đen/chép được.
 // variant="card": lưới (trang chủ, DN cùng ngành). variant="row": danh sách (dòng ngang trên máy tính).
 // highlight: từ khoá tìm kiếm để tô sáng trong tên DN và MST.
-// showNew: hiện nhãn «Mới» cho DN thành lập trong 7 ngày gần nhất (tắt ở khối/trang «DN mới thành lập»).
+// showNew: hiện nhãn «Mới» cho DN thành lập trong 3 ngày gần nhất (tắt ở khối/trang «DN mới thành lập»).
 // showProvince=false: trang theo tỉnh — địa chỉ chỉ ghi phường/xã (tỉnh đã có ở tiêu đề trang).
-const NEW_DAYS = 7;
+const NEW_DAYS = 3;
 function isNew(foundedDate) {
   const t = Date.parse(foundedDate || '');
   return Number.isFinite(t) && Date.now() - t < NEW_DAYS * 86400000 && t <= Date.now() + 86400000;
@@ -99,13 +99,11 @@ export default function CompanyCard({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 lg:flex-col lg:items-start lg:gap-1">
-          <StatusBadge status={c.status} className="text-sm" />
+          <StatusBadge status={c.status} className="text-meta" />
           {date && (
-            <span className="text-meta text-muted lg:text-xs">
-              <span className="lg:hidden">· {M.list.since(date)}</span>
-              <span className="hidden lg:inline">
-                {M.list.activeFrom} {date}
-              </span>
+            <span className="text-meta text-muted">
+              <span className="lg:hidden">· </span>
+              {M.list.since(date)}
             </span>
           )}
         </div>
@@ -113,9 +111,15 @@ export default function CompanyCard({
     );
   }
 
+  // Lưới (trang chủ, DN cùng ngành): cùng nội dung và thứ tự với dòng danh sách trên điện thoại — tên, địa chỉ,
+  // MST, đại diện, tình trạng · ngày — chỉ khác khung bọc.
   return (
     <article
-      className={`group relative flex h-full flex-col gap-2.5 bg-white p-4 ${
+      className={`group relative flex h-full flex-col gap-2 bg-white p-4 ${
+        (c.status?.code || 'active') === 'active'
+          ? 'shadow-[inset_3px_0_0_var(--color-ok)]'
+          : 'shadow-[inset_3px_0_0_var(--color-field)]'
+      } ${
         cell
           ? 'transition-colors duration-150 hover:bg-brand-50'
           : 'rounded-xl border border-line transition-[border-color,box-shadow] duration-150 hover:border-brand hover:shadow-[0_4px_16px_rgba(10,42,94,0.08)]'
@@ -135,27 +139,30 @@ export default function CompanyCard({
         {c.matched === 'phone' && <PhoneMatchBadge />}
         {fresh && <NewBadge />}
       </div>
-      <dl className="flex min-w-0 flex-col gap-1 text-sm">
-        <div className="flex min-w-0 gap-2">
-          <dt className="w-16 flex-none text-muted">MST</dt>
-          <dd className="relative z-10 font-semibold tracking-[0.02em] tabular-nums">{c.mst}</dd>
-        </div>
-        <div className="flex min-w-0 gap-2">
-          <dt className="w-16 flex-none text-muted">{M.company.address}</dt>
-          <dd className="min-w-0 flex-1 truncate" title={c.address}>
-            {addr}
+      <p className="flex min-w-0 items-center gap-1.5 text-sm text-ink-2">
+        <IconMapPin size={16} className="flex-none text-muted" />
+        <span className="sr-only">{M.company.address}: </span>
+        <span className="truncate" title={c.address}>
+          {addr}
+        </span>
+      </p>
+      <dl className="flex min-w-0 flex-col gap-0.5 text-sm">
+        <div className="flex items-baseline gap-1.5">
+          <dt className="text-muted">MST</dt>
+          <dd className="relative z-10 font-semibold tracking-[0.02em] whitespace-nowrap tabular-nums">
+            <Highlight text={c.mst} query={highlight} />
           </dd>
         </div>
-        <div className="flex min-w-0 gap-2">
-          <dt className="w-16 flex-none text-muted">{M.company.repShort}</dt>
-          <dd className="min-w-0 flex-1 truncate">
+        <div className="flex min-w-0 items-baseline gap-1.5">
+          <dt className="flex-none text-muted">{M.company.repShort}</dt>
+          <dd className="truncate">
             <Highlight text={c.representative} query={highlight} />
           </dd>
         </div>
       </dl>
-      <p className="mt-auto flex flex-wrap items-baseline gap-x-1.5 border-t border-line-soft pt-2.5 text-sm">
+      <p className="mt-auto flex flex-wrap items-baseline gap-x-1.5 pt-1 text-meta">
         <StatusBadge status={c.status} />
-        {date && <span className="text-meta text-muted">· {M.list.since(date)}</span>}
+        {date && <span className="text-muted">· {M.list.since(date)}</span>}
       </p>
     </article>
   );

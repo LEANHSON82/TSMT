@@ -20,20 +20,20 @@ export default function ListPageShell({
   params,
   emptyTitle = M.list.emptyTitle,
   emptyHints = [M.list.emptyHint],
+  emptyActions,
   slotPrefix,
   highlight,
   showNew = true,
   showProvince = true,
-  aside,
 }) {
   const totalPages = Math.max(1, Math.ceil((data.total || 0) / (data.page_size || 20)));
   return (
-    <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-5 px-4 pt-4 pb-12 md:px-6 md:pt-6">
-      {breadcrumb && <Breadcrumb items={breadcrumb} />}
-      {/* aside: hình trang trí bên phải tiêu đề (≥ 768px), không chiếm chỗ trên điện thoại. */}
-      <header className="flex items-center justify-between gap-6">
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <h1 className="text-2xl leading-8 font-semibold text-pretty text-navy md:text-3xl md:leading-9">
+    <main className="flex w-full flex-col">
+      {/* Dải tiêu đề trắng (breadcrumb, H1, mô tả, tổng số) tách khỏi phần danh sách trên nền xám. */}
+      <div className="border-b border-line bg-white">
+        <header className="mx-auto flex max-w-[1200px] flex-col gap-3 px-4 pt-4 pb-5 md:px-6 md:pt-6 md:pb-7">
+          {breadcrumb && <Breadcrumb items={breadcrumb} />}
+          <h1 className="text-2xl leading-8 font-semibold text-pretty text-navy md:text-[32px] md:leading-10">
             {title}
             {data.page > 1 && (
               <span className="font-normal text-muted"> – {M.pagination.page(data.page)}</span>
@@ -41,35 +41,45 @@ export default function ListPageShell({
           </h1>
           {description && <p className="max-w-3xl text-body leading-6 text-ink-2">{description}</p>}
           {totalLabel !== false && (
-            <p className="text-sm font-semibold text-muted">
-              {totalLabel ?? M.list.total(formatNumber(data.total || 0))}
+            <p className="text-sm text-muted">
+              {totalLabel ?? (
+                <>
+                  <strong className="text-base font-semibold text-ink tabular-nums">
+                    {formatNumber(data.total || 0)}
+                  </strong>{' '}
+                  {M.list.totalUnit}
+                </>
+              )}
             </p>
           )}
+        </header>
+      </div>
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-5 px-4 pt-5 pb-12 md:px-6 md:pt-6">
+        {filters}
+        {/* data-list-content: mờ đi khi đang chuyển trang / đổi bộ lọc (NavigationProgress). */}
+        <div data-list-content className="flex flex-col gap-5">
+          {data.items?.length ? (
+            <>
+              <CompanyList
+                items={data.items}
+                slotPrefix={slotPrefix}
+                highlight={highlight}
+                showNew={showNew}
+                showProvince={showProvince}
+              />
+              <Pagination
+                page={data.page}
+                totalPages={totalPages}
+                basePath={basePath}
+                params={params}
+              />
+            </>
+          ) : (
+            <EmptyState title={emptyTitle} hints={emptyHints}>
+              {emptyActions}
+            </EmptyState>
+          )}
         </div>
-        {aside && <div className="hidden flex-none md:block">{aside}</div>}
-      </header>
-      {filters}
-      {/* data-list-content: mờ đi khi đang chuyển trang / đổi bộ lọc (NavigationProgress). */}
-      <div data-list-content className="flex flex-col gap-5">
-        {data.items?.length ? (
-          <>
-            <CompanyList
-              items={data.items}
-              slotPrefix={slotPrefix}
-              highlight={highlight}
-              showNew={showNew}
-              showProvince={showProvince}
-            />
-            <Pagination
-              page={data.page}
-              totalPages={totalPages}
-              basePath={basePath}
-              params={params}
-            />
-          </>
-        ) : (
-          <EmptyState title={emptyTitle} hints={emptyHints} />
-        )}
       </div>
     </main>
   );

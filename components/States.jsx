@@ -1,11 +1,9 @@
 import Link from 'next/link';
 import { M } from '@/lib/messages';
-import { IllusEmptySearch } from './Illustrations';
 
 export function EmptyState({ title, hints = [], children }) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-xl border border-line bg-white px-6 py-10 text-center">
-      <IllusEmptySearch className="w-[140px]" />
       <h2 className="text-lg font-semibold text-navy">{title}</h2>
       {hints.length > 0 && (
         <ul className="max-w-md list-disc space-y-1 pl-5 text-left text-body text-ink-2">

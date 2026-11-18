@@ -1,9 +1,9 @@
 // DN theo ngành /nganh/{ma-nganh}-{slug}?tinh=&page= (spec mục 2, 3.5). Mã ngành VSIC 4 số.
 import { notFound } from 'next/navigation';
 import AdvancedFilterLink from '@/components/AdvancedFilterLink';
+import IndustryIcon from '@/components/IndustryIcon';
 import ListFilters from '@/components/ListFilters';
 import ListPageShell from '@/components/ListPageShell';
-import { IllusIndustry } from '@/components/Illustrations';
 import { listCompanies } from '@/lib/api';
 import { resolveIndustry } from '@/lib/industry';
 import { M } from '@/lib/messages';
@@ -58,9 +58,17 @@ export async function IndustryList({ params, searchParams }) {
 
   return (
     <ListPageShell
-      aside={<IllusIndustry className="w-[150px]" />}
       breadcrumb={[{ name: M.list.industry.crumb(industry.code) }]}
-      title={M.list.industry.title(industry.code, industry.name)}
+      title={
+        <span className="inline-flex items-start gap-3">
+          <IndustryIcon
+            code={industry.code}
+            size={32}
+            className="mt-0.5 flex-none text-brand md:mt-1"
+          />
+          <span>{M.list.industry.title(industry.code, industry.name)}</span>
+        </span>
+      }
       description={M.list.industry.lead(where)}
       filters={
         <div className="flex flex-col gap-1">

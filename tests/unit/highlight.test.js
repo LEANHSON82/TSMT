@@ -31,3 +31,14 @@ describe('highlightParts', () => {
     expect(hits('CÔNG TY A', 'xyz')).toEqual([]);
   });
 });
+
+describe('không tô cụm chữ chung', () => {
+  it('«công ty» một mình hoặc kèm từ khác: không tô «CÔNG TY»', () => {
+    const hits = (t, q) =>
+      highlightParts(t, q)
+        .filter((p) => p.hit)
+        .map((p) => p.text);
+    expect(hits('CÔNG TY TNHH SÔNG HỒNG', 'cong ty')).toEqual([]);
+    expect(hits('CÔNG TY TNHH SÔNG HỒNG', 'công ty sông hồng')).toEqual(['SÔNG HỒNG']);
+  });
+});

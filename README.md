@@ -145,6 +145,9 @@ hiện số).
 - `GET /v1/search` nhận thêm `field=name|representative|number`, `sort=founded_desc|founded_asc` (bỏ
   trống = phù hợp nhất), `industry=`; mỗi DN thêm `matched`; thêm `counts: {all, name, representative,
 number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
+- **Số liệu trang chủ:** `GET /v1/stats` → `{total, new_7d, new_30d, daily: [{date, count}] (14 ngày, cũ → mới,
+đủ cả ngày 0), top_industries: [{code, name, slug, count}] (8 ngành nhiều DN nhất)}`, tính theo ngày Việt Nam,
+  cache vài phút.
 - **Lọc nâng cao** (trang `/tim-kiem`): `province=01,79` và `industry=6201,4330` nhận nhiều mã cách nhau dấu
   phẩy; `founded_from=YYYY-MM-DD` chỉ lấy DN thành lập từ ngày đó; `q` được để trống khi có ít nhất một bộ lọc
   (khi đó sắp `founded_desc`, không có `counts`). Thêm `GET /v1/industries` → `{items: [{code, name, slug}]}`
@@ -162,19 +165,18 @@ number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
 
 - **Trang:** đủ các trang ở mục 2. Header dính đầu trang: logo, ô tìm (máy tính trùng khít ô nhập của ô tìm lớn trang chủ; trang chủ chỉ hiện khi cuộn qua ô lớn), menu Tỉnh/thành · Ngành nghề · DN mới (≥ 1280px; nhỏ hơn dùng nút ☰). Có footer và banner cookie.
 - **Logo «TMST»** là SVG từ nét chữ Be Vietnam Pro (`components/Logo.jsx`): «T» màu cam, «MST» màu xanh; favicon `app/icon.svg` là chữ T trắng trên ô vuông xanh. Sinh lại path bằng `python3 scripts/gen-logo.py <font SemiBold .woff2>`. Tên site mặc định `TMST` (`NEXT_PUBLIC_SITE_NAME`).
-- **Màu sắc, hình ảnh** (spec không quy định bảng màu; mục 7.2 yêu cầu ảnh/icon SVG):
-  - Thẻ DN ghi địa chỉ rút gọn: phường/xã, tỉnh/thành (trang theo tỉnh chỉ ghi phường/xã) — `areaAddress` trong `lib/format.js`.
-  - Nhãn «Mới» cho DN thành lập trong 7 ngày (tắt ở khối/trang DN mới thành lập).
-  - Trang chủ: khối tỉnh/thành đặt trước khối DN mới, trên dải nền xanh nhạt. Bản đồ chấm Việt Nam (có Hoàng Sa, Trường Sa) sinh lại bằng `python3 scripts/gen-vn-dots.py countries-50m.json` (dữ liệu Natural Earth, xem đầu script).
-  - Hình minh hoạ SVG cho không có kết quả, trang 404, gửi yêu cầu thành công (`components/Illustrations.jsx`).
-  - Bản đồ chấm đánh dấu tỉnh (`components/VnDotMap.jsx`, toạ độ trung tâm hành chính 34 tỉnh/thành trong `lib/vn-map-points.js`, sinh cùng script bản đồ): trang tỉnh đánh dấu tỉnh đang xem; khối tỉnh/thành trang chủ (≥ 1024px) rê chuột tên tỉnh thì chấm tỉnh sáng lên (CSS `:has`, không JS).
-  - Minh hoạ đầu trang: DN mới, ngành nghề, giới thiệu, liên hệ, điều khoản, chính sách, form yêu cầu. Ẩn trên điện thoại.
-- **Chuyển động** (CSS thuần, không thư viện; chỉ transform/opacity nên CLS 0; tắt hết khi máy bật «giảm chuyển động»):
-  - Khối/thẻ nằm dưới màn hình đầu trượt lên khi cuộn tới (`.reveal`, CSS scroll-driven animation — trình duyệt chưa hỗ trợ thì hiện bình thường). Không làm mờ để chữ luôn đủ tương phản.
-  - Thẻ DN trong danh sách nhấc nhẹ khi rê chuột; mũi tên «Xem tất cả» trượt; gợi ý tìm kiếm hiện lần lượt.
-  - Số điện thoại «chạy số» rồi dừng ở số thật sau khi xem quảng cáo (`components/RollingNumber.jsx`); khôi phục từ sessionStorage thì không chạy.
+- **Hình thức** (spec không quy định bảng màu; mục 7.2 yêu cầu icon SVG). Giàu bằng nội dung và cấu trúc, không dùng hình minh hoạ trang trí:
+  - Trang chủ đúng thứ tự spec 3.1: ô tìm → DN mới thành lập → quảng cáo → tỉnh/thành, thêm khối «Ngành nghề có nhiều doanh nghiệp» ở cuối. Đầu trang là dải xanh navy: tiêu đề, ô tìm, 2–3 ví dụ bấm được, ô số liệu (tổng DN, DN mới 7 / 30 ngày) và biểu đồ cột DN mới 14 ngày (`components/DailyBars.jsx`, rê chuột xem từng ngày, có bảng ẩn cho trình đọc màn hình). Số liệu lấy từ `GET /v1/stats` (đề xuất API bên dưới); API chưa có thì ẩn.
+  - Lưới tỉnh/thành và ngành nghề có thanh tỉ lệ số DN; tỉnh xếp theo số DN, điện thoại chỉ hiện 8 tỉnh + nút «Xem tất cả 34 tỉnh/thành». Icon nét theo nhóm ngành VSIC (`components/IndustryIcon.jsx`) ở khối ngành, menu Ngành nghề và tiêu đề trang ngành.
+  - Trang danh sách, trang DN, trang tĩnh, form: dải tiêu đề trắng (breadcrumb, H1, mô tả, tổng số) tách khỏi nội dung trên nền xám. Trang DN có dòng tóm tắt dưới tên: tình trạng · MST · ngày hoạt động · tỉnh. Footer nền navy.
+  - Thẻ DN một mẫu nội dung cho cả lưới và danh sách: tên, địa chỉ rút gọn (phường/xã, tỉnh — `areaAddress` trong `lib/format.js`), MST, đại diện, tình trạng · «từ dd/mm/yyyy»; vạch màu mép trái theo tình trạng (xanh / xám). Nhãn «Mới» cho DN thành lập trong 3 ngày (tắt ở khối/trang DN mới). Không tô sáng cụm chữ chung («công ty», «TNHH»…).
+  - Trang chi tiết: breadcrumb một dòng (tên DN dài cắt «…», tên đầy đủ ở H1), bảng thông tin trên điện thoại cùng một kiểu nhãn-trên-giá-trị, nút «▶ Xem số điện thoại» cam đặc ngay dưới số che.
+  - 404 với đường dẫn là MST đúng định dạng: «Chưa có dữ liệu cho MST …» (vẫn trả HTTP 404).
+- **Chuyển động** (CSS thuần, chỉ khi người dùng thao tác; tắt hết khi máy bật «giảm chuyển động»):
+  - Thẻ DN đổi màu viền khi rê chuột; mũi tên «Xem tất cả» trượt; gợi ý tìm kiếm hiện lần lượt; số điện thoại vừa mở được tô nền nhẹ.
   - Chuyển trang: nội dung trang mới hiện mờ dần + trượt lên 6px (0,22 s; không chạy ở lần tải đầu). Trang DN chưa có trong bộ đệm hiện khung chờ (`app/[mstSlug]/loading.js`); gợi ý tìm kiếm đang chọn được tải trước.
-  - Header có bóng đổ khi cuộn khỏi đầu trang (scroll-driven); viền focus khép vào nút; ô form báo lỗi rung nhẹ khi bấm gửi.
+  - Header có bóng đổ khi cuộn khỏi đầu trang (scroll-driven); viền focus khép vào nút.
+- **Quảng cáo trống:** Google không có quảng cáo cho một ô còn nằm dưới màn hình → gỡ cả khung + nhãn (không để mảng xám); ô đã trong màn hình giữ khung giữ chỗ như spec 5.4.
 - **SEO bổ sung:** URL viết hoa → 301 chữ thường; `/{mst}-{slug}.html` → 301; đường dẫn có dấu chấm khác → 404 thật; «DN mới» lọc tỉnh canonical về `/tinh/{slug}`; ngành × tỉnh không có DN → noindex; trang 2+ có «– Trang N» trong H1; Open Graph cho mọi trang, ảnh `app/opengraph-image.png` (1200×630 — **đổi tên site thì chụp lại ảnh này**).
 - **Tìm kiếm:** gợi ý chia nhóm Doanh nghiệp / Người đại diện / Tỉnh/thành (ghi rõ khớp ở đâu, khớp SĐT không hiện số) + dòng «Xem tất cả kết quả»; trạng thái đang tải / không có gợi ý. Trang kết quả có tab «Tìm theo» kèm số đếm; lọc nâng cao chọn nhiều tỉnh/thành và nhiều ngành (ô tích có tìm nhanh, bấm «Áp dụng»), «Thành lập trong» 7 ngày → 3 năm, tình trạng, sắp xếp; lọc được cả khi không có từ khoá. Trang tỉnh / ngành / DN mới giữ một giá trị như spec, có link «Lọc nâng cao» sang `/tim-kiem`; thẻ bộ lọc bỏ được từng cái, gợi ý «Lọc tại [tỉnh]» khi từ khoá có tên tỉnh. Tô sáng từng từ khoá ở đầu chữ (không phân biệt hoa/thường, dấu — `lib/highlight.js`).
 - **Chi tiết DN:**
@@ -233,8 +235,10 @@ Các lệch trước đây (308 thay 301, trang danh sách không ISR, `?page=99
    sẽ được thay bằng bản owner gửi/luật sư duyệt, không phải chữ giao diện. Mọi chữ giao diện khác đã ở
    `lib/messages.js`.
 3. **Header dính đầu trang** (ô tìm luôn trong màn hình) là thêm ngoài spec, không trái spec.
-4. **Thứ tự khối trang chủ:** theo yêu cầu, khối «Tra cứu theo tỉnh/thành» đặt trước khối «Doanh nghiệp mới thành lập» (spec 3.1 liệt kê ngược lại); ô quảng cáo vẫn nằm giữa hai khối.
-5. **Quy trình:** spec yêu cầu pull request < 400 dòng kèm ảnh chụp; mockup này đang là các commit trên `main`.
+4. **Placeholder ô tìm lớn trên màn hình < 480px** dùng câu ngắn «MST, tên DN hoặc người đại diện» (câu spec 3.1
+   dài, bị cắt giữa chữ); từ 480px dùng đúng câu spec.
+5. **Trang tĩnh** không hiện hộp «Bản nháp»; trang Liên hệ chỉ hiện email khi có `NEXT_PUBLIC_CONTACT_EMAIL`.
+6. **Quy trình:** spec yêu cầu pull request < 400 dòng kèm ảnh chụp; mockup này đang là các commit trên `main`.
 
 ## Câu hỏi mở cho owner (spec mục 9.4, cộng thêm)
 

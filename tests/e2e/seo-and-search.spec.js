@@ -322,7 +322,7 @@ test('từ khoá có tên tỉnh → gợi ý «Lọc tại …» với từ kho
 
 test('không tìm được DN bằng số điện thoại đã bị chủ DN ẩn', async ({ page }) => {
   await page.goto('/tim-kiem?q=0901823874');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Tìm thấy 0 kết quả/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Không tìm thấy kết quả/);
 });
 
 test('lọc nâng cao: chọn nhiều tỉnh, thành lập trong 30 ngày, không cần từ khoá; thẻ bỏ từng tỉnh', async ({
@@ -354,4 +354,14 @@ test('lọc nâng cao: chọn nhiều tỉnh, thành lập trong 30 ngày, khôn
     /tinh=ho-chi-minh&thanhlap=30-ngay|thanhlap=30-ngay.*tinh=ho-chi-minh/,
   );
   await expect(page).not.toHaveURL(/ha-noi/);
+});
+
+test('MST đúng định dạng nhưng chưa có dữ liệu: vẫn 404, nói rõ «Chưa có dữ liệu cho MST …»', async ({
+  page,
+}) => {
+  const res = await page.goto('/0100109106');
+  expect(res.status()).toBe(404);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Chưa có dữ liệu cho MST 0100109106',
+  );
 });

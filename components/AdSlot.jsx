@@ -10,7 +10,7 @@ import AdUnit from './AdUnit';
 export default function AdSlot({ slotId, variant = 'inline', className = '' }) {
   if (variant === 'rail') {
     return (
-      <div className={`hidden lg:block ${className}`}>
+      <div data-ad-wrap className={`hidden lg:block ${className}`}>
         <div className="sticky top-[96px] flex flex-col gap-1">
           <span className="text-xs tracking-wide text-muted uppercase">{M.ad.label}</span>
           <AdUnit
@@ -26,7 +26,7 @@ export default function AdSlot({ slotId, variant = 'inline', className = '' }) {
   return (
     // Container query: chỉ đổi sang 728×90 khi khung chứa đủ 728px (cột chính trang DN ở 1024px hẹp hơn),
     // banner thật không bị ép / tràn ngang.
-    <div className={`@container flex flex-col items-center ${className}`}>
+    <div data-ad-wrap className={`@container flex flex-col items-center ${className}`}>
       <div className="flex w-[300px] max-w-full flex-col gap-1 @min-[728px]:w-[728px]">
         <span className="text-xs tracking-wide text-muted uppercase">{M.ad.label}</span>
         <AdUnit

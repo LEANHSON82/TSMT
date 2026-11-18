@@ -458,30 +458,6 @@ html[data-navigating] [data-list-content] {
   transform: translate(-50%, -50%) scale(2);
 }
 
-/* Trồi lên khi cuộn tới: khối nằm dưới màn hình đầu trượt lên nhẹ khi cuộn vào. Dùng CSS scroll-driven
-   animation (không JS). Khối đã nằm trong màn hình lúc tải đã ở trạng thái cuối → không chậm LCP.
-   Hiện rõ hẳn khi phần tử đã lộ 120px (tính theo px để khối cao như bảng ngành không bị mờ lâu).
-   Trình duyệt chưa hỗ trợ / người dùng chọn giảm chuyển động: hiện bình thường. Không gắn lên ô quảng cáo. */
-/* Chỉ trượt + thu nhỏ, KHÔNG làm mờ: khối nằm dở ở mép dưới màn hình sẽ đứng ở trạng thái giữa chừng cho
-   tới khi cuộn — nếu mờ thì chữ lúc đó không đủ tương phản (Lighthouse/axe báo lỗi color-contrast). */
-@keyframes motion-reveal {
-  from {
-    transform: translateY(32px) scale(0.98);
-  }
-}
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    /* fill-mode backwards (không phải both): trượt xong thì animation thôi tác động, phần tử được vẽ lại
-       như thường. Giữ trạng thái cuối khiến phần tử thành lớp vẽ riêng mãi, ở toạ độ lẻ (màn hình phóng
-       125%…) các đường kẻ 1px bên trong bị làm tròn mất. */
-    .reveal {
-      animation: motion-reveal linear backwards;
-      animation-timeline: view();
-      animation-range: entry 0% entry 120px;
-    }
-  }
-}
-
 /* Số điện thoại «chạy số» sau khi xem quảng cáo (components/RollingNumber.jsx): mỗi chữ số là một cột
    10 số cuộn dọc rồi dừng ở số thật; --to do JS đặt theo độ dài cột. */
 @keyframes motion-roll {

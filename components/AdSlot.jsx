@@ -7,10 +7,17 @@ import AdUnit from './AdUnit';
 // Manager vào phần tử có data-ad-slot khi ô sắp vào màn hình; còn lại là khung giả lập.
 //   variant="inline": điện thoại 300×250, máy tính 728×90
 //   variant="rail":   chỉ máy tính, 300×600, dính khi cuộn
+// Có nguồn banner thật không: gpt + đã khai ad unit banner (owner tạo trên Ad Manager), hoặc mock (dev/test,
+// để thấy chỗ đặt ô). fallback / gpt chưa có ad unit: không vẽ ô — một khung xám trống mãi trông như trang lỗi.
+const provider = process.env.NEXT_PUBLIC_AD_PROVIDER;
+export const BANNERS_ON =
+  provider === 'gpt' ? Boolean(process.env.NEXT_PUBLIC_GPT_BANNER_PATH) : provider !== 'fallback';
+
 export default function AdSlot({ slotId, variant = 'inline', className = '' }) {
+  if (!BANNERS_ON) return null;
   if (variant === 'rail') {
     return (
-      <div className={`hidden lg:block ${className}`}>
+      <div data-ad-wrap className={`hidden lg:block ${className}`}>
         <div className="sticky top-[96px] flex flex-col gap-1">
           <span className="text-xs tracking-wide text-muted uppercase">{M.ad.label}</span>
           <AdUnit
@@ -26,7 +33,7 @@ export default function AdSlot({ slotId, variant = 'inline', className = '' }) {
   return (
     // Container query: chỉ đổi sang 728×90 khi khung chứa đủ 728px (cột chính trang DN ở 1024px hẹp hơn),
     // banner thật không bị ép / tràn ngang.
-    <div className={`@container flex flex-col items-center ${className}`}>
+    <div data-ad-wrap className={`@container flex flex-col items-center ${className}`}>
       <div className="flex w-[300px] max-w-full flex-col gap-1 @min-[728px]:w-[728px]">
         <span className="text-xs tracking-wide text-muted uppercase">{M.ad.label}</span>
         <AdUnit

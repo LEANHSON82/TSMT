@@ -15,8 +15,9 @@ const LINKS = [
 // Footer (spec mục 3): link trang tĩnh, dòng «Dữ liệu tổng hợp từ nguồn công khai», link yêu cầu
 // ẩn/sửa thông tin. Nền sáng, chia cột: giới thiệu ngắn · liên kết · dữ liệu.
 export default function SiteFooter() {
+  // Vùng bấm 44px trên điện thoại (spec 7.3); máy tính dùng chuột → 32px, footer không cao lênh khênh.
   const linkCls =
-    'inline-flex min-h-11 items-center text-sm text-ink-2 no-underline hover:text-brand';
+    'inline-flex min-h-11 items-center text-sm text-ink-2 no-underline hover:text-brand md:min-h-8';
   return (
     <footer className="mt-auto border-t border-line bg-white">
       <div className="mx-auto grid max-w-[1200px] gap-8 px-4 pt-10 pb-8 md:grid-cols-[1.5fr_1fr_1.2fr] md:gap-10 md:px-6">
@@ -43,7 +44,7 @@ export default function SiteFooter() {
           <Link
             prefetch={false}
             href="/yeu-cau-cap-nhat"
-            className="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold no-underline"
+            className="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold no-underline md:min-h-8"
           >
             <IconEyeOff size={18} />
             {M.nav.updateRequest}

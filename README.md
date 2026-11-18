@@ -145,6 +145,12 @@ hiện số).
 - `GET /v1/search` nhận thêm `field=name|representative|number`, `sort=founded_desc|founded_asc` (bỏ
   trống = phù hợp nhất), `industry=`; mỗi DN thêm `matched`; thêm `counts: {all, name, representative,
 number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
+- **Một người đại diện nhiều DN:** `GET /v1/suggest` thêm `people: [{name, company_count, company: {mst, name, slug}}]`
+  (người đại diện khớp từ khoá, gộp theo họ tên, `company_count` = tổng số DN có người đại diện trùng tên);
+  `GET /v1/search` thêm `people: [{name, count}]` (gộp theo họ tên trong kết quả sau bộ lọc);
+  `GET /v1/companies/{mst}` thêm `representative_company_count`. Không có mã định danh cá nhân công khai nên
+  giao diện luôn ghi «gộp theo họ tên — có thể gồm nhiều người trùng tên». Thiếu các trường này thì giao diện
+  quay về cách cũ (mỗi DN một dòng gợi ý, không có khung người đại diện).
 - **Lọc nâng cao** (trang `/tim-kiem`): `province=01,79` và `industry=6201,4330` nhận nhiều mã cách nhau dấu
   phẩy; `founded_from=YYYY-MM-DD` chỉ lấy DN thành lập từ ngày đó; `q` được để trống khi có ít nhất một bộ lọc
   (khi đó sắp `founded_desc`, không có `counts`). Thêm `GET /v1/industries` → `{items: [{code, name, slug}]}`

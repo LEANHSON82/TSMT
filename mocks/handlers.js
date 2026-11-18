@@ -21,6 +21,30 @@ const store = (globalThis.__mockUnlockStore ||= { unlocks: new Map(), seq: 0, re
 // Bộ tìm mẫu (mocks/search.js): xếp hạng, matched, không tìm theo SĐT đã ẩn.
 const searchIndex = buildIndex(companiesData, phonesData);
 
+// Người đại diện: gộp theo tên (chữ hoa, gọn khoảng trắng). Không có mã định danh cá nhân công khai nên «cùng tên»
+// không chắc là cùng một người — giao diện phải ghi rõ điều này.
+const repKey = (name) =>
+  String(name || '')
+    .normalize('NFC')
+    .toUpperCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+const repCount = new Map();
+for (const c of companiesData)
+  repCount.set(repKey(c.representative), (repCount.get(repKey(c.representative)) || 0) + 1);
+
+/** Gộp các kết quả khớp người đại diện theo tên → [{ name, count, companies }], nhiều DN xếp trước. */
+function groupPeople(results) {
+  const groups = new Map();
+  for (const r of results) {
+    if (r.matched !== 'representative') continue;
+    const k = repKey(r.c.representative);
+    if (!groups.has(k)) groups.set(k, { name: r.c.representative, companies: [] });
+    groups.get(k).companies.push(r.c);
+  }
+  return [...groups.values()];
+}
+
 function error(status, code, message, extra = {}) {
   return HttpResponse.json({ error: { code, message }, ...extra }, { status });
 }
@@ -96,17 +120,25 @@ export const handlers = [
   http.get('*/v1/suggest', ({ request }) => {
     const q = new URL(request.url).searchParams.get('q') || '';
     if (q.trim().length < 2) return HttpResponse.json({ items: [] });
-    const items = search(searchIndex, q, { mode: 'suggest' })
-      .slice(0, 8)
-      .map(({ c, matched }) => ({
-        mst: c.mst,
-        name: c.name,
-        slug: c.slug,
-        province: c.province.name,
-        representative: c.representative,
-        matched,
+    const found = search(searchIndex, q, { mode: 'suggest' });
+    const items = found.slice(0, 8).map(({ c, matched }) => ({
+      mst: c.mst,
+      name: c.name,
+      slug: c.slug,
+      province: c.province.name,
+      representative: c.representative,
+      matched,
+    }));
+    // Đề xuất mở rộng (README): người đại diện khớp từ khoá, gộp theo tên; company_count = tổng số DN có người
+    // đại diện trùng tên này; company = DN tiêu biểu (dùng khi chỉ có 1 DN).
+    const people = groupPeople(found)
+      .slice(0, 6)
+      .map((g) => ({
+        name: g.name,
+        company_count: repCount.get(repKey(g.name)) || g.companies.length,
+        company: { mst: g.companies[0].mst, name: g.companies[0].name, slug: g.companies[0].slug },
       }));
-    return HttpResponse.json({ items });
+    return HttpResponse.json({ items, people });
   }),
 
   // Đề xuất mở rộng: field=name|representative|number, sort=relevance|founded_desc|founded_asc,
@@ -121,6 +153,13 @@ export const handlers = [
         ? applyFilters(companiesData, url).map((c) => ({ c, matched: null }))
         : [];
     const counts = q ? countByField(found) : undefined;
+    // Người đại diện khớp từ khoá trong kết quả (sau bộ lọc), gộp theo tên: [{ name, count }].
+    const people = q
+      ? groupPeople(found)
+          .map((g) => ({ name: g.name, count: g.companies.length }))
+          .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'vi'))
+          .slice(0, 12)
+      : undefined;
     const field = url.searchParams.get('field');
     let list = FIELD_GROUPS[field]
       ? found.filter((r) => FIELD_GROUPS[field].includes(r.matched))
@@ -134,6 +173,7 @@ export const handlers = [
     return HttpResponse.json({
       ...page,
       counts,
+      people,
       items: page.items.map((r) => ({ ...summary(r.c), matched: r.matched })),
     });
   }),
@@ -166,8 +206,12 @@ export const handlers = [
 
   http.get('*/v1/companies/:mst', ({ params }) => {
     const c = byMst.get(params.mst);
+    // representative_company_count (đề xuất mở rộng): số DN có người đại diện trùng tên, kể cả DN này.
     return c
-      ? HttpResponse.json(publicCompany(c))
+      ? HttpResponse.json({
+          ...publicCompany(c),
+          representative_company_count: repCount.get(repKey(c.representative)) || 1,
+        })
       : error(404, 'not_found', 'Không tìm thấy doanh nghiệp');
   }),
 

@@ -355,3 +355,35 @@ test('lọc nâng cao: chọn nhiều tỉnh, thành lập trong 30 ngày, khôn
   );
   await expect(page).not.toHaveURL(/ha-noi/);
 });
+
+test('một người đại diện nhiều DN: gợi ý gộp một dòng «Đại diện của 4 doanh nghiệp», trang kết quả tóm tắt, trang DN có link', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const input = page.locator('[data-hero-search] input');
+  await input.click();
+  await input.pressSequentially('đỗ đức lan', { delay: 30 });
+  const list = page.locator('[data-hero-search] [role=listbox]');
+  const person = list.getByRole('option', { name: /ĐỖ ĐỨC LAN.*Đại diện của 4 doanh nghiệp/ });
+  await expect(person).toBeVisible();
+  await expect(list.getByRole('option', { name: /ĐỖ ĐỨC LAN/ })).toHaveCount(1);
+  await person.click();
+  await expect(page).toHaveURL(/theo=dai-dien/);
+  await expect(page.getByText(/là người đại diện của 4 doanh nghiệp/)).toBeVisible();
+  await expect(page.locator('main ol > li article')).toHaveCount(4);
+
+  await page.goto('/2507041926-cong-ty-co-phan-phan-mem-song-hong');
+  await page.getByRole('link', { name: /Đại diện của 4 doanh nghiệp/ }).click();
+  await expect(page).toHaveURL(/theo=dai-dien/);
+});
+
+test('trang kết quả: người đại diện khớp từ khoá gộp theo tên, bấm để xem DN của tên đó', async ({
+  page,
+}) => {
+  await page.goto('/tim-kiem?q=son');
+  const box = page.getByRole('region', { name: /Người đại diện khớp/ });
+  await expect(box).toBeVisible();
+  await box.getByRole('link', { name: /BÙI ĐỨC SƠN/ }).click();
+  await expect(page).toHaveURL(/theo=dai-dien/);
+  await expect(page.locator('main ol > li article')).toHaveCount(1);
+});

@@ -23,16 +23,20 @@ export { default as ErrorState } from './ErrorState';
 
 export function ListSkeleton({ rows = 6 }) {
   return (
-    <div aria-busy="true" aria-live="polite" className="flex flex-col gap-4">
-      <span className="sr-only">{M.common.loading}</span>
+    <div
+      aria-busy="true"
+      aria-live="polite"
+      className="flex flex-col divide-y divide-line overflow-hidden rounded-xl border border-line bg-white"
+    >
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="rounded-xl border border-line bg-white p-4">
+        <div key={i} className="p-4">
           <div className="skeleton h-5 w-3/4 rounded" />
           <div className="skeleton mt-3 h-4 w-1/2 rounded" />
           <div className="skeleton mt-2 h-4 w-2/3 rounded" />
           <div className="skeleton mt-4 h-6 w-32 rounded-full" />
         </div>
       ))}
+      <span className="sr-only">{M.common.loading}</span>
     </div>
   );
 }

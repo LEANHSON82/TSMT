@@ -52,20 +52,23 @@ export default function CompanyCard({
   const addr = areaAddress(c.address, c.province?.name, { withProvince: showProvince });
   const date = formatDate(c.founded_date);
   const fresh = showNew && isNew(c.founded_date);
+  // Chỉ tô sáng ở trường đã khớp (API trả matched): tìm «Đỗ Đức Lan» khớp người đại diện thì không tô «DO» trong
+  // «DOANH NGHIỆP». Không có matched (trang danh sách, API cũ) → tô như trước.
+  const hl = (field) => (!c.matched || c.matched === field ? highlight : undefined);
 
   if (variant === 'row') {
     return (
-      <article className="group relative grid gap-x-5 gap-y-1.5 bg-white px-4 py-3.5 lg:grid-cols-[minmax(0,1fr)_144px_200px_168px] lg:items-center lg:gap-y-2.5 lg:px-5">
+      <article className="group relative grid gap-x-5 gap-y-1.5 px-4 py-3.5 lg:grid-cols-[minmax(0,1fr)_144px_200px_168px] lg:items-center lg:gap-y-2.5 lg:px-5">
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <H className="line-clamp-2 text-base leading-6 font-semibold">
+            <H className="line-clamp-2 text-body leading-6 font-semibold">
               <Link
                 href={href}
                 prefetch={false}
                 title={c.name}
                 className="text-ink no-underline group-hover:text-brand after:absolute after:inset-0"
               >
-                <Highlight text={c.name} query={highlight} />
+                <Highlight text={c.name} query={hl('name')} />
               </Link>
             </H>
             <span className="flex min-w-0 items-center gap-1.5 text-sm text-ink-2">
@@ -85,7 +88,7 @@ export default function CompanyCard({
           <div className="flex flex-none items-baseline gap-1.5 lg:flex-col lg:gap-0.5">
             <span className="text-muted lg:text-xs">MST</span>
             <span className="relative z-10 font-semibold tracking-[0.02em] whitespace-nowrap tabular-nums lg:text-body">
-              <Highlight text={c.mst} query={highlight} />
+              <Highlight text={c.mst} query={hl('mst')} />
             </span>
           </div>
           <div className="flex min-w-0 items-baseline gap-1.5 lg:flex-col lg:gap-0.5">
@@ -94,7 +97,7 @@ export default function CompanyCard({
               <span className="hidden lg:inline">{M.company.representative}</span>
             </span>
             <span className="truncate">
-              <Highlight text={c.representative} query={highlight} />
+              <Highlight text={c.representative} query={hl('representative')} />
             </span>
           </div>
         </div>
@@ -122,14 +125,14 @@ export default function CompanyCard({
       }`}
     >
       <div className="flex items-start gap-3">
-        <H className="line-clamp-2 flex-1 text-base leading-6 font-semibold sm:min-h-12">
+        <H className="line-clamp-2 flex-1 text-body leading-6 font-semibold sm:min-h-12">
           <Link
             href={href}
             prefetch={false}
             title={c.name}
             className="text-ink no-underline group-hover:text-brand after:absolute after:inset-0"
           >
-            <Highlight text={c.name} query={highlight} />
+            <Highlight text={c.name} query={hl('name')} />
           </Link>
         </H>
         {c.matched === 'phone' && <PhoneMatchBadge />}
@@ -149,7 +152,7 @@ export default function CompanyCard({
         <div className="flex min-w-0 gap-2">
           <dt className="w-16 flex-none text-muted">{M.company.repShort}</dt>
           <dd className="min-w-0 flex-1 truncate">
-            <Highlight text={c.representative} query={highlight} />
+            <Highlight text={c.representative} query={hl('representative')} />
           </dd>
         </div>
       </dl>

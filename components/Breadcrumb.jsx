@@ -19,11 +19,15 @@ export default function Breadcrumb({ items }) {
   return (
     <>
       <nav aria-label={M.nav.breadcrumb} className="min-w-0">
-        <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+        {/* Luôn một dòng: mục cuối (tên DN dài) cắt bằng «…» — tên đầy đủ đã có ở H1 ngay dưới. */}
+        <ol className="flex items-center gap-x-2 text-sm text-muted">
           {all.map((it, i) => {
             const last = i === all.length - 1;
             return (
-              <li key={i} className={`flex min-w-0 items-center gap-2 ${last ? 'max-w-full' : ''}`}>
+              <li
+                key={i}
+                className={`flex items-center gap-2 ${last ? 'min-w-0 flex-1' : 'flex-none'}`}
+              >
                 {i > 0 && <span aria-hidden="true">›</span>}
                 {last || !it.href ? (
                   <span aria-current={last ? 'page' : undefined} className="truncate text-ink-2">

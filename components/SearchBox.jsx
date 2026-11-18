@@ -39,6 +39,7 @@ export default function SearchBox({
   const [value, setValue] = useState(defaultValue);
   const [items, setItems] = useState([]);
   const [provItems, setProvItems] = useState([]);
+  const [people, setPeople] = useState(null); // người đại diện gộp theo tên (API có thì dùng)
   const [lastQ, setLastQ] = useState(''); // từ khoá ứng với gợi ý đang hiện
   const provinces = useProvinces();
   const [open, setOpen] = useState(false);
@@ -84,10 +85,11 @@ export default function SearchBox({
       abortRef.current = ctrl;
       setStatus('loading');
       try {
-        const res = await suggestCompanies(q, { signal: ctrl.signal });
+        const { items: res, people: ppl } = await suggestCompanies(q, { signal: ctrl.signal });
         const provs = suggestProvinces(q, provinces);
         const any = res.length > 0 || provs.length > 0;
         setItems(res.slice(0, 8));
+        setPeople(ppl);
         setProvItems(provs);
         setLastQ(q);
         setOpen(any && document.activeElement === inputRef.current);
@@ -96,6 +98,7 @@ export default function SearchBox({
       } catch (err) {
         if (err?.name !== 'AbortError') {
           setItems([]);
+          setPeople(null);
           setProvItems([]);
           setOpen(false);
           setStatus('idle');
@@ -106,24 +109,37 @@ export default function SearchBox({
   }, [value, provinces]);
 
   // Danh sách phẳng theo thứ tự hiển thị (phím ↑↓ đi qua đúng thứ tự này).
+  // Người đại diện: API trả `people` (gộp theo tên, kèm tổng số DN) thì mỗi tên một dòng — một người đứng tên nhiều
+  // DN không lặp lại nhiều dòng; không có thì dùng các DN khớp người đại diện như trước. Tổng ≤ 8 (spec 3.1).
   const entries = useMemo(() => {
+    const persons = people ? people.slice(0, 4).map((person) => ({ kind: 'person', person })) : [];
+    const reps = people
+      ? []
+      : items.filter((i) => i.matched === 'representative').map((item) => ({ kind: 'rep', item }));
+    const companies = items
+      .filter((i) => i.matched !== 'representative')
+      .slice(0, Math.max(0, 8 - persons.length - reps.length))
+      .map((item) => ({ kind: 'company', item }));
     const list = [
-      ...items
-        .filter((i) => i.matched !== 'representative')
-        .map((item) => ({ kind: 'company', item })),
-      ...items.filter((i) => i.matched === 'representative').map((item) => ({ kind: 'rep', item })),
+      ...companies,
+      ...reps,
+      ...persons,
       ...provItems.map((p) => ({ kind: 'province', p })),
     ];
     if (list.length) list.push({ kind: 'all' });
     return list;
-  }, [items, provItems]);
+  }, [items, people, provItems]);
 
   const hrefOf = (e) =>
     e.kind === 'province'
       ? `/tinh/${e.p.slug}`
       : e.kind === 'all'
         ? `/tim-kiem?q=${encodeURIComponent(lastQ)}`
-        : companyPath(e.item);
+        : e.kind === 'person'
+          ? e.person.company_count > 1
+            ? `/tim-kiem?q=${encodeURIComponent(e.person.name)}&theo=dai-dien`
+            : companyPath(e.person.company)
+          : companyPath(e.item);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -137,7 +153,11 @@ export default function SearchBox({
 
   function activate(e) {
     setOpen(false);
-    if (e.kind === 'company' || e.kind === 'rep')
+    if (
+      e.kind === 'company' ||
+      e.kind === 'rep' ||
+      (e.kind === 'person' && e.person.company_count === 1)
+    )
       track('search', { query_type: searchQueryType(lastQ), result_count: 1 });
     startNavigation();
     router.push(hrefOf(e));
@@ -310,7 +330,9 @@ export default function SearchBox({
                   ? `p-${e.p.code}`
                   : e.kind === 'all'
                     ? 'all'
-                    : `${e.kind}-${e.item.mst}`
+                    : e.kind === 'person'
+                      ? `person-${e.person.name}`
+                      : `${e.kind}-${e.item.mst}`
               }
               id={`${listId}-${i}`}
               role="option"
@@ -330,15 +352,19 @@ export default function SearchBox({
           ));
           if (!label) return options;
           const hid = `${listId}-h-${kind}`;
+          // Tiêu đề nhóm tách hẳn khỏi các dòng gợi ý: dải nền xám nhạt, chữ cam đậm, có số dòng trong nhóm.
           return (
             <li key={`g-${kind}`} role="none">
               <ul role="group" aria-labelledby={hid}>
                 <li
                   id={hid}
                   role="presentation"
-                  className="px-4 pt-2.5 pb-1 text-xs font-semibold tracking-wide text-muted uppercase"
+                  className="flex items-center justify-between border-y border-line-soft bg-page px-4 py-1.5 text-[13px] font-bold tracking-wide text-cta uppercase"
                 >
-                  {M.search[label]}
+                  <span>{M.search[label]}</span>
+                  <span className="font-semibold text-muted tabular-nums" aria-hidden="true">
+                    {group.length}
+                  </span>
                 </li>
                 {options}
               </ul>
@@ -366,6 +392,7 @@ export default function SearchBox({
 const GROUPS = [
   { kind: 'company', label: 'groupCompanies' },
   { kind: 'rep', label: 'groupRepresentatives' },
+  { kind: 'person', label: 'groupRepresentatives' },
   { kind: 'province', label: 'groupProvinces' },
   { kind: 'all', label: null },
 ];
@@ -387,6 +414,27 @@ function SuggestionRow({ entry: e, query }) {
         </span>
         <span className="text-meta text-muted">
           {M.search.provinceCount(e.p.company_count ?? 0)}
+        </span>
+      </>
+    );
+  }
+  if (e.kind === 'person') {
+    const { person } = e;
+    return (
+      <>
+        <span className="line-clamp-1 text-body font-semibold text-navy">
+          <Highlight text={person.name} query={query} />
+        </span>
+        <span className="line-clamp-1 text-meta text-muted">
+          {person.company_count > 1 ? (
+            <span className="font-semibold text-brand">
+              {M.search.personCompanies(person.company_count)} →
+            </span>
+          ) : (
+            <>
+              {M.search.repOf} · {person.company.name}
+            </>
+          )}
         </span>
       </>
     );

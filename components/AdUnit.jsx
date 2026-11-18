@@ -41,7 +41,15 @@ export default function AdUnit({ slotId, size = 'inline', className = '', ...res
         // Cột phải: Google trả cỡ nhỏ hơn 300×600 → khung co theo quảng cáo, không để thừa mảng xám.
         // Chỉ cột phải (cột riêng, co lại không xô nội dung chính); ô trong bài đã đúng cỡ sẵn.
         const onRender = size === 'rail' ? ([, h]) => (el.style.height = `${h}px`) : undefined;
-        renderBanner(slotId, el, { sizes: pickSizes(size, el), onRender })
+        // Google không có quảng cáo: ô còn nằm dưới màn hình (người dùng chưa thấy) thì gỡ cả khung + nhãn, không
+        // để mảng xám — co lại ngoài màn hình không xô nội dung đang xem (CLS). Ô đã trong màn hình thì giữ khung
+        // giữ chỗ (spec 5.4). Cột phải: luôn gỡ được (cột riêng, không xô nội dung chính).
+        const onEmpty = () => {
+          const wrap = el.closest('[data-ad-wrap]');
+          if (wrap && (size === 'rail' || el.getBoundingClientRect().top > window.innerHeight))
+            wrap.hidden = true;
+        };
+        renderBanner(slotId, el, { sizes: pickSizes(size, el), onRender, onEmpty })
           .then((fn) => (cancelled ? fn?.() : (destroy = fn)))
           .catch(() => {
             /* bị chặn / lỗi mạng: giữ khung giữ chỗ */

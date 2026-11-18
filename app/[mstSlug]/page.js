@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
-import AdSlot from '@/components/AdSlot';
+import AdSlot, { BANNERS_ON } from '@/components/AdSlot';
 import Breadcrumb from '@/components/Breadcrumb';
 import CompanyCard from '@/components/CompanyCard';
 import CompanyInfoTable from '@/components/CompanyInfoTable';
@@ -113,10 +113,11 @@ export default async function CompanyPage({ params }) {
         ]}
       />
 
-      <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+      {/* Chưa có nguồn banner: bỏ cột phải, cột chính rộng hết khung (không để cột trống). */}
+      <div className={`mt-4 grid gap-8 ${BANNERS_ON ? 'lg:grid-cols-[minmax(0,1fr)_300px]' : ''}`}>
         <main className="flex min-w-0 flex-col gap-6">
           <section className="flex flex-col gap-2.5">
-            <h1 className="text-2xl leading-[30px] font-semibold text-pretty break-words text-navy md:text-3xl md:leading-9">
+            <h1 className="text-xl leading-7 font-semibold text-pretty break-words text-navy md:text-2xl md:leading-8">
               {c.name}
             </h1>
             {(c.name_en || c.name_short) && (
@@ -138,7 +139,10 @@ export default async function CompanyPage({ params }) {
           </section>
 
           <section aria-labelledby="info-title" className="flex flex-col gap-3">
-            <h2 id="info-title" className="text-lg leading-7 font-semibold text-navy md:text-xl">
+            <h2
+              id="info-title"
+              className="text-xl leading-7 font-semibold text-navy md:text-2xl md:leading-8"
+            >
               {M.company.info}
             </h2>
             <CompanyInfoTable company={c} parent={parent} />
@@ -147,8 +151,11 @@ export default async function CompanyPage({ params }) {
           <AdSlot slotId="detail-below-info" className="pt-2" />
 
           {c.industries?.length > 0 && (
-            <section aria-labelledby="ind-title" className="reveal flex flex-col gap-3">
-              <h2 id="ind-title" className="text-lg leading-7 font-semibold text-navy md:text-xl">
+            <section aria-labelledby="ind-title" className="flex flex-col gap-3">
+              <h2
+                id="ind-title"
+                className="text-xl leading-7 font-semibold text-navy md:text-2xl md:leading-8"
+              >
                 {M.company.industries}
               </h2>
               <IndustryTable industries={c.industries} />
@@ -170,8 +177,11 @@ export default async function CompanyPage({ params }) {
           </p>
 
           {related.length > 0 && (
-            <section aria-labelledby="rel-title" className="reveal flex flex-col gap-3">
-              <h2 id="rel-title" className="text-lg leading-7 font-semibold text-navy md:text-xl">
+            <section aria-labelledby="rel-title" className="flex flex-col gap-3">
+              <h2
+                id="rel-title"
+                className="text-xl leading-7 font-semibold text-navy md:text-2xl md:leading-8"
+              >
                 {M.company.related(c.province?.name || '')}
               </h2>
               <div className="overflow-hidden rounded-xl border border-line bg-white">

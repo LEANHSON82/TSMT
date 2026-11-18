@@ -7,6 +7,7 @@ import ListFilters from '@/components/ListFilters';
 import Breadcrumb from '@/components/Breadcrumb';
 import ListPageShell from '@/components/ListPageShell';
 import SearchBox from '@/components/SearchBox';
+import PeopleMatches from '@/components/PeopleMatches';
 import SearchFieldTabs, { FIELD_TABS } from '@/components/SearchFieldTabs';
 import TrackOnMount from '@/components/TrackOnMount';
 import { searchCompanies } from '@/lib/api';
@@ -221,6 +222,7 @@ export default async function SearchPage({ searchParams }) {
                 />
               )}
               {filterForm}
+              <PeopleMatches people={data.people} q={q} tab={tab.value} params={params} />
             </div>
           )
         }

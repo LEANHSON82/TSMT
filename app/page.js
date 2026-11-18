@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import AdSlot from '@/components/AdSlot';
+import AdvancedFilterLink from '@/components/AdvancedFilterLink';
 import CompanyCard from '@/components/CompanyCard';
 import VnDotMap from '@/components/VnDotMap';
 import JsonLd from '@/components/JsonLd';
@@ -65,6 +66,7 @@ export default async function HomePage() {
             <div data-hero-search className="mt-3 w-full">
               <SearchBox size="lg" autoFocusDesktop />
             </div>
+            <AdvancedFilterLink variant="inline" />
           </div>
         </section>
 
@@ -73,7 +75,7 @@ export default async function HomePage() {
             <div className="flex flex-col gap-0.5">
               <h2
                 id="prov-title"
-                className="min-w-0 text-lg leading-7 font-semibold text-navy md:text-xl md:leading-7"
+                className="min-w-0 text-xl leading-7 font-semibold text-navy md:text-2xl md:leading-8"
               >
                 {M.home.provincesTitle}
               </h2>
@@ -112,7 +114,7 @@ export default async function HomePage() {
               <div className="flex flex-col gap-0.5">
                 <h2
                   id="new-title"
-                  className="min-w-0 text-lg leading-7 font-semibold text-navy md:text-xl md:leading-7"
+                  className="min-w-0 text-xl leading-7 font-semibold text-navy md:text-2xl md:leading-8"
                 >
                   {M.home.newTitle}
                 </h2>
@@ -132,9 +134,7 @@ export default async function HomePage() {
             </div>
             {/* Một khung, các ô ngăn bằng đường kẻ mảnh: mỗi ô có viền phải + dưới, lưới lùi 1px để viền
               của cột/hàng cuối nấp dưới viền khung. Ô trống ở hàng cuối (nếu có) vẫn là nền trắng. */}
-            {/* .reveal đặt trên cả khung, KHÔNG đặt trên từng ô: ô có transform thành lớp vẽ riêng, ô bắt đầu
-                ở toạ độ lẻ (vd. x = 640,5) mất đường kẻ 1px. */}
-            <div className="reveal overflow-hidden rounded-xl border border-line bg-white">
+            <div className="overflow-hidden rounded-xl border border-line bg-white">
               <ul className="-mr-px -mb-px grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 {newest.map((c) => (
                   <li key={c.mst} className="border-r border-b border-line">

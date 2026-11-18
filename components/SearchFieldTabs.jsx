@@ -19,6 +19,9 @@ export const FIELD_TABS = [
 ];
 
 export default function SearchFieldTabs({ active, counts, hrefFor }) {
+  // Đang ở «Tất cả» mà mọi kết quả chỉ khớp một mục (vd. chỉ Tên DN): hai tab cùng số → thừa, ẩn cả dải tab.
+  const withResults = FIELD_TABS.filter((t) => t.value && counts?.[t.countKey] > 0);
+  if (!active && counts && withResults.length <= 1) return null;
   return (
     <nav aria-label={M.search.fieldTabs} className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
       <ul className="flex min-w-max gap-1 border-b border-line">

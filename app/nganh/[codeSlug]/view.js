@@ -63,7 +63,7 @@ export async function IndustryList({ params, searchParams }) {
       title={M.list.industry.title(industry.code, industry.name)}
       description={M.list.industry.lead(where)}
       filters={
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-3">
           <ListFilters
             key={province?.slug || ''}
             action={basePath}

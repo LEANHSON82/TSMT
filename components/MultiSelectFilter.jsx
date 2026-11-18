@@ -37,8 +37,21 @@ export default function MultiSelectFilter({
   }, [options, valueKey]);
   const index = useMemo(() => ordered.map((o) => norm(o.label)), [ordered]);
   const q = norm(query);
-  const visible = ordered.map((_, i) => !q || index[i].includes(q));
-  const anyVisible = visible.some(Boolean);
+  // Có gõ tìm: mục có từ BẮT ĐẦU bằng chữ gõ lên trước («ha» → Hà Nội, Hà Tĩnh… rồi mới tới Đồng Tháp).
+  const rank = (i) => {
+    if (!q) return 0;
+    const t = index[i];
+    if (t.startsWith(q) || t.includes(` ${q}`)) return 1;
+    return t.includes(q) ? 2 : 0;
+  };
+  const display = ordered
+    .map((o, i) => ({ o, i, r: rank(i) }))
+    .filter((x) => !q || x.r > 0)
+    .sort((a, b) => a.r - b.r || a.i - b.i);
+  const shown = new Set(display.map((x) => x.o.value));
+  // Mục bị lọc đi vẫn nằm trong form (ẩn) để form gửi được khi chưa có JS.
+  const rows = [...display.map((x) => x.o), ...ordered.filter((o) => !shown.has(o.value))];
+  const anyVisible = display.length > 0;
 
   // Đóng (hoặc giá trị đã áp dụng đổi) → bỏ lựa chọn nháp; mở → đưa con trỏ vào ô tìm.
   useEffect(() => {
@@ -129,10 +142,10 @@ export default function MultiSelectFilter({
           </div>
           <fieldset className="max-h-64 overflow-y-auto overscroll-contain p-1">
             <legend className="sr-only">{label}</legend>
-            {ordered.map((o, i) => (
+            {rows.map((o) => (
               <label
                 key={o.value}
-                className={`${visible[i] ? 'flex' : 'hidden'} min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 text-body text-ink hover:bg-brand-50`}
+                className={`${shown.has(o.value) ? 'flex' : 'hidden'} min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 text-body text-ink hover:bg-brand-50`}
               >
                 <input
                   type="checkbox"

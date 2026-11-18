@@ -55,7 +55,6 @@ export default function ListFilters({ action, fields, hidden = {} }) {
   const has = (f) => (f.multiple ? f.value?.length > 0 : Boolean(f.value));
   const urlValue = (f) => (f.multiple ? (f.value || []).join(',') : f.value || '');
   const optionOf = (f, v) => f.options.find((o) => o.value === v);
-  const activeCount = fields.filter((f) => has(f) && isFilter(f)).length;
   const current = Object.fromEntries(fields.map((f) => [f.name, urlValue(f)]));
   const keep = Object.fromEntries(
     fields.filter((f) => !isFilter(f)).map((f) => [f.name, urlValue(f)]),
@@ -73,6 +72,8 @@ export default function ListFilters({ action, fields, hidden = {} }) {
         }),
       })),
     );
+  // Số trên nút «Lọc» (điện thoại) = số thẻ bộ lọc bên dưới (2 tỉnh + thời gian = 3).
+  const activeCount = chips.length;
 
   /** overrides: { name: giá trị } — ô chọn nhiều gửi lựa chọn vừa áp dụng (mảng). */
   function apply(overrides = {}) {
@@ -167,14 +168,6 @@ export default function ListFilters({ action, fields, hidden = {} }) {
           {M.list.applyFilter}
         </button>
       </noscript>
-      {activeCount > 0 && (
-        <Link
-          href={buildHref(action, { ...hidden, ...keep })}
-          className="inline-flex min-h-11 items-center text-body font-semibold"
-        >
-          {M.list.clearFilter}
-        </Link>
-      )}
     </div>
   );
 
@@ -217,22 +210,32 @@ export default function ListFilters({ action, fields, hidden = {} }) {
       {chips.length > 0 && (
         <ul aria-label={M.list.activeFilters} className="mt-1 flex flex-wrap gap-x-2">
           {chips.map((c) => (
-            <li key={c.key}>
-              {/* Vùng bấm cao 44px (spec 7.3), phần nhìn thấy là viên thuốc gọn bên trong. */}
+            <li key={c.key} className="max-w-full">
+              {/* Vùng bấm cao 44px (spec 7.3), phần nhìn thấy là thẻ gọn bên trong. Nhãn dài (tên ngành) xuống
+                  dòng trong thẻ: cao theo chữ, có đệm trên dưới — không cố định chiều cao (chữ tràn ra viền). */}
               <Link
                 href={c.href}
                 aria-label={M.list.removeFilter(c.label)}
-                className="group inline-flex min-h-11 items-center no-underline"
+                className="group inline-flex min-h-11 max-w-full items-center no-underline"
               >
-                <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-brand/30 bg-brand-50 pr-2.5 pl-3 text-sm font-semibold text-brand-hover group-hover:border-brand">
-                  {c.label}
-                  <span aria-hidden="true" className="text-base leading-none">
+                <span className="inline-flex min-h-8 max-w-full items-center gap-2 rounded-2xl border border-brand/30 bg-brand-50 py-1 pr-2.5 pl-3 text-sm leading-5 font-semibold text-brand-hover group-hover:border-brand">
+                  <span className="min-w-0">{c.label}</span>
+                  <span aria-hidden="true" className="flex-none text-base leading-none">
                     ×
                   </span>
                 </span>
               </Link>
             </li>
           ))}
+          {/* «Bỏ lọc» (bỏ hết, giữ sắp xếp) đứng cuối hàng thẻ. */}
+          <li>
+            <Link
+              href={buildHref(action, { ...hidden, ...keep })}
+              className="inline-flex min-h-11 items-center px-1 text-sm font-semibold"
+            >
+              {M.list.clearFilter}
+            </Link>
+          </li>
         </ul>
       )}
     </form>

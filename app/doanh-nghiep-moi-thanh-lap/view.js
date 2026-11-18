@@ -40,7 +40,7 @@ export async function NewCompaniesList({ searchParams }) {
       title={`${M.list.newCompanies.title}${where}`}
       description={M.list.newCompanies.lead(where)}
       filters={
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-3">
           <ListFilters
             key={province?.slug || ''}
             action="/doanh-nghiep-moi-thanh-lap"

@@ -132,8 +132,9 @@ export default async function HomePage() {
                 />
               </Link>
             </div>
-            {/* Mỗi DN một thẻ riêng, cách nhau 16px; máy tính 3 cột (không nhồi 4) để mắt dễ theo từng thẻ. */}
-            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Mỗi DN một thẻ riêng, cách nhau 16px. 20 DN (spec 3.1): máy tính 4 cột, tablet 2 cột → hàng nào cũng
+                đầy (20 chia hết); 5 cột thì thẻ quá hẹp, tên DN xuống 3 dòng. */}
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {newest.map((c) => (
                 <li key={c.mst}>
                   <CompanyCard company={c} showNew={false} />

@@ -184,15 +184,15 @@ export default async function CompanyPage({ params }) {
               >
                 {M.company.related(c.province?.name || '')}
               </h2>
-              <div className="overflow-hidden rounded-xl border border-line bg-white">
-                <ul className="-mr-px -mb-px grid grid-cols-1 sm:grid-cols-2">
-                  {related.map((r) => (
-                    <li key={r.mst} className="border-r border-b border-line">
-                      <CompanyCard company={r} variant="cell" />
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {/* Mỗi DN một thẻ riêng (có viền), cách nhau bằng khoảng trống: 1 DN thì 1 thẻ, 3 DN thì 3 thẻ — không
+                  còn ô trắng thừa như khi dùng chung một khung lưới với số DN lẻ. */}
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {related.map((r) => (
+                  <li key={r.mst}>
+                    <CompanyCard company={r} />
+                  </li>
+                ))}
+              </ul>
             </section>
           )}
         </main>

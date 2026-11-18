@@ -202,6 +202,27 @@ describe('gpt renderBanner', () => {
     expect(gt.destroySlots).toHaveBeenCalledWith([gt._slot]);
   });
 
+  it('báo cỡ thật của quảng cáo qua onRender; quảng cáo trống thì không', async () => {
+    const gt = setupDom();
+    const { renderBanner } = await loadGptModule();
+    const onRender = vi.fn();
+    await renderBanner(
+      'detail-rail',
+      { id: '', isConnected: true },
+      {
+        sizes: [
+          [300, 600],
+          [300, 250],
+        ],
+        onRender,
+      },
+    );
+    gt.emit('slotRenderEnded', { isEmpty: true, size: null });
+    expect(onRender).not.toHaveBeenCalled();
+    gt.emit('slotRenderEnded', { isEmpty: false, size: [300, 250] });
+    expect(onRender).toHaveBeenCalledWith([300, 250]);
+  });
+
   it('chưa cấu hình banner → không làm gì', async () => {
     setupDom();
     const { renderBanner } = await loadGptModule({ banner: '' });

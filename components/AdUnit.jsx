@@ -3,16 +3,16 @@
 // Phần tử giữ chỗ của một ô quảng cáo. Với NEXT_PUBLIC_AD_PROVIDER=gpt: khi ô sắp vào màn hình (cách 200px)
 // thì mới nạp GPT và đổ banner (spec 5.2); rời trang thì huỷ slot. mock / fallback: chỉ là khung xám.
 // size: 'inline' → 728×90 nếu khung đủ 728px, không thì 300×250 (đo lúc đổ, khớp container query của AdSlot);
-//       'rail' → 300×600 (hoặc 160×600 / 300×250); 'fallback' → 336×280 hoặc 300×250 (modal quảng cáo dự phòng).
+//       'rail' → 300×600 (hoặc 300×250); 'fallback' → 336×280 hoặc 300×250 (modal quảng cáo dự phòng).
 import { useEffect, useRef } from 'react';
 import { AD_PROVIDER, renderBanner } from '@/lib/ads';
 
 function pickSizes(size, el) {
-  // Cột phải: ưu tiên 300×600, nhận thêm 160×600 và 300×250 để luôn có quảng cáo (tăng tỉ lệ lấp đầy).
+  // Cột phải: ưu tiên 300×600, nhận thêm 300×250 để luôn có quảng cáo (tăng tỉ lệ lấp đầy). Cùng rộng 300px nên
+  // khung chỉ cần co chiều cao theo quảng cáo (onRender), không thừa mảng xám hai bên.
   if (size === 'rail')
     return [
       [300, 600],
-      [160, 600],
       [300, 250],
     ];
   if (size === 'fallback')
@@ -38,7 +38,10 @@ export default function AdUnit({ slotId, size = 'inline', className = '', ...res
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
         io.disconnect();
-        renderBanner(slotId, el, { sizes: pickSizes(size, el) })
+        // Cột phải: Google trả cỡ nhỏ hơn 300×600 → khung co theo quảng cáo, không để thừa mảng xám.
+        // Chỉ cột phải (cột riêng, co lại không xô nội dung chính); ô trong bài đã đúng cỡ sẵn.
+        const onRender = size === 'rail' ? ([, h]) => (el.style.height = `${h}px`) : undefined;
+        renderBanner(slotId, el, { sizes: pickSizes(size, el), onRender })
           .then((fn) => (cancelled ? fn?.() : (destroy = fn)))
           .catch(() => {
             /* bị chặn / lỗi mạng: giữ khung giữ chỗ */

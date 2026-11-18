@@ -82,10 +82,6 @@ function summary(c) {
 // founded_from=YYYY-MM-DD: chỉ DN thành lập từ ngày đó.
 const csv = (v) => (v ? v.split(',').filter(Boolean) : []);
 
-function hasFilters(url) {
-  return ['province', 'status', 'industry', 'founded_from'].some((k) => url.searchParams.get(k));
-}
-
 function applyFilters(items, url) {
   const provinces = csv(url.searchParams.get('province'));
   const status = url.searchParams.get('status');
@@ -146,12 +142,10 @@ export const handlers = [
   http.get('*/v1/search', ({ request }) => {
     const url = new URL(request.url);
     const q = (url.searchParams.get('q') || '').trim();
-    // Không từ khoá nhưng có bộ lọc: lọc toàn bộ DN (mới thành lập trước); không có gì → rỗng.
+    // Không từ khoá: duyệt toàn bộ DN theo bộ lọc (không lọc gì = tất cả), mới thành lập trước.
     const found = q
       ? search(searchIndex, q).filter((r) => applyFilters([r.c], url).length)
-      : hasFilters(url)
-        ? applyFilters(companiesData, url).map((c) => ({ c, matched: null }))
-        : [];
+      : applyFilters(companiesData, url).map((c) => ({ c, matched: null }));
     const counts = q ? countByField(found) : undefined;
     // Người đại diện khớp từ khoá trong kết quả (sau bộ lọc), gộp theo tên: [{ name, count }].
     const people = q

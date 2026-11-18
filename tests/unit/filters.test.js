@@ -47,9 +47,12 @@ describe('API giả /v1/search lọc nâng cao', () => {
     for (const c of recent.items) expect(c.founded_date >= '2026-10-19').toBe(true);
   });
 
-  it('không từ khoá, không bộ lọc → rỗng', async () => {
-    const body = await get('/v1/search');
-    expect(body.total).toBe(0);
+  it('không từ khoá, không bộ lọc → toàn bộ DN, mới thành lập trước', async () => {
+    const body = await get('/v1/search?sort=founded_desc');
+    expect(body.total).toBe(248);
+    expect(body.items).toHaveLength(20);
+    const dates = body.items.map((c) => c.founded_date);
+    expect(dates).toEqual([...dates].sort().reverse());
   });
 
   it('danh mục ngành GET /v1/industries', async () => {

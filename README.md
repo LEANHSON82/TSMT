@@ -152,7 +152,7 @@ number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
   giao diện luôn ghi «gộp theo họ tên — có thể gồm nhiều người trùng tên». Thiếu các trường này thì giao diện
   quay về cách cũ (mỗi DN một dòng gợi ý, không có khung người đại diện).
 - **Lọc nâng cao** (trang `/tim-kiem`): `province=01,79` và `industry=6201,4330` nhận nhiều mã cách nhau dấu
-  phẩy; `founded_from=YYYY-MM-DD` chỉ lấy DN thành lập từ ngày đó; `q` được để trống khi có ít nhất một bộ lọc
+  phẩy; `founded_from=YYYY-MM-DD` chỉ lấy DN thành lập từ ngày đó; `q` được để trống (duyệt toàn bộ DN, có hoặc không có bộ lọc)
   (khi đó sắp `founded_desc`, không có `counts`). Thêm `GET /v1/industries` → `{items: [{code, name, slug}]}`
   (danh mục VSIC cấp 4) cho ô chọn ngành; chưa có thì giao diện dùng 15 ngành phổ biến.
 - Xếp hạng: khớp nguyên chữ trước khớp phần đầu; gõ có dấu thì đúng dấu xếp trên; mọi từ khoá khớp trong

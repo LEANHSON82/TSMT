@@ -1,10 +1,9 @@
 // Kết quả tìm /tim-kiem?q=...&tinh=...&trangthai=...&page=2 (spec mục 3.2). SSR, noindex.
 // Thêm (đề xuất mở rộng API, README): &theo=ten|dai-dien|so (tab «Tìm theo»), &sapxep=moi|cu (bỏ trống = phù hợp
 // nhất), lọc nâng cao &tinh=ha-noi,ho-chi-minh (nhiều tỉnh), &nganh=6201,4330 (nhiều ngành), &thanhlap=30-ngay.
-// Không có từ khoá nhưng có bộ lọc → danh sách DN theo bộ lọc, mới thành lập trước.
+// Không có từ khoá: hiện sẵn danh sách DN (theo bộ lọc nếu có, không lọc = tất cả), mới thành lập trước.
 // Từ khoá có tên tỉnh mà chưa lọc tỉnh → gợi ý «Lọc tại …».
 import ListFilters from '@/components/ListFilters';
-import Breadcrumb from '@/components/Breadcrumb';
 import ListPageShell from '@/components/ListPageShell';
 import SearchBox from '@/components/SearchBox';
 import PeopleMatches from '@/components/PeopleMatches';
@@ -29,7 +28,11 @@ export async function generateMetadata({ searchParams }) {
   const sp = await searchParams;
   const q = firstParam(sp.q).trim();
   return {
-    title: q ? M.search.resultsTitle(q) : M.search.filterTitle,
+    title: q
+      ? M.search.resultsTitle(q)
+      : ['tinh', 'nganh', 'thanhlap', 'trangthai'].some((k) => firstParam(sp[k]))
+        ? M.search.filterTitle
+        : M.search.pageTitle,
     robots: { index: false, follow: true },
     alternates: { canonical: buildHref('/tim-kiem', { q, page: pageNumber(sp.page) }) },
   };
@@ -139,22 +142,6 @@ export default async function SearchPage({ searchParams }) {
     />
   );
 
-  if (!q && !f.hasFilter) {
-    return (
-      <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-5 px-4 pt-4 pb-12 md:px-6 md:pt-6">
-        <Breadcrumb items={[{ name: M.search.pageTitle }]} />
-        <h1 className="text-2xl leading-8 font-semibold text-navy md:text-3xl md:leading-9">
-          {M.search.pageTitle}
-        </h1>
-        <p className="max-w-3xl text-body leading-6 text-ink-2">{M.search.noQuery}</p>
-        <div data-hero-search className="max-w-[760px]">
-          <SearchBox size="lg" autoFocusDesktop />
-        </div>
-        {filterForm}
-      </main>
-    );
-  }
-
   const data = await searchCompanies({
     q,
     province: f.selProvinces.map((p) => p.code),
@@ -199,20 +186,30 @@ export default async function SearchPage({ searchParams }) {
         <TrackOnMount name="search" params={{ query_type: queryType, result_count: data.total }} />
       )}
       <ListPageShell
-        breadcrumb={[{ name: q ? M.search.pageTitle : M.search.filterTitle }]}
+        breadcrumb={[{ name: q || !f.hasFilter ? M.search.pageTitle : M.search.filterTitle }]}
         highlight={q}
         title={
-          q
-            ? M.search.resultsFor(formatNumber(data.total), q)
-            : M.search.filterResults(formatNumber(data.total))
+          !q && !f.hasFilter
+            ? M.search.pageTitle
+            : q
+              ? M.search.resultsFor(formatNumber(data.total), q)
+              : M.search.filterResults(formatNumber(data.total))
         }
-        totalLabel={false}
+        description={!q && !f.hasFilter ? M.search.noQuery : undefined}
+        totalLabel={!q && !f.hasFilter ? undefined : false}
         filters={
           // 0 kết quả mà chưa bật bộ lọc nào: tab và bộ lọc không giúp gì, ẩn để thông báo + gợi ý hiện ngay.
           data.total === 0 && !hasFilter && !tab.value ? (
             intentBox
           ) : (
             <div className="flex flex-col gap-4">
+              {/* Chưa gõ từ khoá (đang duyệt / lọc): ô tìm lớn ngay trên bộ lọc. data-hero-search: ô tìm trên
+                  header ẩn đi khi ô này còn trong màn hình (tránh 2 ô tìm). */}
+              {!q && (
+                <div data-hero-search className="max-w-[760px]">
+                  <SearchBox size="lg" autoFocusDesktop />
+                </div>
+              )}
               {intentBox}
               {q && (
                 <SearchFieldTabs

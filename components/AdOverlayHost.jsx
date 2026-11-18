@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { subscribeAdOverlay } from '@/lib/ads/overlay';
 import { M } from '@/lib/messages';
 import Modal from './Modal';
+import AdUnit from './AdUnit';
 import { IconClose, IconPlay } from './Icons';
 
 function MockVideo({ req, done }) {
@@ -109,9 +110,10 @@ function FallbackAd({ req, done }) {
       <div className="flex flex-col items-center gap-4">
         <div className="flex w-full flex-col items-center gap-1">
           <span className="self-start text-xs text-muted">{M.ad.label}</span>
-          <div
-            data-ad-slot="fallback"
-            className="h-[280px] w-[336px] max-w-full rounded-lg bg-ad"
+          <AdUnit
+            slotId="fallback"
+            size="fallback"
+            className="flex h-[280px] w-[336px] max-w-full items-center justify-center overflow-hidden rounded-lg bg-ad"
           />
         </div>
         <p

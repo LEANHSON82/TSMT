@@ -49,6 +49,23 @@ Thêm tham số vào URL để ép từng nhánh ở spec mục 4.2:
 | `?mock=410`       | phiên hết hạn → tự tạo phiên mới, không bắt xem lại video                |
 | `?mock=500`       | lỗi server sau khi xem xong → «Thử lại» lấy được số, không xem lại video |
 
+### Chạy quảng cáo Google thật (ad unit thử nghiệm)
+
+Chưa có tài khoản Google Ad Manager vẫn xem được quảng cáo mẫu thật của Google (không có doanh thu).
+Thêm vào `.env.local` rồi chạy lại `npm run dev`:
+
+```bash
+NEXT_PUBLIC_AD_PROVIDER=gpt
+NEXT_PUBLIC_GPT_AD_UNIT_PATH=/22639388115/rewarded_web_example   # video có thưởng
+NEXT_PUBLIC_GPT_BANNER_PATH=/6355419/Travel/Europe               # banner 300×250 / 728×90
+```
+
+- `gpt.js` chỉ nạp khi bấm «Xem số điện thoại» hoặc khi ô banner cách màn hình 200px (`components/AdUnit.jsx`).
+- Video có thưởng chạy trên điện thoại. Google có thể không hiện trên máy tính; khi đó tự chuyển sang quảng cáo dự phòng 5 giây (spec 5.1).
+- Chưa đồng ý cookie quảng cáo thì GPT chạy chế độ `limitedAds`: không cookie, không cá nhân hoá. Đổi lựa chọn sẽ áp ngay cho lần tải quảng cáo sau.
+- Ad unit thử nghiệm không có mẫu 300×600, nên ô cột phải trang DN để trống (giữ khung). Ad unit thật sẽ có.
+- Khi owner có tài khoản: thay 2 đường dẫn trên bằng ad unit thật và đặt `GOOGLE_AD_PUBLISHER_ID=pub-…` để `/ads.txt` có nội dung. Không phải sửa code.
+
 Số đã mở được nhớ trong `sessionStorage` của tab. Muốn xem lại luồng thì mở tab mới.
 
 ## Cấu trúc
@@ -71,7 +88,7 @@ components/                  # CompanyCard, CompanyInfoTable, PhoneReveal, AdSlo
 hooks/usePhoneUnlock.js      # máy trạng thái luồng xem SĐT
 lib/
   api.js                     # chỗ DUY NHẤT gọi API
-  ads/                       # AdProvider: mock | fallback | gpt (gpt đang stub)
+  ads/                       # AdProvider: mock | fallback | gpt (Google Publisher Tag)
   analytics.js               # track(name, params) — lọc bỏ SĐT/email
   messages.js                # toàn bộ chữ hiển thị
   slug.js mst.js format.js   # có unit test
@@ -180,7 +197,7 @@ number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
 ## Để sau (cần dịch vụ thật hoặc owner chốt)
 
 - [ ] Nối API Go thật
-- [ ] Google Ad Manager: `lib/ads/gpt.js` đang stub (ghi sẵn các bước) và luôn trả `no_fill`, nên rơi xuống quảng cáo dự phòng. Banner thật đổ vào `data-ad-slot`.
+- [ ] Google Ad Manager: code xong và đã chạy thử với ad unit thử nghiệm (video có thưởng, banner, `/ads.txt`, CSP). Cần owner mở tài khoản, tạo ad unit, đưa `NEXT_PUBLIC_GPT_AD_UNIT_PATH`, `NEXT_PUBLIC_GPT_BANNER_PATH`, `GOOGLE_AD_PUBLISHER_ID`.
 - [ ] Cloudflare Turnstile: `lib/turnstile.js` đang trả token giả
 - [ ] GA4: code xong (nạp sau khi đồng ý cookie). Cần owner tạo property GA4, đưa `NEXT_PUBLIC_GA_ID`, rồi kiểm bằng GA4 DebugView.
 - [ ] Nội dung chính thức của các trang tĩnh (owner gửi, luật sư duyệt)

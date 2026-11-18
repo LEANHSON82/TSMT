@@ -9,40 +9,59 @@ function apiOrigin() {
   }
 }
 
-// Chỉ cho phép đúng các domain Google Ads, GA, Turnstile và API.
+// Chỉ cho phép đúng các domain Google Ads, GA, Turnstile và API (spec 8.2).
+// Domain Google Ads lấy từ thực tế khi chạy GPT (banner, SafeFrame, video có thưởng, chống gian lận
+// adtrafficquality). Quảng cáo thật mà bị chặn: xem lỗi CSP trong console rồi thêm đúng domain Google đó.
+const GOOGLE_ADS = {
+  script: [
+    'https://securepubads.g.doubleclick.net',
+    'https://pagead2.googlesyndication.com',
+    'https://tpc.googlesyndication.com',
+    'https://www.gstatic.com',
+    'https://*.adtrafficquality.google',
+  ],
+  connect: [
+    'https://*.doubleclick.net',
+    'https://csi.gstatic.com',
+    'https://*.googlesyndication.com',
+    'https://*.adtrafficquality.google',
+    'https://www.google.com',
+  ],
+  frame: [
+    'https://*.doubleclick.net',
+    'https://*.googlesyndication.com',
+    'https://*.adtrafficquality.google',
+    'https://www.google.com',
+  ],
+};
+
 const csp = [
   "default-src 'self'",
   [
     "script-src 'self' 'unsafe-inline'",
     isDev ? "'unsafe-eval'" : '',
-    'https://securepubads.g.doubleclick.net',
-    'https://pagead2.googlesyndication.com',
+    ...GOOGLE_ADS.script,
     'https://www.googletagmanager.com',
     'https://challenges.cloudflare.com',
   ]
     .filter(Boolean)
     .join(' '),
-  "style-src 'self' 'unsafe-inline'",
+  // fonts.googleapis.com / fonts.gstatic.com: font Roboto của mẫu quảng cáo Google.
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: https:",
-  "font-src 'self'",
+  "font-src 'self' https://fonts.gstatic.com",
+  "media-src 'self' https:",
   [
     "connect-src 'self'",
     apiOrigin(),
     'https://*.google-analytics.com',
     'https://www.googletagmanager.com',
-    'https://securepubads.g.doubleclick.net',
-    'https://pagead2.googlesyndication.com',
+    ...GOOGLE_ADS.connect,
     'https://challenges.cloudflare.com',
   ]
     .filter(Boolean)
     .join(' '),
-  [
-    'frame-src',
-    'https://*.doubleclick.net',
-    'https://tpc.googlesyndication.com',
-    'https://googleads.g.doubleclick.net',
-    'https://challenges.cloudflare.com',
-  ].join(' '),
+  ['frame-src', ...GOOGLE_ADS.frame, 'https://challenges.cloudflare.com'].join(' '),
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'self'",

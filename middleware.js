@@ -17,7 +17,7 @@ export const config = {
     // Đường dẫn MỘT đoạn (chi tiết DN), trừ các trang/tệp có sẵn (ảnh do Next sinh: icon, opengraph-image…). Đoạn có
     // dấu chấm (/wp-login.php, /{mst}-{slug}.html) cũng vào đây để trả 404 / 301 thật — không rơi vào
     // trang [mstSlug] (có loading.js nên đã gửi 200 trước khi biết là 404).
-    '/((?!_next|api|tinh|nganh|tim-kiem|doanh-nghiep-moi-thanh-lap|yeu-cau-cap-nhat|gioi-thieu|lien-he|dieu-khoan|chinh-sach-bao-mat|khong-tim-thay|sitemap|sitemaps|robots|icon|favicon|opengraph-image|twitter-image|apple-icon)[^/]+)',
+    '/((?!_next|api|tinh|nganh|tim-kiem|doanh-nghiep-moi-thanh-lap|yeu-cau-cap-nhat|gioi-thieu|lien-he|dieu-khoan|chinh-sach-bao-mat|khong-tim-thay|sitemap|sitemaps|robots|icon|favicon|opengraph-image|twitter-image|apple-icon|ads.txt)[^/]+)',
     // Đường dẫn có chữ hoa (link ngoài viết hoa) → 301 về chữ thường.
     '/((?!_next|api)(?:.*[A-Z].*))',
     // Truy cập thẳng trang 404 → trả đúng mã 404.

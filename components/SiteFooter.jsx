@@ -21,7 +21,7 @@ export default function SiteFooter() {
     <footer className="mt-auto border-t border-line bg-white">
       <div className="mx-auto grid max-w-[1200px] gap-8 px-4 pt-10 pb-8 md:grid-cols-[1.5fr_1fr_1.2fr] md:gap-10 md:px-6">
         <div className="flex flex-col gap-3">
-          <Logo title={SITE_NAME} className="h-8 w-auto self-start" />
+          <Logo title={SITE_NAME} className="h-6 w-auto self-start" />
           <p className="max-w-xs text-sm leading-6 text-ink-2">{M.footer.tagline}</p>
         </div>
         <nav aria-label={M.footer.navLabel} className="flex flex-col">

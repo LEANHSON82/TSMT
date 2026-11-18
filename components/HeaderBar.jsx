@@ -12,7 +12,7 @@ import { M } from '@/lib/messages';
 import { SITE_NAME } from '@/lib/site';
 import IndustryCode from './IndustryCode';
 import { trapTab } from './focusTrap';
-import Logo, { LogoMark } from './Logo';
+import Logo from './Logo';
 import SearchBox from './SearchBox';
 import {
   IconBriefcase,
@@ -47,12 +47,7 @@ function SiteLogo() {
       aria-label={`${SITE_NAME} — ${M.nav.home}`}
       className="inline-flex min-h-11 flex-none items-center no-underline"
     >
-      {/* Dưới 414px chỉ hiện biểu tượng (ô tìm bên cạnh có thêm ~70px). 1024–1279: thấp hơn một chút để
-          không chạm ô tìm (đặt tuyệt đối từ giữa trang − 380px). */}
-      <svg viewBox="0 0 48 48" aria-hidden="true" className="h-8 w-8 min-[414px]:hidden">
-        <LogoMark />
-      </svg>
-      <Logo className="h-7 w-auto max-[413px]:hidden md:h-8 lg:h-7 xl:h-8" />
+      <Logo className="h-[22px] w-auto md:h-6" />
     </Link>
   );
 }

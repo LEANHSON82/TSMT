@@ -157,7 +157,7 @@ number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
 ## Đã làm theo spec
 
 - **Trang:** đủ các trang ở mục 2. Header dính đầu trang: logo, ô tìm (máy tính trùng khít ô nhập của ô tìm lớn trang chủ; trang chủ chỉ hiện khi cuộn qua ô lớn), menu Tỉnh/thành · Ngành nghề · DN mới (≥ 1280px; nhỏ hơn dùng nút ☰). Có footer và banner cookie.
-- **Logo TMST** (`components/Logo.jsx`): biểu tượng ô vuông xanh chữ T + kính lúp cam (vẽ tay trên lưới 48×48, cũng là favicon `app/icon.svg`) + chữ «TMST» một màu xanh đậm, là nét Be Vietnam Pro đã chuyển thành path (in lại path bằng `python3 scripts/gen-logo.py <font SemiBold .woff2>`). Tên site mặc định `TMST` (`NEXT_PUBLIC_SITE_NAME`).
+- **Logo «TMST»** là SVG từ nét chữ Be Vietnam Pro (`components/Logo.jsx`): «T» màu cam, «MST» màu xanh; favicon `app/icon.svg` là chữ T trắng trên ô vuông xanh. Sinh lại path bằng `python3 scripts/gen-logo.py <font SemiBold .woff2>`. Tên site mặc định `TMST` (`NEXT_PUBLIC_SITE_NAME`).
 - **Màu sắc, hình ảnh** (spec không quy định bảng màu; mục 7.2 yêu cầu ảnh/icon SVG):
   - Thẻ DN ghi địa chỉ rút gọn: phường/xã, tỉnh/thành (trang theo tỉnh chỉ ghi phường/xã) — `areaAddress` trong `lib/format.js`.
   - Nhãn «Mới» cho DN thành lập trong 7 ngày (tắt ở khối/trang DN mới thành lập).

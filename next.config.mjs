@@ -67,6 +67,24 @@ const csp = [
   "frame-ancestors 'self'",
 ].join('; ');
 
+// Địa chỉ chính là www.… (NEXT_PUBLIC_SITE_URL) → tên miền gốc chuyển 301 sang www (một địa chỉ duy nhất cho SEO).
+function bareHostRedirect() {
+  try {
+    const { host, protocol } = new URL(process.env.NEXT_PUBLIC_SITE_URL || '');
+    if (!host.startsWith('www.')) return [];
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: host.slice(4) }],
+        destination: `${protocol}//${host}/:path*`,
+        statusCode: 301,
+      },
+    ];
+  } catch {
+    return [];
+  }
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
@@ -79,6 +97,9 @@ const nextConfig = {
   // để vẫn ISR được như spec mục 2 — trang đọc searchParams thì Next buộc render động.
   // Chạy SAU middleware.js (middleware lo 301/404 và bỏ ?tinh= không hợp lệ). Rewrite trong middleware
   // không dùng được vì Next 15.5 không cache ISR cho route đích của rewrite từ middleware.
+  async redirects() {
+    return bareHostRedirect();
+  },
   async rewrites() {
     const page = { type: 'query', key: 'page', value: '(?<page>[1-9]\\d{0,5})' };
     const tinh = { type: 'query', key: 'tinh', value: '(?<tinh>[a-z0-9-]{1,80})' };

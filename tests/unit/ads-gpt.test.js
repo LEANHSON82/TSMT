@@ -109,6 +109,32 @@ describe('gpt showRewarded', () => {
     expect(gt.pubads().setPrivacySettings).toHaveBeenCalledWith({ limitedAds: false });
   });
 
+  it('được thưởng + video hết → tự đóng sau 1 giây, không cần bấm X', async () => {
+    const gt = setupDom();
+    const { showRewarded, AUTO_CLOSE_MS } = await loadGptModule();
+    const p = showRewarded();
+    await vi.waitFor(() => expect(gt.display).toHaveBeenCalled());
+    gt.emit('rewardedSlotReady', { makeRewardedVisible: () => {} });
+    gt.emit('rewardedSlotGranted', { payload: { type: 'coins', amount: 20 } });
+    gt.emit('rewardedSlotVideoCompleted');
+    expect(gt.destroySlots).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(AUTO_CLOSE_MS);
+    expect(await p).toMatchObject({ status: 'granted' });
+    expect(gt.destroySlots).toHaveBeenCalledWith([gt._slot]);
+    gt.emit('rewardedSlotClosed'); // đến muộn sau khi đã đóng: không đổi kết quả
+  });
+
+  it('được thưởng nhưng không có sự kiện video hết → vẫn tự đóng sau 3 giây', async () => {
+    const gt = setupDom();
+    const { showRewarded, COMPLETE_WAIT_MS } = await loadGptModule();
+    const p = showRewarded();
+    await vi.waitFor(() => expect(gt.display).toHaveBeenCalled());
+    gt.emit('rewardedSlotReady', { makeRewardedVisible: () => {} });
+    gt.emit('rewardedSlotGranted', { payload: {} });
+    vi.advanceTimersByTime(COMPLETE_WAIT_MS);
+    expect(await p).toMatchObject({ status: 'granted' });
+  });
+
   it('đóng trước khi được thưởng → closed', async () => {
     const gt = setupDom();
     const { showRewarded } = await loadGptModule();

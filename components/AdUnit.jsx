@@ -3,12 +3,18 @@
 // Phần tử giữ chỗ của một ô quảng cáo. Với NEXT_PUBLIC_AD_PROVIDER=gpt: khi ô sắp vào màn hình (cách 200px)
 // thì mới nạp GPT và đổ banner (spec 5.2); rời trang thì huỷ slot. mock / fallback: chỉ là khung xám.
 // size: 'inline' → 728×90 nếu khung đủ 728px, không thì 300×250 (đo lúc đổ, khớp container query của AdSlot);
-//       'rail' → 300×600; 'fallback' → 336×280 hoặc 300×250 (modal quảng cáo dự phòng).
+//       'rail' → 300×600 (hoặc 160×600 / 300×250); 'fallback' → 336×280 hoặc 300×250 (modal quảng cáo dự phòng).
 import { useEffect, useRef } from 'react';
 import { AD_PROVIDER, renderBanner } from '@/lib/ads';
 
 function pickSizes(size, el) {
-  if (size === 'rail') return [300, 600];
+  // Cột phải: ưu tiên 300×600, nhận thêm 160×600 và 300×250 để luôn có quảng cáo (tăng tỉ lệ lấp đầy).
+  if (size === 'rail')
+    return [
+      [300, 600],
+      [160, 600],
+      [300, 250],
+    ];
   if (size === 'fallback')
     return el.clientWidth >= 336
       ? [

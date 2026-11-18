@@ -17,7 +17,7 @@ export default function AdSlot({ slotId, variant = 'inline', className = '' }) {
             slotId={slotId}
             size="rail"
             data-ad-size="300x600"
-            className="h-[600px] w-[300px] overflow-hidden rounded-lg bg-ad"
+            className="flex h-[600px] w-[300px] justify-center overflow-hidden rounded-lg bg-ad"
           />
         </div>
       </div>

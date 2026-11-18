@@ -132,17 +132,14 @@ export default async function HomePage() {
                 />
               </Link>
             </div>
-            {/* Một khung, các ô ngăn bằng đường kẻ mảnh: mỗi ô có viền phải + dưới, lưới lùi 1px để viền
-              của cột/hàng cuối nấp dưới viền khung. Ô trống ở hàng cuối (nếu có) vẫn là nền trắng. */}
-            <div className="overflow-hidden rounded-xl border border-line bg-white">
-              <ul className="-mr-px -mb-px grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                {newest.map((c) => (
-                  <li key={c.mst} className="border-r border-b border-line">
-                    <CompanyCard company={c} variant="cell" showNew={false} />
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Mỗi DN một thẻ riêng, cách nhau 16px; máy tính 3 cột (không nhồi 4) để mắt dễ theo từng thẻ. */}
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {newest.map((c) => (
+                <li key={c.mst}>
+                  <CompanyCard company={c} showNew={false} />
+                </li>
+              ))}
+            </ul>
           </section>
         </div>
       </main>

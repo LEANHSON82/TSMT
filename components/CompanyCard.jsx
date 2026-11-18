@@ -118,7 +118,7 @@ export default function CompanyCard({
 
   return (
     <article
-      className={`group relative flex h-full flex-col gap-2.5 bg-white p-4 ${
+      className={`group relative flex h-full flex-col bg-white ${cell ? 'gap-2.5 p-4' : 'gap-3 p-5'} ${
         cell
           ? 'transition-colors duration-150 hover:bg-brand-50'
           : 'rounded-xl border border-line transition-[border-color,box-shadow] duration-150 hover:border-brand hover:shadow-[0_4px_16px_rgba(10,42,94,0.08)]'
@@ -138,7 +138,7 @@ export default function CompanyCard({
         {c.matched === 'phone' && <PhoneMatchBadge />}
         {fresh && <NewBadge />}
       </div>
-      <dl className="flex min-w-0 flex-col gap-1 text-sm">
+      <dl className={`flex min-w-0 flex-col text-sm ${cell ? 'gap-1' : 'gap-1.5'}`}>
         <div className="flex min-w-0 gap-2">
           <dt className="w-16 flex-none text-muted">MST</dt>
           <dd className="relative z-10 font-semibold tracking-[0.02em] tabular-nums">{c.mst}</dd>
@@ -156,7 +156,9 @@ export default function CompanyCard({
           </dd>
         </div>
       </dl>
-      <p className="mt-auto flex flex-wrap items-baseline gap-x-1.5 border-t border-line-soft pt-2.5 text-sm">
+      <p
+        className={`mt-auto flex flex-wrap items-baseline gap-x-1.5 border-t border-line-soft text-sm ${cell ? 'pt-2.5' : 'pt-3'}`}
+      >
         <StatusBadge status={c.status} />
         {date && <span className="text-meta text-muted">· {M.list.since(date)}</span>}
       </p>

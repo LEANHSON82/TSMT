@@ -5,7 +5,9 @@
    Chữ: Inter 400/600 · thang 13 · 14 · 16 · 20 · 28 (H1 điện thoại 22).
    Khoảng cách: 4 · 8 · 12 · 16 · 24 · 32 · 48. Khung 1200 = cột chính 852 + khe 48 + cột phải 300. */
 @theme {
-  --font-sans: var(--font-inter), system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-sans:
+    var(--font-inter-vi), var(--font-inter-latin-ext), var(--font-inter-latin), system-ui,
+    -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
 
   /* Thang chữ A: meta 14 (nhãn, chú thích; trước 13) · sm 14 (chữ phụ) · base/body 16 (nội dung) · xl 20 (tiêu đề
      khối) · h1 28 (tiêu đề trang; điện thoại dùng h1-m 22). text-body giữ tên cũ, nay = 16px như A

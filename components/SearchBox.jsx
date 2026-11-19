@@ -20,6 +20,9 @@ import { useProvinces } from './ProvincesContext';
 const MIN_CHARS = 2;
 const DEBOUNCE_MS = 300;
 
+// size: 'lg' (ô tìm lớn trong trang: trang chủ, 404…) | 'nav' (hàng 2 header). Hệ thiết kế A dùng CÙNG một
+// khuôn cho cả hai (cao 52px, điện thoại 48px, nút «Tìm» xanh bên phải) để ô tìm trang chủ và ô tìm header
+// trùng khít; size chỉ còn quyết định ô có tự focus không (do trang truyền autoFocusDesktop).
 export default function SearchBox({
   size = 'lg',
   defaultValue = '',
@@ -29,6 +32,10 @@ export default function SearchBox({
   className = '',
   listClassName = '',
   labelledBy,
+  addon = null, // phần tử thêm cuối hàng, sau nút «Tìm» (header điện thoại: nút icon «Lọc nâng cao»)
+  // false: chữ điền sẵn (defaultValue) không tự lấy gợi ý — chỉ lấy khi người dùng gõ. Trang 404 điền sẵn MST và
+  // tự focus: không bung hộp «Không có gợi ý…» trong khi H1 vừa báo đúng điều đó.
+  suggestPrefilled = true,
 }) {
   const router = useRouter();
   const uid = useId();
@@ -36,6 +43,7 @@ export default function SearchBox({
   const listId = `ql-${uid}`;
   const inputRef = useRef(null);
   const abortRef = useRef(null);
+  const typedRef = useRef(false); // người dùng đã gõ vào ô (khác chữ điền sẵn)
   const [value, setValue] = useState(defaultValue);
   const [items, setItems] = useState([]);
   const [provItems, setProvItems] = useState([]);
@@ -43,11 +51,14 @@ export default function SearchBox({
   const [lastQ, setLastQ] = useState(''); // từ khoá ứng với gợi ý đang hiện
   const provinces = useProvinces();
   const [open, setOpen] = useState(false);
+  // Dòng chọn bằng phím ↑↓ (Enter mở dòng này). Rê chuột chỉ tô nền (CSS hover), KHÔNG đổi active: chuột
+  // nằm yên trên danh sách cũ rồi gõ chữ mới + Enter không được mở nhầm gợi ý cũ.
   const [active, setActive] = useState(-1);
   // 'idle' | 'loading' (đang lấy gợi ý) | 'empty' (không có gợi ý) | 'ready'
   const [status, setStatus] = useState('idle');
   const [focused, setFocused] = useState(false);
   const [wide, setWide] = useState(false);
+  const [narrow, setNarrow] = useState(false);
 
   useEffect(() => {
     if (!placeholderWide) return undefined;
@@ -57,6 +68,15 @@ export default function SearchBox({
     mq.addEventListener('change', update);
     return () => mq.removeEventListener('change', update);
   }, [placeholderWide]);
+
+  // Điện thoại (< 640px): câu spec dài bị cắt giữa chữ («tên doanh nghi…») → câu ngắn cùng ý.
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639.98px)');
+    const update = () => setNarrow(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   // Tự focus trên máy tính, KHÔNG tự focus trên điện thoại (bàn phím che màn hình) — spec mục 3.1.
   useEffect(() => {
@@ -71,7 +91,7 @@ export default function SearchBox({
 
   useEffect(() => {
     const q = value.trim();
-    if (q.length < MIN_CHARS) {
+    if (q.length < MIN_CHARS || (!suggestPrefilled && !typedRef.current)) {
       abortRef.current?.abort();
       setItems([]);
       setProvItems([]);
@@ -106,7 +126,7 @@ export default function SearchBox({
       }
     }, DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [value, provinces]);
+  }, [value, provinces, suggestPrefilled]);
 
   // Danh sách phẳng theo thứ tự hiển thị (phím ↑↓ đi qua đúng thứ tự này).
   // Người đại diện: API trả `people` (gộp theo tên, kèm tổng số DN) thì mỗi tên một dòng — một người đứng tên nhiều
@@ -143,7 +163,7 @@ export default function SearchBox({
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  // Gợi ý đang được chọn (rê chuột / phím mũi tên): tải trước trang để bấm vào là hiện ngay.
+  // Gợi ý đang chọn bằng phím mũi tên (rê chuột: onMouseEnter bên dưới): tải trước trang để bấm vào là hiện ngay.
   useEffect(() => {
     const e = entries[active];
     if (e && e.kind !== 'all') router.prefetch(hrefOf(e));
@@ -163,9 +183,12 @@ export default function SearchBox({
     router.push(hrefOf(e));
   }
 
+  // Gợi ý đang có là của đúng chữ trong ô (không phải của lần gõ trước, chưa kịp tải gợi ý mới).
+  const fresh = lastQ !== '' && lastQ === value.trim();
+
   function onSubmit(e) {
     e.preventDefault();
-    if (open && active >= 0 && entries[active]) {
+    if (open && fresh && active >= 0 && entries[active]) {
       activate(entries[active]);
       return;
     }
@@ -189,27 +212,23 @@ export default function SearchBox({
 
   function onKeyDown(e) {
     if (e.key === 'ArrowDown') {
-      if (!entries.length) return;
+      if (!entries.length || !fresh) return;
       e.preventDefault();
       setOpen(true);
       setActive((a) => (a + 1) % entries.length);
     } else if (e.key === 'ArrowUp') {
-      if (!entries.length) return;
+      if (!entries.length || !fresh) return;
       e.preventDefault();
       setOpen(true);
       setActive((a) => (a <= 0 ? entries.length - 1 : a - 1));
     } else if (e.key === 'Escape') {
-      if (open) {
-        e.preventDefault();
-        setOpen(false);
-        setActive(-1);
-      }
+      // input type=search mặc định xoá sạch chữ khi Esc → chặn luôn: Esc chỉ đóng gợi ý.
+      e.preventDefault();
+      setOpen(false);
+      setActive(-1);
     }
   }
 
-  const lg = size === 'lg';
-  // 'nav': ô tìm trong thanh nav — kính lúp bên trong ô, không có nút «Tìm» (bấm Enter để tìm).
-  const nav = size === 'nav';
   const showList = open && entries.length > 0;
   const loading = status === 'loading';
   const showEmpty = status === 'empty' && focused;
@@ -227,11 +246,9 @@ export default function SearchBox({
       className={`relative w-full ${className}`}
       action="/tim-kiem"
     >
-      {/* lg: ô tìm lớn (trang chủ) — ô nhập cao 56px + nút «Tìm» rộng cố định 96px bên phải (điện thoại:
-          nút rộng hết chiều ngang dưới ô). nav: ô trên thanh nav — từ 1024px trở lên cùng khuôn với ô
-          nhập của lg (cao 56px, chữ 17px), không có nút; HeaderBar đặt nó đúng chỗ ô nhập của lg. */}
-      <div className={`flex w-full ${lg ? 'flex-wrap gap-2' : ''}`}>
-        <div className={`relative min-w-0 ${lg ? 'flex-[1_1_320px]' : 'flex-1'}`}>
+      {/* Ô nhập (kính lúp bên trong) + nút «Tìm» luôn cùng một hàng, kể cả điện thoại 360px. */}
+      <div className="flex w-full gap-2">
+        <div className="relative min-w-0 flex-1">
           <label
             htmlFor={inputId}
             className="sr-only"
@@ -239,20 +256,9 @@ export default function SearchBox({
           >
             {M.search.label}
           </label>
-          {lg && (
-            <span className="pointer-events-none absolute top-1/2 left-4 flex h-[22px] w-[22px] -translate-y-1/2 items-center justify-center text-muted">
-              {loading ? spinner : <IconSearch size={22} />}
-            </span>
-          )}
-          {nav && (
-            <span className="pointer-events-none absolute top-1/2 left-3.5 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-muted lg:left-4 lg:h-[22px] lg:w-[22px]">
-              {loading ? (
-                spinner
-              ) : (
-                <IconSearch size={22} className="h-5 w-5 lg:h-[22px] lg:w-[22px]" />
-              )}
-            </span>
-          )}
+          <span className="pointer-events-none absolute top-1/2 left-3 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-muted md:left-3.5">
+            {loading ? spinner : <IconSearch size={20} strokeWidth={1.6} />}
+          </span>
           <input
             ref={inputRef}
             id={inputId}
@@ -271,14 +277,28 @@ export default function SearchBox({
             placeholder={
               (wide && placeholderWide) ||
               placeholder ||
-              (lg ? M.search.placeholder : M.search.placeholderShort)
+              (narrow
+                ? addon
+                  ? M.search.placeholderXs // 360px: ô chỉ còn ~170px chữ
+                  : M.search.placeholderNarrow
+                : M.search.placeholder)
             }
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              typedRef.current = true;
+              setValue(v);
+              // Chữ khác với gợi ý đang hiện: đóng danh sách cũ, bỏ dòng đang chọn (chờ gợi ý mới).
+              if (v.trim() !== lastQ) {
+                setOpen(false);
+                setActive(-1);
+                if (status === 'empty') setStatus('idle');
+              }
+            }}
             onKeyDown={onKeyDown}
             onFocus={() => {
               setFocused(true);
-              if (entries.length) setOpen(true);
+              if (entries.length && fresh) setOpen(true);
             }}
             onBlur={() =>
               setTimeout(() => {
@@ -286,31 +306,17 @@ export default function SearchBox({
                 setFocused(false);
               }, 150)
             }
-            className={
-              lg
-                ? 'h-14 w-full rounded-md border border-field bg-white pr-4 pl-[50px] text-lg text-ink text-ellipsis placeholder:text-[#6B7280] hover:border-ink-2'
-                : nav
-                  ? 'h-11 w-full rounded-md border border-field bg-white pr-3 pl-11 text-base text-ink text-ellipsis placeholder:text-[#6B7280] hover:border-ink-2 lg:h-14 lg:pr-4 lg:pl-[50px] lg:text-lg'
-                  : 'h-11 w-full rounded-l-md border border-r-0 border-field bg-white px-3 text-base text-ink placeholder:text-[#6B7280]'
-            }
+            data-size={size}
+            className="search-input h-12 w-full appearance-none rounded border border-field bg-white pr-1 pl-[38px] text-base text-ink text-ellipsis placeholder:text-[#6b7483] hover:border-ink-2 md:h-[52px] md:pr-4 md:pl-[46px]"
           />
         </div>
-        {lg ? (
-          <button
-            type="submit"
-            className="inline-flex h-14 w-full flex-none items-center justify-center rounded-md bg-cta text-lg font-semibold text-white hover:bg-cta-hover sm:w-24"
-          >
-            {M.search.submit}
-          </button>
-        ) : nav ? null : (
-          <button
-            type="submit"
-            aria-label={M.search.submit}
-            className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-r-md border border-field bg-brand-50 text-brand hover:bg-[#dfe8fa]"
-          >
-            {loading ? spinner : <IconSearch size={20} />}
-          </button>
-        )}
+        <button
+          type="submit"
+          className="inline-flex h-12 flex-none items-center justify-center rounded bg-brand px-2.5 text-base font-semibold text-white hover:bg-brand-hover md:h-[52px] md:px-7"
+        >
+          {M.search.submit}
+        </button>
+        {addon}
       </div>
 
       <ul
@@ -318,7 +324,7 @@ export default function SearchBox({
         role="listbox"
         aria-label={M.search.suggestions}
         hidden={!showList}
-        className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1 max-h-[70vh] overflow-auto rounded-md border border-line bg-white py-1 text-left shadow-[0_8px_24px_rgba(10,42,94,0.14)] ${listClassName}`}
+        className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1 max-h-[70vh] overflow-auto rounded border border-line-strong bg-white pt-1 text-left shadow-[0_8px_24px_rgba(22,27,38,0.12)] ${listClassName}`}
       >
         {GROUPS.map(({ kind, label }) => {
           const group = entries.map((e, i) => ({ e, i })).filter(({ e }) => e.kind === kind);
@@ -341,25 +347,27 @@ export default function SearchBox({
                 ev.preventDefault();
                 activate(e);
               }}
-              onMouseEnter={() => setActive(i)}
+              onMouseEnter={() => e.kind !== 'all' && router.prefetch(hrefOf(e))}
               style={{ animationDelay: `${Math.min(i, 4) * 20}ms` }}
+              // «Xem tất cả kết quả»: dính đáy khung (danh sách dài cuộn bên dưới), không bao giờ bị cắt nửa dòng.
               className={`motion-rise flex min-h-11 cursor-pointer flex-col justify-center gap-0.5 px-4 py-2 ${
-                i === active ? 'bg-brand-50' : ''
-              } ${e.kind === 'all' ? 'mt-1 border-t border-line-soft' : ''}`}
+                i === active ? 'bg-brand-50' : 'hover:bg-brand-50'
+              } ${e.kind === 'all' ? `sticky bottom-0 mt-1 border-t border-line ${i === active ? '' : 'bg-white'}` : ''}`}
             >
               <SuggestionRow entry={e} query={lastQ} />
             </li>
           ));
           if (!label) return options;
           const hid = `${listId}-h-${kind}`;
-          // Tiêu đề nhóm tách hẳn khỏi các dòng gợi ý: dải nền xám nhạt, chữ cam đậm, có số dòng trong nhóm.
+          // Tiêu đề nhóm tách hẳn khỏi các dòng gợi ý: dải nền xám nhạt, chữ xám đậm, có số dòng trong nhóm
+          // (hệ A: cam chỉ dành cho logo và nút «Xem số điện thoại»).
           return (
             <li key={`g-${kind}`} role="none">
               <ul role="group" aria-labelledby={hid}>
                 <li
                   id={hid}
                   role="presentation"
-                  className="flex items-center justify-between border-y border-line-soft bg-page px-4 py-1.5 text-[13px] font-bold tracking-wide text-cta uppercase"
+                  className="flex items-center justify-between border-y border-line bg-page px-4 py-1.5 text-meta font-semibold text-ink-2"
                 >
                   <span>{M.search[label]}</span>
                   <span className="font-semibold text-muted tabular-nums" aria-hidden="true">
@@ -379,7 +387,7 @@ export default function SearchBox({
       {showEmpty && (
         <p
           aria-hidden="true"
-          className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1 rounded-md border border-line bg-white px-4 py-3 text-left text-sm text-ink-2 shadow-[0_8px_24px_rgba(10,42,94,0.14)] ${listClassName}`}
+          className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1 rounded border border-line-strong bg-white px-4 py-3 text-left text-sm text-ink-2 shadow-[0_8px_24px_rgba(22,27,38,0.12)] ${listClassName}`}
         >
           {M.search.noSuggestions(value.trim())}
         </p>
@@ -409,7 +417,7 @@ function SuggestionRow({ entry: e, query }) {
   if (e.kind === 'province') {
     return (
       <>
-        <span className="text-body font-semibold text-navy">
+        <span className="text-body font-semibold text-ink">
           <Highlight text={e.p.name} query={query} />
         </span>
         <span className="text-meta text-muted">
@@ -422,7 +430,7 @@ function SuggestionRow({ entry: e, query }) {
     const { person } = e;
     return (
       <>
-        <span className="line-clamp-1 text-body font-semibold text-navy">
+        <span className="line-clamp-1 text-body font-semibold text-ink">
           <Highlight text={person.name} query={query} />
         </span>
         <span className="line-clamp-1 text-meta text-muted">
@@ -443,7 +451,7 @@ function SuggestionRow({ entry: e, query }) {
   if (e.kind === 'rep') {
     return (
       <>
-        <span className="line-clamp-1 text-body font-semibold text-navy">
+        <span className="line-clamp-1 text-body font-semibold text-ink">
           <Highlight text={item.representative} query={query} />
         </span>
         <span className="line-clamp-1 text-meta text-muted">
@@ -454,7 +462,7 @@ function SuggestionRow({ entry: e, query }) {
   }
   return (
     <>
-      <span className="line-clamp-2 text-body font-semibold text-navy">
+      <span className="line-clamp-2 text-body font-semibold text-ink">
         <Highlight text={item.name} query={query} />
       </span>
       <span className="flex flex-wrap items-center gap-x-1 text-meta text-muted">
@@ -466,9 +474,7 @@ function SuggestionRow({ entry: e, query }) {
         </span>
         <span>· {item.province}</span>
         {item.matched === 'phone' && (
-          <span className="ml-1 rounded bg-brand-50 px-1.5 text-xs font-semibold text-brand-hover">
-            {M.search.matchedPhone}
-          </span>
+          <span className="tag tag-brand ml-1">{M.search.matchedPhone}</span>
         )}
       </span>
     </>

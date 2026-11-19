@@ -322,13 +322,16 @@ test('từ khoá có tên tỉnh → gợi ý «Lọc tại …» với từ kho
 
 test('không tìm được DN bằng số điện thoại đã bị chủ DN ẩn', async ({ page }) => {
   await page.goto('/tim-kiem?q=0901823874');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Tìm thấy 0 kết quả/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    /Không tìm thấy doanh nghiệp nào cho “0901823874”/,
+  );
 });
 
 test('lọc nâng cao: chọn nhiều tỉnh, thành lập trong 30 ngày, không cần từ khoá; thẻ bỏ từng tỉnh', async ({
   page,
 }) => {
   await page.goto('/tinh/ha-noi');
+  // Lối vào «Lọc nâng cao» ở hàng ô tìm trên header, mở sẵn tỉnh đang xem.
   await page.getByRole('link', { name: /Lọc nâng cao/ }).click();
   await expect(page).toHaveURL(/\/tim-kiem\?tinh=ha-noi$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Tìm thấy \d+ doanh nghiệp/);

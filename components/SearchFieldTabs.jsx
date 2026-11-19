@@ -24,8 +24,8 @@ export default function SearchFieldTabs({ active, counts, hrefFor }) {
   if (!active && counts && withResults.length <= 1) return null;
   return (
     <nav aria-label={M.search.fieldTabs} className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-      <ul className="flex min-w-max gap-1 border-b border-line">
-        {FIELD_TABS.map((t) => {
+      <ul className="flex min-w-max border-b border-line">
+        {FIELD_TABS.map((t, i) => {
           const n = counts?.[t.countKey];
           const current = t.value === active;
           if (n === 0 && !current && t.value) return null;
@@ -41,27 +41,34 @@ export default function SearchFieldTabs({ active, counts, hrefFor }) {
               )}
               {n != null && (
                 <span
-                  className={`rounded-full px-1.5 text-xs tabular-nums ${current ? 'bg-brand-50 text-brand-hover' : 'bg-line-soft text-muted'}`}
+                  className={`rounded-xs px-1.5 text-meta tabular-nums ${current ? 'bg-brand-50 text-brand-hover' : 'bg-line-soft text-muted'}`}
                 >
                   {formatNumber(n)}
                 </span>
               )}
             </>
           );
-          const cls =
-            '-mb-px inline-flex min-h-11 items-center gap-1.5 border-b-2 px-3 text-body font-semibold whitespace-nowrap no-underline';
+          // Vùng bấm = cả ô (đệm 12px hai bên, cao 44px); vạch xanh chỉ dưới chữ + số. Tab đầu không đệm
+          // trái → chữ thẳng mép khung như H1 và bảng.
+          const cls = `-mb-px flex min-h-11 items-stretch text-body font-semibold whitespace-nowrap no-underline ${
+            i === 0 ? 'pr-3' : 'px-3'
+          }`;
+          const label = (on) => (
+            <span
+              className={`inline-flex items-center gap-1.5 border-b-2 ${on ? 'border-brand' : 'border-transparent'}`}
+            >
+              {inner}
+            </span>
+          );
           return (
             <li key={t.countKey}>
               {current ? (
-                <span aria-current="page" className={`${cls} border-brand text-brand`}>
-                  {inner}
+                <span aria-current="page" className={`${cls} text-brand`}>
+                  {label(true)}
                 </span>
               ) : (
-                <Link
-                  href={hrefFor(t.value)}
-                  className={`${cls} border-transparent text-ink-2 hover:text-brand`}
-                >
-                  {inner}
+                <Link href={hrefFor(t.value)} className={`${cls} text-ink-2 hover:text-brand`}>
+                  {label(false)}
                 </Link>
               )}
             </li>

@@ -13,33 +13,36 @@ const provider = process.env.NEXT_PUBLIC_AD_PROVIDER;
 export const BANNERS_ON =
   provider === 'gpt' ? Boolean(process.env.NEXT_PUBLIC_GPT_BANNER_PATH) : provider !== 'fallback';
 
+// Hệ A: nhãn «Quảng cáo» 13px xám (không in hoa) trên khung; ô trong bài là khung nền xám nhạt viền mảnh
+// rộng đúng khung nội dung, banner nằm giữa; cột phải là ô 300×600 trơn, dính khi cuộn (dưới hàng ô tìm dính).
 export default function AdSlot({ slotId, variant = 'inline', className = '' }) {
   if (!BANNERS_ON) return null;
   if (variant === 'rail') {
     return (
       <div data-ad-wrap className={`hidden lg:block ${className}`}>
-        <div className="sticky top-[96px] flex flex-col gap-1">
-          <span className="text-xs tracking-wide text-muted uppercase">{M.ad.label}</span>
+        <div className="sticky top-24 flex flex-col gap-1">
+          <span className="text-meta text-muted">{M.ad.label}</span>
           <AdUnit
             slotId={slotId}
             size="rail"
             data-ad-size="300x600"
-            className="flex h-[600px] w-[300px] justify-center overflow-hidden rounded-lg bg-ad"
+            className="flex h-[600px] w-[300px] justify-center overflow-hidden bg-ad"
           />
         </div>
       </div>
     );
   }
   return (
-    // Container query: chỉ đổi sang 728×90 khi khung chứa đủ 728px (cột chính trang DN ở 1024px hẹp hơn),
-    // banner thật không bị ép / tràn ngang.
-    <div data-ad-wrap className={`@container flex flex-col items-center ${className}`}>
-      <div className="flex w-[300px] max-w-full flex-col gap-1 @min-[728px]:w-[728px]">
-        <span className="text-xs tracking-wide text-muted uppercase">{M.ad.label}</span>
+    <div data-ad-wrap className={`flex flex-col gap-1 ${className}`}>
+      <span className="text-meta text-muted">{M.ad.label}</span>
+      {/* Container query trên khung: chỉ đổi sang 728×90 khi lòng khung đủ 728px (cột chính trang DN ở 1024px
+          hẹp hơn), banner thật không bị ép / tràn ngang. AdUnit rộng đúng cỡ banner nên clientWidth (AdUnit
+          dùng để chọn cỡ khi đổ GPT) khớp với khung giữ chỗ. */}
+      <div className="@container flex justify-center border border-line bg-page p-3 md:p-4">
         <AdUnit
           slotId={slotId}
           data-ad-size="300x250,728x90"
-          className="flex h-[250px] w-full justify-center overflow-hidden rounded-lg bg-ad @min-[728px]:h-[90px]"
+          className="flex h-[250px] w-[300px] max-w-full justify-center overflow-hidden bg-ad @min-[728px]:h-[90px] @min-[728px]:w-[728px]"
         />
       </div>
     </div>

@@ -1,13 +1,13 @@
 'use client';
 
-// Ngành nghề kinh doanh (spec mục 3.4): ngành chính in đậm + nhãn, quá 10 ngành thì thu gọn.
-// Toàn bộ ngành vẫn có trong HTML server trả về để Google đọc được.
+// Ngành nghề kinh doanh (spec mục 3.4), kiểu A: bảng kẻ mảnh hai cột Mã ngành · Tên ngành, mã ngành là link
+// chữ xanh (cột thẳng, số tabular), ngành chính đứng đầu, in đậm + nhãn «Ngành chính». Quá 10 ngành thì thu
+// gọn, nút «Xem thêm N ngành». Toàn bộ ngành vẫn có trong HTML server trả về để Google đọc được.
 import Link from 'next/link';
 import { useId, useState } from 'react';
 import { M } from '@/lib/messages';
 import { toSlug } from '@/lib/slug';
 import { IconChevronDown, IconChevronUp } from './Icons';
-import IndustryCode from './IndustryCode';
 
 const VISIBLE = 10;
 
@@ -18,17 +18,17 @@ export default function IndustryTable({ industries }) {
   const extra = rows.length - VISIBLE;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-white">
-      <table id={tableId} className="w-full border-collapse text-sm md:text-body">
+    <>
+      <table id={tableId} className="w-full border-collapse text-body">
         <thead>
-          <tr className="bg-page text-left text-meta font-semibold text-ink-2">
+          <tr className="text-left text-meta text-muted">
             <th
               scope="col"
-              className="w-[72px] py-2.5 pr-2 pl-4 whitespace-nowrap md:w-[120px] md:px-5 md:py-3"
+              className="w-24 border-b border-line-strong py-2.5 pr-4 font-semibold whitespace-nowrap md:w-[120px]"
             >
               {M.company.industryCode}
             </th>
-            <th scope="col" className="py-2.5 pr-4 pl-2 md:py-3 md:pr-5 md:pl-0">
+            <th scope="col" className="border-b border-line-strong py-2.5 font-semibold">
               {M.company.industryName}
             </th>
           </tr>
@@ -38,47 +38,43 @@ export default function IndustryTable({ industries }) {
             <tr
               key={ind.code}
               hidden={!expanded && i >= VISIBLE}
-              className={`border-t border-line-soft align-top ${i >= VISIBLE ? 'motion-fade' : ''}`}
+              className={`align-top ${i >= VISIBLE ? 'motion-fade' : ''}`}
             >
-              <td
-                className={`py-2.5 pr-2 pl-4 tabular-nums md:px-5 md:py-3 ${ind.is_main ? 'font-semibold' : ''}`}
-              >
+              <td className="border-b border-line py-3 pr-4 leading-6 tabular-nums">
+                {/* Vùng bấm 44px bằng padding + margin âm: dòng không cao thêm. */}
                 <Link
                   href={`/nganh/${ind.code}-${toSlug(ind.name)}`}
                   aria-label={`${ind.code} – ${ind.name}`}
-                  className="-my-2.5 inline-flex min-h-11 min-w-11 items-center no-underline hover:opacity-80"
+                  className="-my-2.5 inline-block min-w-11 py-2.5 no-underline hover:underline hover:underline-offset-[3px]"
                 >
-                  <IndustryCode code={ind.code} />
+                  {ind.code}
                 </Link>
               </td>
-              <td className="py-2.5 pr-4 pl-2 md:py-3 md:pr-5 md:pl-0">
-                <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
-                  <span className={ind.is_main ? 'font-semibold' : ''}>{ind.name}</span>
-                  {ind.is_main && (
-                    <span className="inline-flex h-6 items-center rounded-full bg-brand-50 px-2.5 text-xs font-semibold text-brand">
-                      {M.company.mainIndustry}
-                    </span>
-                  )}
-                </span>
+              <td className="border-b border-line py-3 leading-6 text-ink">
+                <span className={ind.is_main ? 'font-semibold' : ''}>{ind.name}</span>
+                {/* Máy tính: nhãn ngay sau tên trên cùng dòng; điện thoại: xuống dòng dưới tên (cột tên hẹp). */}
+                {ind.is_main && (
+                  <span className="tag tag-brand mt-1 table align-[1px] md:mt-0 md:ml-3 md:inline-block">
+                    {M.company.mainIndustry}
+                  </span>
+                )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
       {extra > 0 && (
-        <div className="border-t border-line-soft px-4 pt-3 pb-4 md:px-5">
-          <button
-            type="button"
-            aria-expanded={expanded}
-            aria-controls={tableId}
-            onClick={() => setExpanded((v) => !v)}
-            className="flex h-12 w-full items-center justify-center gap-1.5 rounded-md border-[1.5px] border-brand bg-white text-body font-semibold text-brand hover:bg-brand-50 md:inline-flex md:h-11 md:w-auto md:px-4"
-          >
-            {expanded ? M.company.showLessIndustries : M.company.showMoreIndustries(extra)}
-            {expanded ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
-          </button>
-        </div>
+        <button
+          type="button"
+          aria-expanded={expanded}
+          aria-controls={tableId}
+          onClick={() => setExpanded((v) => !v)}
+          className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-body font-semibold text-brand hover:text-brand-hover hover:underline hover:underline-offset-[3px]"
+        >
+          {expanded ? M.company.showLessIndustries : M.company.showMoreIndustries(extra)}
+          {expanded ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
+        </button>
       )}
-    </div>
+    </>
   );
 }

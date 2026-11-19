@@ -5,7 +5,6 @@ import { getCompany } from '@/lib/api';
 import { companyPath, isValidMst, normalizeMst } from '@/lib/mst';
 import { firstParam } from '@/lib/url';
 import { M } from '@/lib/messages';
-import { IllusForm } from '@/components/Illustrations';
 
 export const metadata = {
   title: M.updateRequest.metaTitle,
@@ -23,18 +22,26 @@ export default async function UpdateRequestPage({ searchParams }) {
     ? { mst: company.mst, name: company.name, path: companyPath(company) }
     : null;
   return (
-    <main className="mx-auto flex w-full max-w-[880px] flex-col gap-5 px-4 pt-4 pb-12 md:px-6 md:pt-6">
-      <Breadcrumb items={[{ name: M.updateRequest.title }]} />
-      <header className="flex items-center justify-between gap-6">
-        <div className="flex min-w-0 flex-col gap-2">
-          <h1 className="text-2xl leading-8 font-semibold text-navy md:text-3xl md:leading-9">
-            {M.updateRequest.title}
-          </h1>
-          <p className="max-w-2xl text-body leading-6 text-ink-2">{M.updateRequest.intro}</p>
+    // Hệ A: cùng khung, H1 cùng chỗ với mọi trang (breadcrumb trên 20 / dưới 16), không hình minh hoạ.
+    // ≥ 1280px: lưới cột chính + cột phải (.rail-grid) — form rộng đúng cột chính 852, đoạn giới thiệu sang cột
+    // phải, vạch 2px của nó nối liền vạch mở đầu form → một mép phải duy nhất cho mỗi cột, không còn đoạn chữ
+    // 640 lửng giữa trang và khoảng trống bên phải suốt trang. Thứ tự DOM vẫn H1 → giới thiệu → form (đọc đúng
+    // thứ tự trên điện thoại / trình đọc màn hình); dưới 1280 xếp một cột, cùng bề rộng 852 với form.
+    <main className="site-wrap">
+      <div className="pt-3 pb-3 md:pt-5 md:pb-4">
+        <Breadcrumb items={[{ name: M.updateRequest.title }]} />
+      </div>
+      <div className="rail-grid max-xl:max-w-[852px]">
+        <h1 className="text-h1-m font-semibold text-pretty text-ink md:text-h1">
+          {M.updateRequest.title}
+        </h1>
+        <p className="mt-2 text-body leading-7 text-pretty text-ink-2 xl:sticky xl:top-24 xl:col-start-2 xl:row-start-2 xl:mt-8 xl:border-t-2 xl:border-ink xl:pt-6 xl:text-sm xl:leading-6">
+          {M.updateRequest.intro}
+        </p>
+        <div className="mt-5 md:mt-8 xl:col-start-1 xl:row-start-2">
+          <UpdateRequestForm initialMst={mst} initialCompany={initialCompany} />
         </div>
-        <IllusForm className="hidden w-[140px] flex-none sm:block" />
-      </header>
-      <UpdateRequestForm initialMst={mst} initialCompany={initialCompany} />
+      </div>
     </main>
   );
 }

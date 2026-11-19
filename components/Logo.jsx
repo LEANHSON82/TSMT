@@ -1,5 +1,6 @@
 // Logo «TMST» dạng hình vẽ (SVG): nét chữ Be Vietnam Pro SemiBold đã chuyển thành path nên hiển thị
-// sắc nét, giống nhau mọi máy, không phụ thuộc font. «T» màu cam (màu nhấn, như nút Tìm), «MST» màu xanh thương hiệu.
+// sắc nét, giống nhau mọi máy, không phụ thuộc font. «T» màu cam (hệ A: cam chỉ dùng ở đây và nút «Xem số điện
+// thoại»), «MST» màu xanh thương hiệu — lấy từ token nên đổi màu ở globals.css là đủ.
 // tone="dark" dùng trên nền tối (footer). Sinh lại path: xem scripts/gen-logo.py.
 const T_PATH = 'M269 740V118H41V0H633V118H405V740Z';
 const MST_PATH =

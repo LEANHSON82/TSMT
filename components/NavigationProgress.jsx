@@ -11,7 +11,8 @@ const SAFETY_MS = 15000; // không bao giờ treo thanh tiến độ nếu đi�
 // Router của Next 15.5 thỉnh thoảng bỏ qua chuyển trang giữa hai URL cùng đường dẫn, chỉ khác tham số
 // (vd. /tim-kiem?q=a → /tim-kiem?q=a&theo=dai-dien): đã nhận đủ dữ liệu trang mới (200) nhưng không áp dụng,
 // không báo lỗi. Gặp nhiều hơn khi API phản hồi chậm. Chưa tìm ra nguyên nhân gốc → quá FALLBACK_MS mà URL
-// vẫn chưa đổi thì tải trang thường (cùng cách với ListFilters).
+// vẫn chưa đổi thì tải trang thường (cùng cách với ListFilters). Trường hợp URL ĐÃ đổi (cả Back/Forward) mà
+// nội dung vẫn của URL cũ: QuerySync (trang /tim-kiem) so tham số server đã render với URL rồi tải lại.
 const FALLBACK_MS = 2500;
 const urlKey = (u) => `${u.pathname}?${[...u.searchParams].sort().join('&')}`;
 
@@ -44,6 +45,11 @@ export function armNavFallback(href) {
 export function startNavigation() {
   cancelNavFallback();
   window.dispatchEvent(new Event(NAV_START));
+}
+
+/** Tắt thanh tiến độ khi pathname/query không đổi nhưng nội dung đã cập nhật (QuerySync sau router.refresh). */
+export function endNavigation() {
+  setNavigating(false);
 }
 
 export default function NavigationProgress() {

@@ -1,6 +1,8 @@
 'use client';
 
 // Modal dùng chung (spec mục 7.3): giữ focus trong modal, Esc đóng, aria-modal + tiêu đề.
+// Kiểu A: khung trắng bo nhỏ (4px; điện thoại là tấm trượt từ đáy, bo hai góc trên), bóng mảnh, tiêu đề 18px,
+// chân hộp ngăn bằng đường kẻ mảnh — gọn như bảng thông tin, không bo tròn to.
 import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { FOCUSABLE, trapTab } from './focusTrap';
@@ -70,7 +72,7 @@ export default function Modal({
         className={
           full
             ? `flex h-full w-full flex-col ${className}`
-            : `motion-sheet w-full max-w-[480px] rounded-t-2xl bg-white shadow-xl sm:rounded-xl ${className}`
+            : `motion-sheet w-full max-w-[440px] rounded-t-lg bg-white shadow-[0_8px_32px_rgba(10,20,40,0.2)] sm:rounded ${className}`
         }
       >
         {full ? (
@@ -82,8 +84,8 @@ export default function Modal({
           </>
         ) : (
           <>
-            <div className="flex items-start justify-between gap-4 px-5 pt-5 sm:px-6">
-              <h2 id={titleId} className="text-lg leading-7 font-semibold text-navy">
+            <div className="flex items-start justify-between gap-4 px-5 pt-4 sm:px-6 sm:pt-5">
+              <h2 id={titleId} className="pt-1 text-h2-m font-semibold text-pretty text-ink">
                 {title}
               </h2>
               {dismissible && (
@@ -91,14 +93,14 @@ export default function Modal({
                   type="button"
                   aria-label={labelClose}
                   onClick={onClose}
-                  className="-mt-1.5 -mr-2 inline-flex h-11 w-11 flex-none items-center justify-center rounded-md text-ink-2 hover:bg-page"
+                  className="-mt-1 -mr-3 inline-flex h-11 w-11 flex-none items-center justify-center rounded text-muted hover:bg-page hover:text-ink"
                 >
-                  <IconClose size={22} />
+                  <IconClose size={20} />
                 </button>
               )}
             </div>
             <div className="px-5 pt-2 pb-5 sm:px-6">{children}</div>
-            {footer && <div className="border-t border-line-soft px-5 py-4 sm:px-6">{footer}</div>}
+            {footer && <div className="border-t border-line px-5 py-4 sm:px-6">{footer}</div>}
           </>
         )}
       </div>

@@ -9,9 +9,8 @@ import { track } from '@/lib/analytics';
 import { isValidMst, normalizeMst } from '@/lib/mst';
 import { M } from '@/lib/messages';
 import { getTurnstileToken, TURNSTILE_SITE_KEY } from '@/lib/turnstile';
-import { IconAlert, IconFile, IconShield, IconUpload } from './Icons';
+import { IconAlert, IconCheckCircle, IconFile, IconShield, IconUpload } from './Icons';
 import CopyButton from './CopyButton';
-import { IllusSent } from './Illustrations';
 
 const REQUEST_TYPES = M.updateRequest.types;
 const E = M.updateRequest.errors;
@@ -38,6 +37,9 @@ function validate(values, file) {
   return e;
 }
 
+// Hệ A: nhãn đậm trên ô, ô cao 48 viền xám đậm (tương phản ≥ 3:1), bo 4px; lỗi = viền đỏ 2px + dòng chữ đỏ
+// 14px có icon ngay dưới ô. Form không đóng hộp — mở đầu bằng vạch 2px như mọi khối khác.
+
 // Ô bắt buộc — aria-required cho trình đọc màn hình (dấu * chỉ để nhìn).
 const REQUIRED = new Set(['mst', 'request_type', 'full_name', 'email', 'content']);
 
@@ -57,16 +59,16 @@ function Field({ id, label, required, hint, error, children }) {
       </label>
       {children}
       {hint && !error && (
-        <p id={`${id}-hint`} className="text-meta text-muted">
+        <p id={`${id}-hint`} className="text-sm text-muted">
           {hint}
         </p>
       )}
       {error && (
         <p
           id={`${id}-error`}
-          className="flex items-start gap-1.5 text-meta font-semibold text-danger"
+          className="flex items-start gap-1.5 text-sm font-semibold text-danger"
         >
-          <IconAlert size={16} className="mt-px flex-none" />
+          <IconAlert size={16} className="mt-0.5 flex-none" />
           {error}
         </p>
       )}
@@ -74,8 +76,9 @@ function Field({ id, label, required, hint, error, children }) {
   );
 }
 
+// Lỗi: viền đỏ dày 2px vẽ VÀO TRONG ô (inset) — cùng cách với viền focus (globals.css), ô không nhích.
 const inputCls = (err) =>
-  `h-12 w-full rounded-md border bg-white px-3 text-base text-ink ${err ? 'border-danger ring-1 ring-danger' : 'border-field hover:border-ink-2'}`;
+  `h-12 w-full rounded border bg-white px-3 text-base text-ink ${err ? 'border-danger shadow-[inset_0_0_0_1px_var(--color-danger)]' : 'border-field hover:border-ink-2'}`;
 
 // initialCompany: { mst, name, path } khi mở từ trang DN — hiện tên DN dưới ô MST để chủ DN xác nhận đúng
 // công ty, và link quay lại trang DN ở màn cảm ơn.
@@ -170,32 +173,36 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
   }
 
   if (done) {
+    // Đã gửi: thay form tại chỗ, cùng vạch 2px mở khối; mã yêu cầu là dòng nhãn–giá trị như bảng thông tin DN.
     return (
       <div
         ref={doneRef}
         tabIndex={-1}
         role="status"
-        className="motion-rise flex flex-col items-center gap-4 rounded-xl border border-line bg-white px-6 py-10 text-center"
+        className="motion-rise flex flex-col items-start gap-3 border-t-2 border-ink pt-6 outline-none"
       >
-        <IllusSent className="w-[150px]" />
-        <h2 className="text-xl font-semibold text-navy">{M.updateRequest.doneTitle}</h2>
-        <p className="max-w-md text-body leading-6 text-ink-2">
-          {M.updateRequest.doneBody} <strong>{values.email.trim()}</strong>.{' '}
+        <h2 className="flex items-center gap-2 text-h2-m font-semibold text-ink md:text-h2">
+          <IconCheckCircle size={24} strokeWidth={1.8} className="flex-none text-ok" />
+          {M.updateRequest.doneTitle}
+        </h2>
+        <p className="max-w-[640px] text-body leading-7 text-ink-2">
+          {M.updateRequest.doneBody}{' '}
+          <strong className="font-semibold text-ink">{values.email.trim()}</strong>.{' '}
           {M.updateRequest.doneKeepCode}
         </p>
-        <p className="rounded-lg bg-page px-5 py-3">
-          <span className="block text-meta text-muted">{M.updateRequest.requestCode}</span>
-          <span className="flex items-center justify-center gap-1">
+        <div className="mt-2 flex w-full items-center gap-4 border-y border-line py-2">
+          <span className="text-sm text-muted">{M.updateRequest.requestCode}</span>
+          <span className="flex items-center gap-1">
             <span
-              className="text-2xl font-semibold tracking-wide text-navy tabular-nums"
+              className="text-h2 font-semibold text-ink tabular-nums"
               data-testid="request-code"
             >
               {done}
             </span>
             <CopyButton text={done} label={M.updateRequest.copyCode} />
           </span>
-        </p>
-        <div className="flex flex-wrap justify-center gap-x-6">
+        </div>
+        <div className="flex flex-wrap gap-x-6">
           {initialCompany && (
             <Link
               href={initialCompany.path}
@@ -218,19 +225,19 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
       ref={formRef}
       noValidate
       onSubmit={onSubmit}
-      className="flex flex-col gap-5 rounded-xl border border-line bg-white p-4 md:p-8"
+      className="flex flex-col gap-6 border-t-2 border-ink pt-6"
     >
       {serverError && (
         <div
           role="alert"
-          className="flex gap-2.5 rounded-lg border border-[#F5C2BE] bg-danger-bg px-4 py-3 text-sm text-[#7A1A12]"
+          className="flex gap-2.5 rounded border border-danger bg-danger-bg px-4 py-3 text-body text-danger"
         >
-          <IconAlert size={20} className="flex-none" />
+          <IconAlert size={20} className="mt-0.5 flex-none" />
           {serverError}
         </div>
       )}
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-x-6 gap-y-5 md:grid-cols-2">
         <Field
           id="f-mst"
           label={F.mst}
@@ -321,7 +328,7 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
           {...aria('content')}
         />
         <p
-          className={`self-end text-meta tabular-nums ${values.content.length > MAX_CONTENT ? 'font-semibold text-danger' : 'text-muted'}`}
+          className={`self-end text-sm tabular-nums ${values.content.length > MAX_CONTENT ? 'font-semibold text-danger' : 'text-muted'}`}
         >
           {values.content.length}/{MAX_CONTENT}
         </p>
@@ -343,20 +350,20 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
             pickFile(e.dataTransfer.files?.[0]);
           }}
           data-field-error={fileError ? 'true' : undefined}
-          className={`flex flex-col items-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center ${
+          className={`flex flex-col items-center gap-2 rounded border border-dashed px-4 py-5 text-center ${
             fileError
               ? 'border-danger bg-danger-bg'
               : dragOver
                 ? 'border-brand bg-brand-50'
-                : 'border-line bg-page'
+                : 'border-field bg-white'
           }`}
         >
           {file ? (
-            <div className="flex w-full max-w-md items-center gap-3 rounded-md bg-white px-3 py-2 text-left ring-1 ring-line">
+            <div className="flex w-full max-w-md items-center gap-3 rounded border border-line bg-white px-3 py-1 text-left">
               <IconFile size={22} className="flex-none text-brand" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold">{file.name}</span>
-                <span className="text-xs text-muted">
+                <span className="text-meta text-muted">
                   {(file.size / 1024 / 1024).toFixed(2)} MB
                 </span>
               </span>
@@ -373,11 +380,11 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
             </div>
           ) : (
             <>
-              <IconUpload size={26} className="text-brand" />
+              <IconUpload size={24} className="text-muted" />
               <p className="text-sm text-ink-2">{F.fileDrop}</p>
             </>
           )}
-          <label className="inline-flex h-11 cursor-pointer items-center rounded-md border-[1.5px] border-brand bg-white px-4 text-body font-semibold text-brand hover:bg-brand-50 has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand">
+          <label className="inline-flex h-11 cursor-pointer items-center rounded border border-line-strong bg-white px-4 text-body font-semibold text-brand hover:border-brand has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus">
             <span id="f-file-btn">{file ? F.fileChooseOther : F.fileChoose}</span>
             <input
               ref={fileRef}
@@ -393,13 +400,13 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
         {fileError ? (
           <p
             id="f-file-error"
-            className="flex items-start gap-1.5 text-meta font-semibold text-danger"
+            className="flex items-start gap-1.5 text-sm font-semibold text-danger"
           >
-            <IconAlert size={16} className="mt-px flex-none" />
+            <IconAlert size={16} className="mt-0.5 flex-none" />
             {fileError}
           </p>
         ) : (
-          <p id="f-file-hint" className="text-meta text-muted">
+          <p id="f-file-hint" className="text-sm text-muted">
             {F.fileHint}
           </p>
         )}
@@ -413,7 +420,7 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
         </span>
       </div>
 
-      <p className="text-meta leading-5 text-muted">
+      <p className="text-sm text-muted">
         {M.updateRequest.privacyNote} <Link href="/chinh-sach-bao-mat">{M.footer.privacy}</Link>.
       </p>
 
@@ -421,7 +428,7 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
         type="submit"
         disabled={submitting}
         aria-busy={submitting}
-        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-brand px-8 text-base font-semibold text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-70 md:w-auto md:self-start"
+        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-brand px-8 text-base font-semibold text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-70 md:w-auto md:self-start"
       >
         {submitting && (
           <span

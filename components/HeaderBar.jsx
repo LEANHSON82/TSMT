@@ -1,15 +1,18 @@
 'use client';
 
-// Header: logo, ô tìm kiếm thu gọn, menu Tỉnh/thành · Ngành nghề · DN mới (spec mục 3).
-// Dính đầu trang khi cuộn, ô tìm luôn trong màn hình. Trang chủ: ô tìm trong header chỉ hiện khi
-// ô tìm lớn ở hero đã cuộn khuất dưới header.
-// Máy tính: dropdown (Esc / bấm ra ngoài để đóng, focus quay về nút).
-// Điện thoại: menu toàn màn hình + danh sách con có nút «‹ Menu».
+// Header hệ A (spec mục 3): hàng 1 logo + menu Tỉnh/thành · Ngành nghề · DN mới (vạch dưới mục đang xem);
+// hàng 2 ô tìm (rộng đúng cột chính 852px) + nút Tìm + link «Lọc nâng cao» ở cột phải.
+// Dính đầu trang: khi cuộn, hàng 1 trôi đi, hàng 2 ở lại (top âm, xem .site-header trong globals.css).
+// Trang chủ: hàng 2 thay bằng hero (H1 + ô tìm lớn, app/page.js) cùng lưới .find-grid nên ô tìm trùng khít;
+// hàng 2 của header chỉ hiện (phủ lên, không xô trang) khi ô tìm hero đã cuộn khuất.
+// Máy tính / máy tính bảng (≥ 768px): dropdown (Esc / bấm ra ngoài để đóng, focus quay về nút).
+// Điện thoại: nút menu (hamburger) → menu toàn màn hình + danh sách con có nút «‹ Menu».
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { M } from '@/lib/messages';
 import { SITE_NAME } from '@/lib/site';
+import { buildHref } from '@/lib/url';
 import IndustryCode from './IndustryCode';
 import { trapTab } from './focusTrap';
 import Logo from './Logo';
@@ -26,18 +29,16 @@ import {
   IconMenu,
 } from './Icons';
 
-// Ô tìm trên header. Dưới 1024px ô hẹp: danh sách gợi ý rộng hết màn hình, ngay dưới header.
-const NAV_SEARCH = {
+// Ô tìm hàng 2 header: cùng khuôn với ô tìm trang chủ (SearchBox tự chọn chữ gợi ý ngắn dưới 640px).
+// Điện thoại: «Lọc nâng cao» là nút icon ngay sau nút Tìm (addon), không chiếm thêm một hàng.
+const navSearch = (filterHref) => ({
   size: 'nav',
-  placeholder: M.search.placeholderHeader,
-  placeholderWide: M.search.placeholderNavWide,
-  listClassName:
-    'max-lg:fixed max-lg:inset-x-0 max-lg:top-14 max-lg:mt-0 md:max-lg:top-16 max-lg:rounded-none max-lg:border-x-0',
-};
+  addon: <AdvancedSearchIcon href={filterHref} className="md:hidden" />,
+});
 
-function SearchWithQuery() {
+function SearchWithQuery({ filterHref }) {
   const q = useSearchParams().get('q') || '';
-  return <SearchBox key={q} defaultValue={q} {...NAV_SEARCH} />;
+  return <SearchBox key={q} defaultValue={q} {...navSearch(filterHref)} />;
 }
 
 function SiteLogo() {
@@ -47,14 +48,74 @@ function SiteLogo() {
       aria-label={`${SITE_NAME} — ${M.nav.home}`}
       className="inline-flex min-h-11 flex-none items-center no-underline"
     >
-      <Logo className="h-[22px] w-auto md:h-6" />
+      <Logo className="h-[18px] w-auto md:h-5" />
     </Link>
   );
 }
 
-// Vạch dưới mục menu của trang đang xem (nằm sát viền dưới header).
-const CURRENT_BAR =
-  'relative after:absolute after:inset-x-1.5 after:-bottom-[14px] after:h-[3px] after:rounded-full after:bg-brand';
+// Lối vào bộ lọc nâng cao (/tim-kiem) theo trang đang xem: trang tỉnh / ngành / DN mới mở sẵn bộ lọc đó.
+function advancedHref(pathname) {
+  const tinh = pathname.match(/^\/tinh\/([^/]+)/)?.[1];
+  if (tinh) return buildHref('/tim-kiem', { tinh });
+  const nganh = pathname.match(/^\/nganh\/(\d+)/)?.[1];
+  if (nganh) return buildHref('/tim-kiem', { nganh });
+  if (pathname === '/doanh-nghiep-moi-thanh-lap')
+    return buildHref('/tim-kiem', { thanhlap: '30-ngay' });
+  return '/tim-kiem';
+}
+
+function FilterIcon({ size = 18 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      aria-hidden="true"
+      className="flex-none"
+    >
+      <path d="M3 6h18M6 12h12M10 18h4" />
+    </svg>
+  );
+}
+
+// Link «Lọc nâng cao» cạnh ô tìm (hàng 2 header, hero trang chủ). Cao bằng ô tìm để căn giữa theo ô.
+export function AdvancedSearchLink({ href = '/tim-kiem', className = '' }) {
+  return (
+    <Link
+      href={href}
+      prefetch={false}
+      className={`inline-flex min-h-11 items-center gap-2 text-base font-semibold whitespace-nowrap no-underline hover:underline hover:underline-offset-[3px] ${className}`}
+    >
+      <FilterIcon />
+      {M.list.advancedFilter}
+    </Link>
+  );
+}
+
+// Điện thoại: cùng lối vào nhưng chỉ icon, rộng 44px, cao bằng ô tìm (48px), viền như ô nhập. Tên đọc + tooltip
+// = «Lọc nâng cao».
+function AdvancedSearchIcon({ href, className = '' }) {
+  return (
+    <Link
+      href={href}
+      prefetch={false}
+      aria-label={M.list.advancedFilter}
+      title={M.list.advancedFilter}
+      className={`inline-flex h-12 w-11 flex-none items-center justify-center rounded border border-field bg-white text-brand no-underline hover:border-ink-2 ${className}`}
+    >
+      <FilterIcon size={20} />
+    </Link>
+  );
+}
+
+// Mục menu hàng 1: chữ 16px đậm; mục của trang đang xem màu xanh + vạch 2px sát đáy vùng bấm.
+const NAV_ITEM =
+  'inline-flex min-h-11 items-center gap-1 text-base font-semibold whitespace-nowrap no-underline';
+const CURRENT_BAR = 'text-brand shadow-[inset_0_-2px_0_var(--color-brand)]';
 
 function DesktopDropdown({ id, label, open, current, onToggle, onClose, children }) {
   const btnRef = useRef(null);
@@ -91,24 +152,24 @@ function DesktopDropdown({ id, label, open, current, onToggle, onClose, children
         aria-controls={id}
         aria-current={current ? 'true' : undefined}
         onClick={onToggle}
-        className={`inline-flex min-h-11 items-center gap-0.5 rounded-md px-1.5 text-sm font-semibold whitespace-nowrap ${
-          open ? 'bg-brand-50 text-brand-hover' : current ? 'text-brand' : 'text-navy hover:bg-page'
-        } ${current ? CURRENT_BAR : ''}`}
+        className={`${NAV_ITEM} cursor-pointer bg-transparent ${
+          current ? CURRENT_BAR : open ? 'text-brand' : 'text-ink hover:text-brand'
+        }`}
       >
         {label}
         <IconChevronDown
-          size={14}
-          strokeWidth={1.8}
-          className={`transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+          size={16}
+          strokeWidth={1.6}
+          className={`text-muted transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
         />
       </button>
       <div
         ref={panelRef}
         id={id}
         hidden={!open}
-        className="motion-drop absolute top-[72px] right-0 left-0 z-30 border-b border-line bg-white shadow-[0_8px_24px_rgba(10,42,94,0.12)]"
+        className="motion-drop absolute top-16 right-0 left-0 z-30 border-y border-line-strong bg-white shadow-[0_8px_24px_rgba(22,27,38,0.10)]"
       >
-        <div className="mx-auto max-w-[1200px] px-6 pt-5 pb-6">{children}</div>
+        <div className="site-wrap pt-5 pb-6">{children}</div>
       </div>
     </>
   );
@@ -147,13 +208,7 @@ function MobileMenu({ provinces, industries, pathname, onClose }) {
 
   return (
     <>
-      {/* Máy tính bảng (768–1279px): menu là ngăn kéo 400px bên phải, nền mờ phía sau (bấm để đóng).
-        Điện thoại: phủ toàn màn hình. */}
-      <div
-        aria-hidden="true"
-        onClick={onClose}
-        className="motion-fade fixed inset-0 z-50 hidden bg-[rgba(10,20,40,0.45)] md:block xl:hidden"
-      />
+      {/* Chỉ điện thoại (< 768px): phủ toàn màn hình. Từ 768px menu chữ đã nằm trên hàng 1. */}
       <div
         id="mobile-menu"
         ref={panelRef}
@@ -166,7 +221,7 @@ function MobileMenu({ provinces, industries, pathname, onClose }) {
               ? M.nav.industries
               : M.nav.menu
         }
-        className="motion-slide-in fixed inset-0 z-50 flex flex-col bg-white md:left-auto md:w-[400px] md:border-l md:border-line md:shadow-[-8px_0_24px_rgba(10,42,94,0.12)] xl:hidden"
+        className="motion-slide-in fixed inset-0 z-50 flex flex-col bg-white md:hidden"
       >
         {sub ? (
           <>
@@ -176,7 +231,7 @@ function MobileMenu({ provinces, industries, pathname, onClose }) {
                 type="button"
                 onClick={() => setSub(null)}
                 aria-label={M.nav.backToMain}
-                className="inline-flex h-11 items-center gap-0.5 justify-self-start rounded-md pr-2.5 pl-1 text-body font-semibold text-brand"
+                className="inline-flex h-11 items-center gap-0.5 justify-self-start rounded pr-2.5 pl-1 text-body font-semibold text-brand"
               >
                 <IconChevronLeft size={22} strokeWidth={1.8} />
                 {M.nav.backToMenu}
@@ -188,7 +243,7 @@ function MobileMenu({ provinces, industries, pathname, onClose }) {
                 type="button"
                 onClick={onClose}
                 aria-label={M.nav.closeMenu}
-                className="inline-flex h-11 w-11 items-center justify-center justify-self-end rounded-md text-navy"
+                className="inline-flex h-11 w-11 items-center justify-center justify-self-end rounded text-navy"
               >
                 <IconClose size={24} strokeWidth={1.6} />
               </button>
@@ -244,7 +299,7 @@ function MobileMenu({ provinces, industries, pathname, onClose }) {
                 aria-label={M.nav.closeMenu}
                 aria-expanded="true"
                 aria-controls="mobile-menu"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-brand-50 text-navy"
+                className="inline-flex h-11 w-11 items-center justify-center rounded bg-brand-50 text-navy"
               >
                 <IconClose size={24} strokeWidth={1.6} />
               </button>
@@ -298,12 +353,13 @@ function MobileMenu({ provinces, industries, pathname, onClose }) {
 
 export default function HeaderBar({ provinces, industries }) {
   const pathname = usePathname();
+  const isHome = pathname === '/';
   const [dropdown, setDropdown] = useState(null); // 'provinces' | 'industries' | null
   const [mobileOpen, setMobileOpen] = useState(false);
-  // Trang chủ chắc chắn có ô tìm lớn nên mặc định ẩn ô trong header (tránh nháy khi tải).
-  const [heroSearchVisible, setHeroSearchVisible] = useState(pathname === '/');
+  // Trang chủ chắc chắn có ô tìm lớn nên mặc định ẩn hàng ô tìm của header (tránh nháy khi tải).
+  const [heroSearchVisible, setHeroSearchVisible] = useState(isHome);
   const menuBtnRef = useRef(null);
-  const headerRef = useRef(null);
+  const findRef = useRef(null);
 
   // Đóng menu khi chuyển trang
   useEffect(() => {
@@ -311,125 +367,128 @@ export default function HeaderBar({ provinces, industries }) {
     setMobileOpen(false);
   }, [pathname]);
 
-  // Trang có ô tìm lớn ([data-hero-search]: trang chủ, /tim-kiem chưa nhập từ khoá): ô đó khuất
-  // dưới header thì mới hiện ô tìm thu gọn, tránh 2 ô tìm cùng lúc.
+  // Menu điện thoại đang mở mà màn hình rộng ra ≥ 768px (xoay ngang máy tính bảng): đóng để không kẹt
+  // body overflow: hidden khi menu đã bị CSS ẩn.
   useEffect(() => {
+    if (!mobileOpen) return undefined;
+    const mq = window.matchMedia('(min-width: 768px)');
+    const onChange = () => mq.matches && setMobileOpen(false);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [mobileOpen]);
+
+  // Trang chủ: ô tìm hero ([data-hero-search]) khuất dưới hàng ô tìm dính thì mới hiện hàng đó.
+  useEffect(() => {
+    if (!isHome) return undefined;
     const hero = document.querySelector('[data-hero-search]');
     if (!hero || typeof IntersectionObserver === 'undefined') {
       setHeroSearchVisible(false);
       return undefined;
     }
-    const top = headerRef.current?.offsetHeight || 64;
+    // Hàng ô tìm dính cao offsetHeight, cách mép trên 8px (phần còn lại của hàng 1).
+    const top = (findRef.current?.offsetHeight || 76) + 8;
     const io = new IntersectionObserver(([entry]) => setHeroSearchVisible(entry.isIntersecting), {
       rootMargin: `-${top}px 0px 0px 0px`,
     });
     io.observe(hero);
     return () => io.disconnect();
-  }, [pathname]);
+  }, [isHome]);
 
-  const showHeaderSearch = !heroSearchVisible;
+  const showHeaderSearch = !isHome || !heroSearchVisible;
   const sortedProvinces = [...provinces].sort((a, b) => a.name.localeCompare(b.name, 'vi'));
   const closeDropdown = () => setDropdown(null);
+  const filterHref = advancedHref(pathname);
 
   return (
-    <header ref={headerRef} className="header-lift sticky top-0 z-30 border-b border-line bg-white">
-      {/* Điện thoại/máy tính bảng: một hàng logo + ô tìm + nút menu. Từ 1024px: ô tìm đặt tuyệt đối,
-          trùng khít ô nhập của ô tìm lớn trang chủ (nhóm ô + nút rộng 760px căn giữa trang: ô nhập
-          656px bắt đầu ở giữa trang − 380px). Menu chữ hiện từ 1280px (đủ chỗ bên phải ô tìm). */}
-      <div className="mx-auto flex h-14 max-w-[1200px] items-center gap-3 pr-2 pl-4 md:h-16 md:gap-6 md:px-6 lg:h-[72px]">
-        <SiteLogo />
+    <>
+      <header
+        className={`site-header header-lift sticky z-30 bg-white ${
+          // Trang chủ: viền dưới nằm ở cuối hero.
+          isHome ? '' : 'border-b border-line-strong'
+        }`}
+      >
+        {/* Hàng 1: logo trái, menu phải (điện thoại: nút menu). */}
+        <div className="site-wrap flex h-14 items-center justify-between gap-4 max-md:pr-1.5 md:h-16">
+          <SiteLogo />
 
-        {/* Luôn giữ chỗ (không đẩy menu khi hiện/ẩn); khi ẩn thì inert để không focus được. */}
-        <div
-          data-header-search
-          inert={!showHeaderSearch}
-          className={`min-w-0 flex-1 transition-opacity duration-150 lg:absolute lg:top-1/2 lg:left-1/2 lg:w-[656px] lg:flex-none lg:-translate-x-[380px] lg:-translate-y-1/2 ${
-            showHeaderSearch ? 'opacity-100' : 'invisible opacity-0'
-          }`}
-        >
-          {/* Trang kết quả: ô giữ sẵn từ khoá đang tìm. useSearchParams chỉ chạy trên /tim-kiem (trang vốn
-              render động) — các trang tĩnh/ISR khác không bị chuyển sang render phía trình duyệt. */}
-          {pathname === '/tim-kiem' ? (
-            <Suspense fallback={<SearchBox {...NAV_SEARCH} />}>
-              <SearchWithQuery />
-            </Suspense>
-          ) : (
-            <SearchBox {...NAV_SEARCH} />
-          )}
-        </div>
+          <nav aria-label={M.nav.mainMenu} className="hidden items-center gap-8 md:flex">
+            <DesktopDropdown
+              id="menu-provinces"
+              label={M.nav.provinces}
+              open={dropdown === 'provinces'}
+              current={pathname.startsWith('/tinh/')}
+              onToggle={() => setDropdown((d) => (d === 'provinces' ? null : 'provinces'))}
+              onClose={closeDropdown}
+            >
+              <div className="mb-3 flex items-baseline gap-3">
+                {/* Không dùng h2: bảng nằm trước H1 của trang (sai thứ bậc heading). */}
+                <p className="text-base font-semibold text-ink">{M.nav.provincesHeading}</p>
+                <span className="text-meta text-muted">
+                  {M.nav.provincesNote(provinces.length)}
+                </span>
+              </div>
+              {/* A–Z theo CỘT dọc (đọc hết cột 1 rồi sang cột 2) — cùng chiều đọc với bảng tỉnh trang chủ. */}
+              <ul
+                className="grid auto-cols-fr grid-flow-col grid-rows-[repeat(var(--rows-md),auto)] gap-x-8 lg:grid-rows-[repeat(var(--rows-lg),auto)]"
+                style={{
+                  '--rows-md': Math.ceil(sortedProvinces.length / 4),
+                  '--rows-lg': Math.ceil(sortedProvinces.length / 6),
+                }}
+              >
+                {sortedProvinces.map((p) => (
+                  <li key={p.code}>
+                    <Link
+                      href={`/tinh/${p.slug}`}
+                      aria-current={pathname === `/tinh/${p.slug}` ? 'page' : undefined}
+                      className={`flex min-h-11 items-center border-b border-line text-base no-underline hover:underline hover:underline-offset-[3px] ${
+                        pathname === `/tinh/${p.slug}` ? 'font-semibold text-brand' : ''
+                      }`}
+                    >
+                      {p.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </DesktopDropdown>
+            <DesktopDropdown
+              id="menu-industries"
+              label={M.nav.industries}
+              open={dropdown === 'industries'}
+              current={pathname.startsWith('/nganh/')}
+              onToggle={() => setDropdown((d) => (d === 'industries' ? null : 'industries'))}
+              onClose={closeDropdown}
+            >
+              <div className="mb-3 flex items-baseline gap-3">
+                <p className="text-base font-semibold text-ink">{M.nav.industriesHeading}</p>
+                <span className="text-meta text-muted">{M.nav.industriesNote}</span>
+              </div>
+              <ul className="grid grid-cols-2 gap-x-12">
+                {industries.map((n) => (
+                  <li key={n.code}>
+                    <Link
+                      href={n.href}
+                      className="flex min-h-12 items-center gap-3 border-b border-line py-1 no-underline hover:bg-page"
+                    >
+                      <IndustryCode code={n.code} />
+                      <span className="text-base text-ink">{n.name}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </DesktopDropdown>
+            <Link
+              href="/doanh-nghiep-moi-thanh-lap"
+              aria-current={pathname === '/doanh-nghiep-moi-thanh-lap' ? 'page' : undefined}
+              className={`${NAV_ITEM} ${
+                pathname === '/doanh-nghiep-moi-thanh-lap'
+                  ? CURRENT_BAR
+                  : 'text-ink hover:text-brand'
+              }`}
+            >
+              {M.nav.newCompaniesShort}
+            </Link>
+          </nav>
 
-        <nav aria-label={M.nav.mainMenu} className="ml-auto hidden items-center xl:flex">
-          <DesktopDropdown
-            id="menu-provinces"
-            label={M.nav.provinces}
-            open={dropdown === 'provinces'}
-            current={pathname.startsWith('/tinh/')}
-            onToggle={() => setDropdown((d) => (d === 'provinces' ? null : 'provinces'))}
-            onClose={closeDropdown}
-          >
-            <div className="mb-3 flex items-baseline gap-3">
-              {/* Không dùng h2: bảng nằm trước H1 của trang (sai thứ bậc heading). */}
-              <p className="text-base font-semibold text-navy">{M.nav.provincesHeading}</p>
-              <span className="text-meta text-muted">{M.nav.provincesNote(provinces.length)}</span>
-            </div>
-            <ul className="grid grid-cols-4 gap-x-4 gap-y-0.5 lg:grid-cols-6">
-              {sortedProvinces.map((p) => (
-                <li key={p.code}>
-                  <Link
-                    href={`/tinh/${p.slug}`}
-                    aria-current={pathname === `/tinh/${p.slug}` ? 'page' : undefined}
-                    className={`flex min-h-11 items-center rounded-md px-2.5 text-body no-underline ${
-                      pathname === `/tinh/${p.slug}`
-                        ? 'bg-brand-50 font-semibold text-brand'
-                        : 'hover:bg-page'
-                    }`}
-                  >
-                    {p.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </DesktopDropdown>
-          <DesktopDropdown
-            id="menu-industries"
-            label={M.nav.industries}
-            open={dropdown === 'industries'}
-            current={pathname.startsWith('/nganh/')}
-            onToggle={() => setDropdown((d) => (d === 'industries' ? null : 'industries'))}
-            onClose={closeDropdown}
-          >
-            <div className="mb-3 flex items-baseline gap-3">
-              <p className="text-base font-semibold text-navy">{M.nav.industriesHeading}</p>
-              <span className="text-meta text-muted">{M.nav.industriesNote}</span>
-            </div>
-            <ul className="grid grid-cols-2 gap-x-8 gap-y-0.5">
-              {industries.map((n) => (
-                <li key={n.code}>
-                  <Link
-                    href={n.href}
-                    className="flex min-h-12 items-center gap-3 rounded-md px-2.5 py-1 no-underline hover:bg-page"
-                  >
-                    <IndustryCode code={n.code} />
-                    <span className="text-body leading-[21px]">{n.name}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </DesktopDropdown>
-          <Link
-            href="/doanh-nghiep-moi-thanh-lap"
-            aria-current={pathname === '/doanh-nghiep-moi-thanh-lap' ? 'page' : undefined}
-            className={`inline-flex min-h-11 items-center rounded-md px-1.5 text-sm font-semibold whitespace-nowrap no-underline ${
-              pathname === '/doanh-nghiep-moi-thanh-lap'
-                ? `text-brand ${CURRENT_BAR}`
-                : 'text-navy hover:bg-page'
-            }`}
-          >
-            {M.nav.newCompaniesShort}
-          </Link>
-        </nav>
-
-        <div className="ml-auto flex flex-none items-center xl:hidden">
           <button
             ref={menuBtnRef}
             type="button"
@@ -437,24 +496,53 @@ export default function HeaderBar({ provinces, industries }) {
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
             onClick={() => setMobileOpen(true)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-md text-navy"
+            className="inline-flex h-11 w-11 flex-none items-center justify-center rounded text-ink md:hidden"
           >
             <IconMenu size={24} />
           </button>
         </div>
-      </div>
 
-      {mobileOpen && (
-        <MobileMenu
-          pathname={pathname}
-          provinces={sortedProvinces}
-          industries={industries}
-          onClose={() => {
-            setMobileOpen(false);
-            menuBtnRef.current?.focus();
-          }}
-        />
-      )}
-    </header>
+        {/* Hàng 2: ô tìm + «Lọc nâng cao». Trang chủ: phủ ngay dưới hàng 1 (absolute, không chiếm chỗ), chỉ
+            hiện khi ô tìm hero đã khuất; khi ẩn thì inert để không focus được. */}
+        <div
+          ref={findRef}
+          data-header-search
+          inert={!showHeaderSearch}
+          className={`${
+            isHome
+              ? 'absolute inset-x-0 top-full border-b border-line-strong bg-white shadow-[0_4px_16px_rgba(22,27,38,0.08)] transition-opacity duration-150'
+              : ''
+          } ${showHeaderSearch ? 'opacity-100' : 'invisible opacity-0'}`}
+        >
+          {/* Điện thoại: đệm đáy 8px → header 56 + 48 + 8 + viền 1 = 113px (trước: 160px với hàng «Lọc nâng cao»). */}
+          <div className="site-wrap find-grid pb-2 md:pt-1 md:pb-5">
+            {/* Trang kết quả: ô giữ sẵn từ khoá đang tìm. useSearchParams chỉ chạy trên /tim-kiem (trang vốn
+              render động) — các trang tĩnh/ISR khác không bị chuyển sang render phía trình duyệt. */}
+            {pathname === '/tim-kiem' ? (
+              <Suspense fallback={<SearchBox {...navSearch(filterHref)} />}>
+                <SearchWithQuery filterHref={filterHref} />
+              </Suspense>
+            ) : (
+              <SearchBox {...navSearch(filterHref)} />
+            )}
+            <div className="hidden h-[52px] items-center md:flex">
+              <AdvancedSearchLink href={filterHref} />
+            </div>
+          </div>
+        </div>
+
+        {mobileOpen && (
+          <MobileMenu
+            pathname={pathname}
+            provinces={sortedProvinces}
+            industries={industries}
+            onClose={() => {
+              setMobileOpen(false);
+              menuBtnRef.current?.focus();
+            }}
+          />
+        )}
+      </header>
+    </>
   );
 }

@@ -166,15 +166,12 @@ number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
 
 ## Đã làm theo spec
 
-- **Trang:** đủ các trang ở mục 2. Header dính đầu trang: logo, ô tìm (máy tính trùng khít ô nhập của ô tìm lớn trang chủ; trang chủ chỉ hiện khi cuộn qua ô lớn), menu Tỉnh/thành · Ngành nghề · DN mới (≥ 1280px; nhỏ hơn dùng nút ☰). Có footer và banner cookie.
+- **Trang:** đủ các trang ở mục 2. Header dính đầu trang: logo, ô tìm (máy tính trùng khít ô nhập của ô tìm lớn trang chủ; trang chủ chỉ hiện khi cuộn qua ô lớn), menu Tỉnh/thành · Ngành nghề · DN mới (≥ 768px; nhỏ hơn dùng nút ☰). Hàng 2 header: ô tìm + «Lọc nâng cao» (điện thoại: nút biểu tượng cạnh nút Tìm). Có footer và banner cookie.
 - **Logo «TMST»** là SVG từ nét chữ Be Vietnam Pro (`components/Logo.jsx`): «T» màu cam, «MST» màu xanh; favicon `app/icon.svg` là chữ T trắng trên ô vuông xanh. Sinh lại path bằng `python3 scripts/gen-logo.py <font SemiBold .woff2>`. Tên site mặc định `TMST` (`NEXT_PUBLIC_SITE_NAME`).
-- **Màu sắc, hình ảnh** (spec không quy định bảng màu; mục 7.2 yêu cầu ảnh/icon SVG):
+- **Giao diện «Cổng tra cứu»** (spec không quy định bảng màu; mục 7.2 yêu cầu ảnh/icon SVG): nền trắng, chữ Inter 400/600, khối mở bằng vạch 2px + tiêu đề khối (`components/SectionHeader.jsx`), danh sách dạng bảng kẻ mảnh một hàng tiêu đề cột (điện thoại: thẻ gọn), nhãn tình trạng chữ nhật. Xanh cho link và nút Tìm; cam chỉ cho chữ «T» logo và nút «Xem số điện thoại». Khung chung `.site-wrap` (1200), cột chính + cột phải 300 `.rail-grid` (≥ 1280px). Không dùng hình minh hoạ.
   - Thẻ DN ghi địa chỉ rút gọn: phường/xã, tỉnh/thành (trang theo tỉnh chỉ ghi phường/xã) — `areaAddress` trong `lib/format.js`.
   - Nhãn «Mới» cho DN thành lập trong 7 ngày (tắt ở khối/trang DN mới thành lập).
-  - Trang chủ: khối tỉnh/thành đặt trước khối DN mới, trên dải nền xanh nhạt. Bản đồ chấm Việt Nam (có Hoàng Sa, Trường Sa) sinh lại bằng `python3 scripts/gen-vn-dots.py countries-50m.json` (dữ liệu Natural Earth, xem đầu script).
-  - Hình minh hoạ SVG cho không có kết quả, trang 404, gửi yêu cầu thành công (`components/Illustrations.jsx`).
-  - Bản đồ chấm đánh dấu tỉnh (`components/VnDotMap.jsx`, toạ độ trung tâm hành chính 34 tỉnh/thành trong `lib/vn-map-points.js`, sinh cùng script bản đồ): trang tỉnh đánh dấu tỉnh đang xem; khối tỉnh/thành trang chủ (≥ 1024px) rê chuột tên tỉnh thì chấm tỉnh sáng lên (CSS `:has`, không JS).
-  - Minh hoạ đầu trang: DN mới, ngành nghề, giới thiệu, liên hệ, điều khoản, chính sách, form yêu cầu. Ẩn trên điện thoại.
+  - Trang chủ: khối tỉnh/thành (bảng 34 tỉnh A–Z) đặt trước khối DN mới (2 cột).
 - **Chuyển động** (CSS thuần, không thư viện; chỉ transform/opacity nên CLS 0; tắt hết khi máy bật «giảm chuyển động»):
   - Khối/thẻ nằm dưới màn hình đầu trượt lên khi cuộn tới (`.reveal`, CSS scroll-driven animation — trình duyệt chưa hỗ trợ thì hiện bình thường). Không làm mờ để chữ luôn đủ tương phản.
   - Thẻ DN trong danh sách nhấc nhẹ khi rê chuột; mũi tên «Xem tất cả» trượt; gợi ý tìm kiếm hiện lần lượt.

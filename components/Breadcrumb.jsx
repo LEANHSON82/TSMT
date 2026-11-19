@@ -19,8 +19,9 @@ export default function Breadcrumb({ items }) {
   return (
     <>
       <nav aria-label={M.nav.breadcrumb} className="min-w-0">
-        {/* Luôn một dòng: mục cuối (tên DN dài) cắt bằng «…» — tên đầy đủ đã có ở H1 ngay dưới. */}
-        <ol className="flex items-center gap-x-2 text-sm text-muted">
+        {/* Luôn một dòng: mục cuối (tên DN dài) cắt bằng «…» — tên đầy đủ đã có ở H1 ngay dưới.
+            Không tự có khoảng cách trên/dưới: trang đặt (hệ A: trên 20px, dưới tới H1 16px; điện thoại 12/12). */}
+        <ol className="flex items-center gap-x-2 text-sm whitespace-nowrap text-muted">
           {all.map((it, i) => {
             const last = i === all.length - 1;
             return (
@@ -36,7 +37,7 @@ export default function Breadcrumb({ items }) {
                 ) : (
                   <Link
                     href={it.href}
-                    className="-my-1.5 inline-flex min-h-11 items-center no-underline"
+                    className="-my-3 inline-flex min-h-11 items-center no-underline hover:underline hover:underline-offset-[3px]"
                   >
                     {it.name}
                   </Link>

@@ -17,27 +17,43 @@ function pageList(page, total) {
   return out;
 }
 
+// Hệ A: «‹ Trước · 1 2 3 · Sau ›» bên trái, «Trang 1 / 2» bên phải. Ô vuông viền mảnh 44×44 (vùng bấm
+// ≥ 44px, spec 7.3), trang hiện tại nền xanh. Điện thoại: «Trước/Sau» chỉ còn mũi tên, ẩn bớt số trang xa,
+// «Trang x / y» xuống dòng dưới.
+const box =
+  'press inline-flex h-11 min-w-11 items-center justify-center gap-1 rounded border px-3 text-body font-semibold tabular-nums no-underline';
+const live = `${box} border-line-strong bg-white text-brand hover:border-brand hover:text-brand`;
+const off = `${box} border-line text-[#8a929e]`;
+
 export default function Pagination({ page, totalPages, basePath, params = {} }) {
   if (totalPages <= 1) return null;
   const href = (p) => buildHref(basePath, { ...params, page: p });
-  const box =
-    'press inline-flex h-11 min-w-11 items-center justify-center rounded-md border px-3 text-body font-semibold tabular-nums no-underline';
+  const prev = (
+    <>
+      <IconChevronLeft size={16} strokeWidth={1.8} />
+      <span className="max-sm:hidden">{M.pagination.prevShort}</span>
+    </>
+  );
+  const next = (
+    <>
+      <span className="max-sm:hidden">{M.pagination.nextShort}</span>
+      <IconChevronRight size={16} strokeWidth={1.8} />
+    </>
+  );
   return (
-    <nav aria-label={M.pagination.label} className="flex justify-center">
-      <ul className="flex flex-wrap items-center justify-center gap-1.5">
+    <nav
+      aria-label={M.pagination.label}
+      className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-6"
+    >
+      <ul className="flex flex-wrap items-center gap-2">
         <li>
           {page > 1 ? (
-            <Link
-              href={href(page - 1)}
-              aria-label={M.pagination.prev}
-              rel="prev"
-              className={`${box} border-line bg-white text-brand hover:border-brand`}
-            >
-              <IconChevronLeft size={20} />
+            <Link href={href(page - 1)} aria-label={M.pagination.prev} rel="prev" className={live}>
+              {prev}
             </Link>
           ) : (
-            <span aria-hidden="true" className={`${box} border-line-soft bg-page text-field`}>
-              <IconChevronLeft size={20} />
+            <span aria-hidden="true" className={off}>
+              {prev}
             </span>
           )}
         </li>
@@ -59,11 +75,7 @@ export default function Pagination({ page, totalPages, basePath, params = {} }) 
                   {p}
                 </span>
               ) : (
-                <Link
-                  href={href(p)}
-                  aria-label={M.pagination.page(p)}
-                  className={`${box} border-line bg-white text-brand hover:border-brand`}
-                >
+                <Link href={href(p)} aria-label={M.pagination.page(p)} className={live}>
                   {p}
                 </Link>
               )}
@@ -72,21 +84,19 @@ export default function Pagination({ page, totalPages, basePath, params = {} }) 
         )}
         <li>
           {page < totalPages ? (
-            <Link
-              href={href(page + 1)}
-              aria-label={M.pagination.next}
-              rel="next"
-              className={`${box} border-line bg-white text-brand hover:border-brand`}
-            >
-              <IconChevronRight size={20} />
+            <Link href={href(page + 1)} aria-label={M.pagination.next} rel="next" className={live}>
+              {next}
             </Link>
           ) : (
-            <span aria-hidden="true" className={`${box} border-line-soft bg-page text-field`}>
-              <IconChevronRight size={20} />
+            <span aria-hidden="true" className={off}>
+              {next}
             </span>
           )}
         </li>
       </ul>
+      <p className="text-sm text-muted tabular-nums max-sm:w-full sm:ml-auto">
+        {M.pagination.of(page, totalPages)}
+      </p>
     </nav>
   );
 }

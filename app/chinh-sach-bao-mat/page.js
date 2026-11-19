@@ -2,7 +2,6 @@ import Link from 'next/link';
 import StaticPage from '@/components/StaticPage';
 import { SITE_NAME } from '@/lib/site';
 import { M } from '@/lib/messages';
-import { IllusLegal } from '@/components/Illustrations';
 
 export const metadata = {
   ...M.staticPage.meta.privacy,
@@ -14,7 +13,6 @@ export const metadata = {
 export default function PrivacyPage() {
   return (
     <StaticPage
-      illustration={<IllusLegal className="w-[130px]" />}
       title="Chính sách bảo mật"
       intro={`Chính sách này giải thích ${SITE_NAME} thu thập, sử dụng và bảo vệ dữ liệu như thế nào.`}
       sections={[

@@ -14,16 +14,15 @@ const key = (s) =>
     .replace(/\s+/g, ' ')
     .trim();
 
+// Hệ A: gọn, không hộp — một dòng nhãn + các thẻ tên chữ nhật viền mảnh, chú thích nhỏ bên dưới.
 export default function PeopleMatches({ people, q, tab, params }) {
   if (!people?.length || !q || (tab && tab !== 'dai-dien')) return null;
   // Gõ đúng họ tên và đang xem tab «Người đại diện»: một câu tóm tắt (tab «Tất cả» vẫn hiện thẻ bên dưới).
   if (tab === 'dai-dien' && people.length === 1 && key(people[0].name) === key(q)) {
     return (
-      <p className="flex flex-col gap-0.5 rounded-xl border border-brand/20 bg-brand-50 px-4 py-3 text-body text-ink-2">
-        <span>
-          <strong className="font-semibold text-navy">{people[0].name}</strong>{' '}
-          {M.search.peopleExact(people[0].count)}
-        </span>
+      <p className="text-body text-ink-2">
+        <strong className="font-semibold text-ink">{people[0].name}</strong>{' '}
+        {M.search.peopleExact(people[0].count)}{' '}
         <span className="text-meta text-muted">{M.search.peopleNote}</span>
       </p>
     );
@@ -31,14 +30,15 @@ export default function PeopleMatches({ people, q, tab, params }) {
   return (
     <section
       aria-labelledby="people-title"
-      className="flex flex-col gap-1 rounded-xl border border-line bg-white px-4 py-3"
+      className="flex flex-col md:flex-row md:flex-wrap md:items-center md:gap-x-3"
     >
-      <h2 id="people-title" className="text-sm font-semibold text-navy">
+      <h2 id="people-title" className="text-sm font-semibold text-ink-2">
         {M.search.peopleTitle(q)}
       </h2>
-      <ul className="flex flex-wrap gap-x-2">
+      {/* Điện thoại: thẻ tên xếp một hàng cuộn ngang (không chiếm cả màn hình đầu, đẩy kết quả xuống). */}
+      <ul className="flex flex-wrap gap-x-2 max-md:-mx-4 max-md:flex-nowrap max-md:overflow-x-auto max-md:px-4">
         {people.slice(0, 10).map((p) => (
-          <li key={p.name}>
+          <li key={p.name} className="flex-none">
             <Link
               href={buildHref('/tim-kiem', {
                 ...params,
@@ -49,15 +49,17 @@ export default function PeopleMatches({ people, q, tab, params }) {
               prefetch={false}
               className="group inline-flex min-h-11 items-center no-underline"
             >
-              <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-line bg-white px-3 text-sm text-ink group-hover:border-brand group-hover:text-brand">
+              <span className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-line-strong bg-white px-2.5 text-sm text-brand group-hover:border-brand">
                 <span className="font-semibold">{p.name}</span>
-                <span className="text-muted tabular-nums">· {M.search.peopleCount(p.count)}</span>
+                {p.count > 1 && (
+                  <span className="text-muted tabular-nums">· {M.search.peopleCount(p.count)}</span>
+                )}
               </span>
             </Link>
           </li>
         ))}
       </ul>
-      <p className="text-meta text-muted">{M.search.peopleNote}</p>
+      <p className="text-meta text-muted md:w-full">{M.search.peopleNote}</p>
     </section>
   );
 }

@@ -1,8 +1,6 @@
 // DN mới thành lập /doanh-nghiep-moi-thanh-lap?tinh=&page= (spec mục 2, 3.5): sắp ngày thành lập mới nhất.
-import AdvancedFilterLink from '@/components/AdvancedFilterLink';
 import ListFilters from '@/components/ListFilters';
 import ListPageShell from '@/components/ListPageShell';
-import { IllusNewCompany } from '@/components/Illustrations';
 import { listCompanies } from '@/lib/api';
 import { M } from '@/lib/messages';
 import { provinceOptions } from '@/lib/provinces';
@@ -35,27 +33,25 @@ export async function NewCompaniesList({ searchParams }) {
   const where = M.common.inProvince(province?.name);
   return (
     <ListPageShell
-      aside={<IllusNewCompany className="w-[150px]" />}
       breadcrumb={[{ name: M.list.newCompanies.title }]}
       title={`${M.list.newCompanies.title}${where}`}
       description={M.list.newCompanies.lead(where)}
+      // Lọc tỉnh bên phải hàng số đếm. «Lọc nâng cao» đã có ở hàng ô tìm trên header.
       filters={
-        <div className="flex flex-col gap-3">
-          <ListFilters
-            key={province?.slug || ''}
-            action="/doanh-nghiep-moi-thanh-lap"
-            fields={[
-              {
-                name: 'tinh',
-                label: M.list.provinceFilter,
-                value: province?.slug || '',
-                allLabel: M.list.allProvinces,
-                options,
-              },
-            ]}
-          />
-          <AdvancedFilterLink params={{ tinh: province?.slug, thanhlap: '30-ngay' }} />
-        </div>
+        <ListFilters
+          key={province?.slug || ''}
+          variant="inline"
+          action="/doanh-nghiep-moi-thanh-lap"
+          fields={[
+            {
+              name: 'tinh',
+              label: M.list.provinceFilter,
+              value: province?.slug || '',
+              allLabel: M.list.allProvinces,
+              options,
+            },
+          ]}
+        />
       }
       data={data}
       basePath="/doanh-nghiep-moi-thanh-lap"

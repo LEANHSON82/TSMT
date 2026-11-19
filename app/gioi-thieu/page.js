@@ -2,14 +2,12 @@ import Link from 'next/link';
 import StaticPage from '@/components/StaticPage';
 import { SITE_NAME } from '@/lib/site';
 import { M } from '@/lib/messages';
-import { IllusAbout } from '@/components/Illustrations';
 
 export const metadata = { ...M.staticPage.meta.about, alternates: { canonical: '/gioi-thieu' } };
 
 export default function AboutPage() {
   return (
     <StaticPage
-      illustration={<IllusAbout className="w-[130px]" />}
       title={`Giới thiệu ${SITE_NAME}`}
       intro={`${SITE_NAME} giúp tra cứu nhanh, miễn phí thông tin doanh nghiệp Việt Nam theo mã số thuế, tên doanh nghiệp hoặc người đại diện.`}
       sections={[

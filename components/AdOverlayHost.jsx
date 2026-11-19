@@ -107,17 +107,18 @@ function FallbackAd({ req, done }) {
       onClose={() => done({ status: 'closed' })}
       className="sm:max-w-[400px]"
     >
+      {/* Kiểu A: nhãn «Quảng cáo» 13px xám trên khung banner trơn (không bo), như ô quảng cáo trong trang. */}
       <div className="flex flex-col items-center gap-4">
         <div className="flex w-full flex-col items-center gap-1">
-          <span className="self-start text-xs text-muted">{M.ad.label}</span>
+          <span className="self-start text-meta text-muted">{M.ad.label}</span>
           <AdUnit
             slotId="fallback"
             size="fallback"
-            className="flex h-[280px] w-[336px] max-w-full items-center justify-center overflow-hidden rounded-lg bg-ad"
+            className="flex h-[280px] w-[336px] max-w-full items-center justify-center overflow-hidden bg-ad"
           />
         </div>
         <p
-          className="text-center text-body font-semibold text-navy"
+          className="text-center text-body font-semibold text-ink"
           aria-live="polite"
           data-testid="fallback-countdown"
         >
@@ -126,14 +127,7 @@ function FallbackAd({ req, done }) {
         {/* Vòng đếm ngược chạy liên tục trong `total` giây (CSS), số giây ở giữa. */}
         <div className="relative h-16 w-16" aria-hidden="true">
           <svg viewBox="0 0 64 64" className="h-16 w-16 -rotate-90">
-            <circle
-              cx="32"
-              cy="32"
-              r="28"
-              fill="none"
-              stroke="var(--color-line-soft)"
-              strokeWidth="5"
-            />
+            <circle cx="32" cy="32" r="28" fill="none" stroke="var(--color-line)" strokeWidth="5" />
             <circle
               cx="32"
               cy="32"
@@ -141,13 +135,13 @@ function FallbackAd({ req, done }) {
               fill="none"
               stroke="var(--color-cta)"
               strokeWidth="5"
-              strokeLinecap="round"
+              strokeLinecap="butt"
               pathLength="100"
               strokeDasharray="100"
               style={{ animation: `motion-ring ${total}s linear forwards` }}
             />
           </svg>
-          <span className="absolute inset-0 flex items-center justify-center text-xl font-semibold text-navy tabular-nums">
+          <span className="absolute inset-0 flex items-center justify-center text-h2 font-semibold text-ink tabular-nums">
             {left}
           </span>
         </div>

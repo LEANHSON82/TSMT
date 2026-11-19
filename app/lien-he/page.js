@@ -1,14 +1,12 @@
 import Link from 'next/link';
 import StaticPage from '@/components/StaticPage';
 import { M } from '@/lib/messages';
-import { IllusContact } from '@/components/Illustrations';
 
 export const metadata = { ...M.staticPage.meta.contact, alternates: { canonical: '/lien-he' } };
 
 export default function ContactPage() {
   return (
     <StaticPage
-      illustration={<IllusContact className="w-[130px]" />}
       title="Liên hệ"
       sections={[
         {

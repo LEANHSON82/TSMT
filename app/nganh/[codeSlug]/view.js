@@ -1,9 +1,7 @@
 // DN theo ngành /nganh/{ma-nganh}-{slug}?tinh=&page= (spec mục 2, 3.5). Mã ngành VSIC 4 số.
 import { notFound } from 'next/navigation';
-import AdvancedFilterLink from '@/components/AdvancedFilterLink';
 import ListFilters from '@/components/ListFilters';
 import ListPageShell from '@/components/ListPageShell';
-import { IllusIndustry } from '@/components/Illustrations';
 import { listCompanies } from '@/lib/api';
 import { resolveIndustry } from '@/lib/industry';
 import { M } from '@/lib/messages';
@@ -58,27 +56,25 @@ export async function IndustryList({ params, searchParams }) {
 
   return (
     <ListPageShell
-      aside={<IllusIndustry className="w-[150px]" />}
       breadcrumb={[{ name: M.list.industry.crumb(industry.code) }]}
       title={M.list.industry.title(industry.code, industry.name)}
       description={M.list.industry.lead(where)}
+      // Bộ lọc tỉnh (spec 3.5) nằm bên phải hàng số đếm. «Lọc nâng cao» đã có ở hàng ô tìm trên header.
       filters={
-        <div className="flex flex-col gap-3">
-          <ListFilters
-            key={province?.slug || ''}
-            action={basePath}
-            fields={[
-              {
-                name: 'tinh',
-                label: M.list.provinceFilter,
-                value: province?.slug || '',
-                allLabel: M.list.allProvinces,
-                options,
-              },
-            ]}
-          />
-          <AdvancedFilterLink params={{ nganh: industry.code, tinh: province?.slug }} />
-        </div>
+        <ListFilters
+          key={province?.slug || ''}
+          variant="inline"
+          action={basePath}
+          fields={[
+            {
+              name: 'tinh',
+              label: M.list.provinceFilter,
+              value: province?.slug || '',
+              allLabel: M.list.allProvinces,
+              options,
+            },
+          ]}
+        />
       }
       data={data}
       basePath={basePath}

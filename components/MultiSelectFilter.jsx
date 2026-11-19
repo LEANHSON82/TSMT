@@ -91,7 +91,7 @@ export default function MultiSelectFilter({
 
   return (
     <div className="flex min-w-0 flex-col gap-1">
-      <span id={`${uid}-label`} className="text-sm font-semibold text-ink-2">
+      <span id={`${uid}-label`} className="text-meta font-semibold text-muted">
         {label}
       </span>
       <details
@@ -114,14 +114,14 @@ export default function MultiSelectFilter({
         <summary
           ref={summaryRef}
           aria-labelledby={`${uid}-label ${uid}-value`}
-          className="select-chevron flex h-11 w-full cursor-pointer list-none items-center rounded-md border border-field bg-white px-3 text-body text-ink hover:border-ink-2 [&::-webkit-details-marker]:hidden"
+          className="select-chevron flex h-11 w-full cursor-pointer list-none items-center rounded border border-line-strong bg-white px-3 text-body text-ink hover:border-ink-2 [&::-webkit-details-marker]:hidden"
         >
           <span id={`${uid}-value`} className="truncate">
             {summary}
           </span>
         </summary>
-        <div className="motion-drop absolute top-full left-0 z-30 mt-1 flex w-full min-w-[min(320px,calc(100vw-2rem))] flex-col rounded-lg border border-line bg-white shadow-[0_8px_24px_rgba(10,42,94,0.14)]">
-          <div className="border-b border-line-soft p-2">
+        <div className="motion-drop absolute top-full left-0 z-30 mt-1 flex w-full min-w-[min(320px,calc(100vw-2rem))] flex-col rounded border border-line-strong bg-white shadow-[0_6px_20px_rgba(22,27,38,0.12)]">
+          <div className="border-b border-line p-2">
             <input
               ref={searchRef}
               type="search"
@@ -137,7 +137,7 @@ export default function MultiSelectFilter({
               aria-label={searchLabel}
               placeholder={searchLabel}
               autoComplete="off"
-              className="h-10 w-full rounded-md border border-field px-3 text-body text-ink placeholder:text-muted"
+              className="h-11 w-full rounded border border-line-strong px-3 text-body text-ink placeholder:text-muted"
             />
           </div>
           <fieldset className="max-h-64 overflow-y-auto overscroll-contain p-1">
@@ -145,7 +145,7 @@ export default function MultiSelectFilter({
             {rows.map((o) => (
               <label
                 key={o.value}
-                className={`${shown.has(o.value) ? 'flex' : 'hidden'} min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 text-body text-ink hover:bg-brand-50`}
+                className={`${shown.has(o.value) ? 'flex' : 'hidden'} min-h-11 cursor-pointer items-center gap-3 rounded-sm px-2 text-body text-ink hover:bg-surface`}
               >
                 <input
                   type="checkbox"
@@ -160,12 +160,12 @@ export default function MultiSelectFilter({
             ))}
             {!anyVisible && <p className="px-2 py-3 text-sm text-muted">{M.search.multiNoMatch}</p>}
           </fieldset>
-          <div className="flex items-center justify-between gap-2 border-t border-line-soft p-2">
+          <div className="flex items-center justify-between gap-2 border-t border-line p-2">
             <button
               type="button"
               onClick={() => setDraft([])}
               disabled={!draft.length}
-              className="h-10 rounded-md px-3 text-body font-semibold text-brand hover:bg-brand-50 disabled:text-muted disabled:hover:bg-transparent"
+              className="h-11 rounded px-3 text-body font-semibold text-brand hover:bg-surface disabled:text-muted disabled:hover:bg-transparent"
             >
               {M.search.multiClear}
             </button>
@@ -175,7 +175,7 @@ export default function MultiSelectFilter({
             <button
               type="button"
               onClick={apply}
-              className="press h-10 rounded-md bg-brand px-4 text-body font-semibold text-white hover:bg-brand-hover"
+              className="press h-11 rounded bg-brand px-4 text-body font-semibold text-white hover:bg-brand-hover"
             >
               {M.search.multiApply}
               {draft.length ? ` (${draft.length})` : ''}

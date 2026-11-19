@@ -5,8 +5,8 @@
 // Từ khoá có tên tỉnh mà chưa lọc tỉnh → gợi ý «Lọc tại …».
 import ListFilters from '@/components/ListFilters';
 import ListPageShell from '@/components/ListPageShell';
-import SearchBox from '@/components/SearchBox';
 import PeopleMatches from '@/components/PeopleMatches';
+import QuerySync from '@/components/QuerySync';
 import SearchFieldTabs, { FIELD_TABS } from '@/components/SearchFieldTabs';
 import TrackOnMount from '@/components/TrackOnMount';
 import { searchCompanies } from '@/lib/api';
@@ -133,12 +133,24 @@ export default async function SearchPage({ searchParams }) {
   const f = await readFilters(sp, q);
   const { params, tab } = f;
   const filterKey = Object.values(params).join('|');
+  // Hai form: bộ lọc nâng cao (hàng ô chọn trên bảng) và «Sắp xếp» (bên phải hàng số đếm, như bản mẫu A).
+  // Mỗi form giữ giá trị của form kia trong hidden → đổi bên nào cũng không mất bên kia.
+  const { sapxep, ...filterParams } = params;
   const filterForm = (
     <ListFilters
       key={filterKey}
       action="/tim-kiem"
-      hidden={{ q, theo: tab.value }}
-      fields={f.fields}
+      hidden={{ q, theo: tab.value, sapxep }}
+      fields={f.fields.filter((x) => x.name !== 'sapxep')}
+    />
+  );
+  const sortForm = (
+    <ListFilters
+      key={`sort|${filterKey}`}
+      variant="inline"
+      action="/tim-kiem"
+      hidden={filterParams}
+      fields={f.fields.filter((x) => x.name === 'sapxep').map((x) => ({ ...x, inlineLabel: true }))}
     />
   );
 
@@ -159,6 +171,7 @@ export default async function SearchPage({ searchParams }) {
       ? findProvinceInQuery(q, f.provinces)
       : null;
   const hasFilter = f.hasFilter;
+  const bare = data.total === 0 && !hasFilter && !tab.value;
   const intentHref = intent
     ? intent.rest
       ? buildHref('/tim-kiem', {
@@ -171,7 +184,7 @@ export default async function SearchPage({ searchParams }) {
     : null;
 
   const intentBox = intent ? (
-    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-brand/20 bg-brand-50 px-4 py-2 text-body text-ink-2">
+    <p className="flex flex-wrap items-center gap-x-3 rounded-sm bg-brand-50 px-4 py-0.5 text-body text-ink-2">
       {M.search.provinceIntent(intent.province.name)}
       <a href={intentHref} className="inline-flex min-h-11 items-center font-semibold">
         {M.search.provinceIntentAction(intent.province.name)} →
@@ -181,6 +194,8 @@ export default async function SearchPage({ searchParams }) {
 
   return (
     <>
+      {/* Back/Forward giữa hai URL /tim-kiem chỉ khác tham số: đảm bảo nội dung khớp URL (QuerySync.jsx). */}
+      <QuerySync params={sp} />
       {/* Sự kiện search (spec mục 7.4) chỉ khi có từ khoá; chỉ dùng bộ lọc thì không phải lượt tìm. */}
       {q && (
         <TrackOnMount name="search" params={{ query_type: queryType, result_count: data.total }} />
@@ -196,20 +211,13 @@ export default async function SearchPage({ searchParams }) {
               : M.search.filterResults(formatNumber(data.total))
         }
         description={!q && !f.hasFilter ? M.search.noQuery : undefined}
-        totalLabel={!q && !f.hasFilter ? undefined : false}
-        filters={
-          // 0 kết quả mà chưa bật bộ lọc nào: tab và bộ lọc không giúp gì, ẩn để thông báo + gợi ý hiện ngay.
-          data.total === 0 && !hasFilter && !tab.value ? (
+        // Chưa gõ từ khoá: không có ô tìm lớn riêng — hàng ô tìm trên header luôn hiện ở trang này.
+        // 0 kết quả mà chưa bật bộ lọc nào: tab và bộ lọc không giúp gì, ẩn để thông báo + gợi ý hiện ngay.
+        intro={
+          bare ? (
             intentBox
           ) : (
-            <div className="flex flex-col gap-4">
-              {/* Chưa gõ từ khoá (đang duyệt / lọc): ô tìm lớn ngay trên bộ lọc. data-hero-search: ô tìm trên
-                  header ẩn đi khi ô này còn trong màn hình (tránh 2 ô tìm). */}
-              {!q && (
-                <div data-hero-search className="max-w-[760px]">
-                  <SearchBox size="lg" autoFocusDesktop />
-                </div>
-              )}
+            <>
               {intentBox}
               {q && (
                 <SearchFieldTabs
@@ -220,9 +228,10 @@ export default async function SearchPage({ searchParams }) {
               )}
               {filterForm}
               <PeopleMatches people={data.people} q={q} tab={tab.value} params={params} />
-            </div>
+            </>
           )
         }
+        filters={data.total ? sortForm : null}
         data={data}
         basePath="/tim-kiem"
         params={params}

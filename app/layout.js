@@ -1,4 +1,4 @@
-import { Be_Vietnam_Pro } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import HeaderBar from '@/components/HeaderBar';
 import SiteFooter from '@/components/SiteFooter';
@@ -12,13 +12,14 @@ import { POPULAR_INDUSTRIES } from '@/lib/popular-industries';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import { M } from '@/lib/messages';
 
-// Một font đủ dấu tiếng Việt, tối đa 2 độ đậm (spec mục 7.2).
-const font = Be_Vietnam_Pro({
+// Một font đủ dấu tiếng Việt, tối đa 2 độ đậm (spec mục 7.2). Inter theo hệ thiết kế A: chữ số đều nét,
+// có số tabular (cột MST, ngày thẳng hàng).
+const font = Inter({
   // latin-ext chứa đ, ă, ơ, ư, ỳ–ỹ… — trang tiếng Việt nào cũng cần, khai để được preload sớm.
   subsets: ['vietnamese', 'latin', 'latin-ext'],
   weight: ['400', '600'],
   display: 'swap',
-  variable: '--font-be-vietnam',
+  variable: '--font-inter',
 });
 
 export const metadata = {
@@ -38,7 +39,8 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0A2A5E',
+  // Thanh trình duyệt điện thoại cùng màu nền trắng của header A.
+  themeColor: '#FFFFFF',
 };
 
 // Chạy trước lần vẽ đầu: đã chọn cookie rồi thì gắn data-consent để CSS ẩn banner ngay,
@@ -58,7 +60,7 @@ export default async function RootLayout({ children }) {
       <body className="flex min-h-screen flex-col font-sans antialiased">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] focus:rounded focus:bg-white focus:px-4 focus:py-2"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] focus:rounded focus:bg-brand focus:px-4 focus:py-2 focus:text-white"
         >
           {M.site.skipToContent}
         </a>

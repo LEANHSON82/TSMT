@@ -3,7 +3,6 @@ import { M } from '@/lib/messages';
 import { SITE_NAME } from '@/lib/site';
 import Logo from './Logo';
 import { CookieSettingsButton } from './CookieConsent';
-import { IconEyeOff } from './Icons';
 
 const LINKS = [
   ['/gioi-thieu', M.footer.about],
@@ -12,47 +11,45 @@ const LINKS = [
   ['/chinh-sach-bao-mat', M.footer.privacy],
 ];
 
-// Footer (spec mục 3): link trang tĩnh, dòng «Dữ liệu tổng hợp từ nguồn công khai», link yêu cầu
-// ẩn/sửa thông tin. Nền sáng, chia cột: giới thiệu ngắn · liên kết · dữ liệu.
+// Footer gọn hệ A (spec mục 3): logo + «Dữ liệu tổng hợp từ nguồn công khai.» · link trang tĩnh · «Yêu cầu
+// ẩn/sửa thông tin»; dòng © bên dưới, ngăn bằng đường kẻ mảnh. Nền xám rất nhạt, viền trên đậm.
+// Cách khối cuối của trang 64px (điện thoại 48px) — trang KHÔNG cần thêm padding đáy.
+// Bố cục: điện thoại xếp dọc; 768–1279 hai hàng có chủ đích (hàng 1: logo + mô tả trái, «Yêu cầu ẩn/sửa» phải;
+// hàng 2: link trang tĩnh) thay vì để một link rớt dòng lẻ loi; từ 1280 đủ chỗ cho một hàng.
 export default function SiteFooter() {
-  // Vùng bấm 44px trên điện thoại (spec 7.3); máy tính dùng chuột → 32px, footer không cao lênh khênh.
+  // Vùng bấm 44px (spec 7.3).
   const linkCls =
-    'inline-flex min-h-11 items-center text-sm text-ink-2 no-underline hover:text-brand md:min-h-8';
+    'inline-flex min-h-11 items-center text-sm text-ink-2 no-underline hover:text-brand';
   return (
-    <footer className="mt-auto border-t border-line bg-white">
-      <div className="mx-auto grid max-w-[1200px] gap-8 px-4 pt-10 pb-8 md:grid-cols-[1.5fr_1fr_1.2fr] md:gap-10 md:px-6">
-        <div className="flex flex-col gap-3">
-          <Logo title={SITE_NAME} className="h-6 w-auto self-start" />
-          <p className="max-w-xs text-sm leading-6 text-ink-2">{M.footer.tagline}</p>
+    <footer className="mt-12 border-t border-line-strong bg-page md:mt-16">
+      <div className="site-wrap flex flex-col items-start gap-2 pt-6 pb-2 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-x-8 md:gap-y-1 md:pt-7 md:pb-5 xl:flex xl:flex-row xl:justify-between">
+        <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:gap-4">
+          <Logo title={SITE_NAME} className="h-[15px] w-auto" />
+          <p className="text-sm text-ink-2">{M.footer.dataSource}</p>
         </div>
-        <nav aria-label={M.footer.navLabel} className="flex flex-col">
-          <p className="mb-1 text-xs font-semibold tracking-wide text-muted uppercase">
-            {M.footer.linksTitle}
-          </p>
+        <nav
+          aria-label={M.footer.navLabel}
+          className="grid w-full grid-cols-2 gap-x-4 md:col-span-2 md:row-start-2 md:flex md:w-auto md:flex-wrap md:gap-x-6"
+        >
           {LINKS.map(([href, label]) => (
             <Link key={href} href={href} prefetch={false} className={linkCls}>
               {label}
             </Link>
           ))}
-          <CookieSettingsButton className={`${linkCls} cursor-pointer self-start bg-transparent`} />
+          <CookieSettingsButton
+            className={`${linkCls} cursor-pointer justify-self-start bg-transparent text-left`}
+          />
         </nav>
-        <div className="flex flex-col gap-2">
-          <p className="mb-1 text-xs font-semibold tracking-wide text-muted uppercase">
-            {M.footer.dataTitle}
-          </p>
-          <p className="text-sm leading-6 text-ink-2">{M.footer.dataSource}</p>
-          <Link
-            prefetch={false}
-            href="/yeu-cau-cap-nhat"
-            className="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold no-underline md:min-h-8"
-          >
-            <IconEyeOff size={18} />
-            {M.nav.updateRequest}
-          </Link>
-        </div>
+        <Link
+          prefetch={false}
+          href="/yeu-cau-cap-nhat"
+          className="inline-flex min-h-11 items-center text-sm font-semibold no-underline hover:underline hover:underline-offset-[3px] md:col-start-2 md:row-start-1"
+        >
+          {M.nav.updateRequest}
+        </Link>
       </div>
-      <div className="border-t border-line-soft">
-        <p className="mx-auto max-w-[1200px] px-4 py-4 text-meta text-muted md:px-6">
+      <div className="site-wrap pt-3 pb-7">
+        <p className="border-t border-line pt-3 text-meta text-muted">
           © {new Date().getFullYear()} {SITE_NAME}
         </p>
       </div>

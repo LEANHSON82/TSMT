@@ -1,46 +1,74 @@
 @import 'tailwindcss';
 
-/* Màu và font lấy từ canvas thiết kế «TraMST» (Claude Design). */
+/* Hệ thiết kế A «Cổng tra cứu chính thống» (bản mẫu: scratchpad/concepts/A/styles.css).
+   Giữ tên token cũ (brand, ink, line…) để class đang dùng vẫn chạy, chỉ đổi giá trị cho khớp A.
+   Chữ: Inter 400/600 · thang 13 · 14 · 16 · 20 · 28 (H1 điện thoại 22).
+   Khoảng cách: 4 · 8 · 12 · 16 · 24 · 32 · 48. Khung 1200 = cột chính 852 + khe 48 + cột phải 300. */
 @theme {
-  --font-sans: var(--font-be-vietnam), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
 
-  /* Thang cỡ chữ (9 bậc): xs 12 · meta 13 · sm 14 · body 15 · base 16 · lg 18 · xl 20 · 2xl 24 · 3xl 30.
-     meta: chữ phụ (ngày, nhãn nhỏ, gợi ý ô nhập); body: chữ nội dung trong bảng, thẻ, danh sách. */
-  --text-meta: 0.8125rem;
+  /* Thang chữ A: meta 14 (nhãn, chú thích; trước 13) · sm 14 (chữ phụ) · base/body 16 (nội dung) · xl 20 (tiêu đề
+     khối) · h1 28 (tiêu đề trang; điện thoại dùng h1-m 22). text-body giữ tên cũ, nay = 16px như A
+     (A không có bậc 15). Tránh dùng thêm xs/lg/2xl/3xl của Tailwind — ngoài thang A. */
+  --text-meta: 0.875rem; /* 14px: người tra cứu lớn tuổi (trước 13px) */
   --text-meta--line-height: 1.25rem;
-  --text-body: 0.9375rem;
-  --text-body--line-height: 1.375rem;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-h2: 1.25rem;
+  --text-h2--line-height: 1.75rem;
+  --text-h2-m: 1.125rem;
+  --text-h2-m--line-height: 1.625rem;
+  --text-h1: 1.75rem;
+  --text-h1--line-height: 2.25rem;
+  --text-h1--letter-spacing: -0.01em;
+  --text-h1-m: 1.375rem;
+  --text-h1-m--line-height: 1.875rem;
 
   /* Mọi class transition-* của Tailwind dùng chung nhịp với luật chung bên dưới (0,15 s ease-out). */
   --default-transition-duration: 150ms;
   --default-transition-timing-function: ease-out;
 
-  --color-brand: #1446a0;
-  --color-brand-hover: #0f3680;
-  --color-brand-50: #eef3fc;
-  --color-navy: #0a2a5e;
-  --color-cta: #c2410c;
-  --color-cta-hover: #9a3412;
-  --color-cta-50: #fff4ed;
+  /* Xanh: link, nút Tìm, mục đang xem. */
+  --color-brand: #133f8c;
+  --color-brand-hover: #0c2d66;
+  --color-brand-50: #e9eef7;
+  /* navy: tên cũ của màu tiêu đề — A dùng cùng màu chữ đậm. */
+  --color-navy: #161b26;
+  /* Cam: CHỈ chữ «T» của logo và nút «Xem số điện thoại». */
+  --color-cta: #b53e0e;
+  --color-cta-hover: #96320b;
+  --color-cta-50: #fbefe9;
 
-  --color-page: #f5f7fa;
-  --color-ink: #111827;
-  --color-ink-2: #4b5563;
-  --color-muted: #5b6472;
-  --color-line: #d9dee7;
+  /* page: nền xám rất nhạt (hover dòng, footer, khung quảng cáo). Nền trang là trắng (body). */
+  --color-page: #f5f7f9;
+  --color-surface: #f5f7f9;
+  --color-ink: #161b26;
+  --color-ink-2: #3d4757;
+  --color-muted: #566070;
+  /* Kẻ: line mảnh (giữa các dòng), line-strong đậm hơn (viền header, đầu bảng, nút phụ), line-soft nhạt nhất. */
+  --color-line: #e1e5ea;
+  --color-line-strong: #c3cad3;
   --color-line-soft: #eef0f3;
-  --color-field: #8a94a3;
+  /* Viền ô nhập liệu (tương phản ≥ 3:1 với nền trắng). */
+  --color-field: #737d8c;
+  --color-focus: #1d5fd1;
 
-  --color-ok: #146c2e;
-  --color-ok-bg: #e7f6ec;
-  --color-off: #4b5563;
-  --color-off-bg: #eef0f3;
+  /* Tình trạng: nhãn chữ nhật, không chấm. */
+  --color-ok: #17603a;
+  --color-ok-bg: #e5f2ea;
+  --color-off: #4a5361;
+  --color-off-bg: #eceef1;
   --color-danger: #b42318;
   --color-danger-bg: #fef3f2;
   --color-warn: #b45309;
   --color-warn-bg: #fffaeb;
 
-  --color-ad: #edf0f4;
+  --color-ad: #eceff2;
+
+  /* Lưới: khung nội dung 1200, cột phải 300, khe 48 (dùng qua .site-wrap / .rail-grid bên dưới). */
+  --container-site: 1200px;
+  --width-rail: 300px;
+  --spacing-rail-gap: 48px;
 }
 
 @layer base {
@@ -51,8 +79,10 @@
   }
 
   body {
-    background: var(--color-page);
+    background: #ffffff;
     color: var(--color-ink);
+    /* Inter: cv11 = chữ a một tầng, ss01 = số 0/1 dễ phân biệt (đọc MST) — như bản mẫu A. */
+    font-feature-settings: 'cv11', 'ss01';
   }
 
   a {
@@ -72,7 +102,7 @@
     input[type='checkbox'],
     input[type='radio']
   ):focus-visible {
-    outline: 3px solid var(--color-brand);
+    outline: 3px solid var(--color-focus);
     outline-offset: 2px;
   }
 
@@ -139,6 +169,103 @@
   html[data-consent] [data-cookie-banner] {
     display: none;
   }
+}
+
+/* ---- Khung & lưới dùng chung (hệ A) ----
+   Đặt trong @layer components để class Tailwind (utilities) vẫn ghi đè được khi cần. */
+@layer components {
+  /* Khung nội dung: rộng 1200 + lề 24 (điện thoại 16). Header, hero, nội dung, footer cùng một mép trái. */
+  .site-wrap {
+    width: 100%;
+    max-width: calc(var(--container-site) + 48px);
+    margin-inline: auto;
+    padding-inline: 24px;
+  }
+  @media (max-width: 767.98px) {
+    .site-wrap {
+      padding-inline: 16px;
+    }
+  }
+
+  /* Cột chính + cột phải 300 (khe 48). Cột chính ở 1440 = 852px. */
+  .rail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+  /* Cột phải chỉ từ 1280: ở 1024 cột chính chỉ còn ~628 (so với 300 cột phải) — quá chật cho bảng thông tin
+     DN và bài viết. Dưới 1280 trang dùng một cột; nội dung cột phải tự ẩn (xl:block) hoặc chuyển lên trên. */
+  @media (min-width: 1280px) {
+    .rail-grid {
+      grid-template-columns: minmax(0, 1fr) var(--width-rail);
+      column-gap: var(--spacing-rail-gap);
+    }
+  }
+
+  /* Hàng tìm kiếm: ô tìm (cột trái) + «Lọc nâng cao» (cột phải). Dùng chung cho hàng 2 header và hero
+     trang chủ → ô tìm hai nơi trùng khít vị trí ngang, bề rộng, chiều cao. ≥ 1280px (cùng mốc .rail-grid):
+     cột phải đúng bằng cột phải trang (300, khe 48) nên ô tìm rộng đúng bằng cột chính. 768–1279: trang một
+     cột → ô tìm rộng gần hết khung, link nằm ngay cạnh ô. */
+  .find-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 768px) {
+    .find-grid {
+      grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: 24px;
+      align-items: end;
+    }
+  }
+  @media (min-width: 1280px) {
+    .find-grid {
+      grid-template-columns: minmax(0, 1fr) var(--width-rail);
+      column-gap: var(--spacing-rail-gap);
+    }
+  }
+
+  /* Nhãn chữ nhật bo 2px, không chấm (tình trạng, «Ngành chính», «Mới»). */
+  .tag {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-size: 0.8125rem;
+    line-height: 18px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tag-ok {
+    background: var(--color-ok-bg);
+    color: var(--color-ok);
+  }
+  .tag-off {
+    background: var(--color-off-bg);
+    color: var(--color-off);
+  }
+  .tag-brand {
+    background: var(--color-brand-50);
+    color: var(--color-brand);
+  }
+}
+
+/* Header 2 hàng (components/HeaderBar.jsx): dính với top âm = chiều cao hàng 1 trừ 8px → khi cuộn, hàng
+   logo/menu trôi đi, chỉ hàng ô tìm ở lại đầu màn hình (ô tìm luôn trong tầm tay, không chiếm 140px). */
+.site-header {
+  top: -48px;
+}
+@media (min-width: 768px) {
+  .site-header {
+    top: -56px;
+  }
+}
+/* Ô tìm hệ A: nút xoá (×) của Chrome giữ chỗ cả khi ô trống → chữ gợi ý 360px bị cắt. Chỉ hiện khi đã gõ. */
+.search-input:placeholder-shown::-webkit-search-cancel-button {
+  display: none;
+}
+/* Ô tìm hệ A: focus = viền xanh + quầng nhạt 3px bên ngoài (rõ hơn ô form thường). */
+.search-input:focus {
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px #c5d3ec;
 }
 
 /* Thanh tiến độ khi chuyển trang (components/NavigationProgress.jsx). Hiện sau 150 ms để không nháy
@@ -378,84 +505,56 @@ html[data-navigating] [data-list-content] {
   animation: motion-shake 0.32s ease-in-out;
 }
 
-/* Chấm tỉnh trên bản đồ (components/VnDotMap.jsx). Đang chọn: cam, to hơn, có vòng sóng. */
-.map-dot {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 9999px;
-  background: var(--color-brand);
-  opacity: 0.5;
-  transform: translate(-50%, -50%);
-  transition:
-    transform 0.15s ease-out,
-    background-color 0.15s ease-out,
-    opacity 0.15s ease-out;
+/* Bảng kê tỉnh/thành trang chủ (hệ A, rộng hết khung, không bản đồ). Điện thoại 2 cột đọc theo HÀNG (An Giang |
+   Bắc Ninh / Cà Mau | Cần Thơ…): đọc dọc 17 hàng thì vần A–Z đứt ở đáy cột trái. Từ 768px đọc dọc từng cột như
+   mục lục (grid-auto-flow: column), số hàng mỗi cột do trang đặt qua --rows-3/4 (= ceil(số tỉnh / số cột)):
+   768–1023 3 cột, ≥ 1024 4 cột. Mỗi dòng cao 44px (vùng bấm), kẻ mảnh dưới; tên tỉnh màu link chữ thường (link
+   có class nên không dính luật «link trong li tô đậm» ở trên — 34 tên đậm thành một mảng nặng), số DN xám bên
+   phải. Tỉnh chưa có DN (.is-empty): chữ xám, không phải link. */
+.prov-index {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
 }
-.map-dot.is-on {
-  z-index: 1;
-  background: var(--color-cta);
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1.6);
-}
-.map-dot.is-on::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border: 1.5px solid var(--color-cta);
-  border-radius: inherit;
-  animation: map-pulse 2.4s ease-out infinite;
-}
-@keyframes map-pulse {
-  from {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  to {
-    transform: scale(2.6);
-    opacity: 0;
+@media (min-width: 768px) {
+  .prov-index {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(var(--rows-3), auto);
+    grid-auto-flow: column;
+    column-gap: 32px;
   }
 }
-/* Trang chủ: rê chuột / focus tên tỉnh trong danh sách → chấm tỉnh đó sáng lên. Mã tỉnh theo danh mục 34
-   tỉnh/thành (lib/vn-map-points.js, sinh bằng scripts/gen-vn-dots.py). */
-.prov-map-scope:has([data-prov='01']:is(:hover, :focus-visible)) [data-map-prov='01'],
-.prov-map-scope:has([data-prov='04']:is(:hover, :focus-visible)) [data-map-prov='04'],
-.prov-map-scope:has([data-prov='08']:is(:hover, :focus-visible)) [data-map-prov='08'],
-.prov-map-scope:has([data-prov='10']:is(:hover, :focus-visible)) [data-map-prov='10'],
-.prov-map-scope:has([data-prov='11']:is(:hover, :focus-visible)) [data-map-prov='11'],
-.prov-map-scope:has([data-prov='12']:is(:hover, :focus-visible)) [data-map-prov='12'],
-.prov-map-scope:has([data-prov='14']:is(:hover, :focus-visible)) [data-map-prov='14'],
-.prov-map-scope:has([data-prov='19']:is(:hover, :focus-visible)) [data-map-prov='19'],
-.prov-map-scope:has([data-prov='20']:is(:hover, :focus-visible)) [data-map-prov='20'],
-.prov-map-scope:has([data-prov='22']:is(:hover, :focus-visible)) [data-map-prov='22'],
-.prov-map-scope:has([data-prov='24']:is(:hover, :focus-visible)) [data-map-prov='24'],
-.prov-map-scope:has([data-prov='25']:is(:hover, :focus-visible)) [data-map-prov='25'],
-.prov-map-scope:has([data-prov='31']:is(:hover, :focus-visible)) [data-map-prov='31'],
-.prov-map-scope:has([data-prov='33']:is(:hover, :focus-visible)) [data-map-prov='33'],
-.prov-map-scope:has([data-prov='37']:is(:hover, :focus-visible)) [data-map-prov='37'],
-.prov-map-scope:has([data-prov='38']:is(:hover, :focus-visible)) [data-map-prov='38'],
-.prov-map-scope:has([data-prov='40']:is(:hover, :focus-visible)) [data-map-prov='40'],
-.prov-map-scope:has([data-prov='42']:is(:hover, :focus-visible)) [data-map-prov='42'],
-.prov-map-scope:has([data-prov='45']:is(:hover, :focus-visible)) [data-map-prov='45'],
-.prov-map-scope:has([data-prov='46']:is(:hover, :focus-visible)) [data-map-prov='46'],
-.prov-map-scope:has([data-prov='48']:is(:hover, :focus-visible)) [data-map-prov='48'],
-.prov-map-scope:has([data-prov='51']:is(:hover, :focus-visible)) [data-map-prov='51'],
-.prov-map-scope:has([data-prov='52']:is(:hover, :focus-visible)) [data-map-prov='52'],
-.prov-map-scope:has([data-prov='56']:is(:hover, :focus-visible)) [data-map-prov='56'],
-.prov-map-scope:has([data-prov='66']:is(:hover, :focus-visible)) [data-map-prov='66'],
-.prov-map-scope:has([data-prov='68']:is(:hover, :focus-visible)) [data-map-prov='68'],
-.prov-map-scope:has([data-prov='75']:is(:hover, :focus-visible)) [data-map-prov='75'],
-.prov-map-scope:has([data-prov='79']:is(:hover, :focus-visible)) [data-map-prov='79'],
-.prov-map-scope:has([data-prov='80']:is(:hover, :focus-visible)) [data-map-prov='80'],
-.prov-map-scope:has([data-prov='86']:is(:hover, :focus-visible)) [data-map-prov='86'],
-.prov-map-scope:has([data-prov='87']:is(:hover, :focus-visible)) [data-map-prov='87'],
-.prov-map-scope:has([data-prov='89']:is(:hover, :focus-visible)) [data-map-prov='89'],
-.prov-map-scope:has([data-prov='92']:is(:hover, :focus-visible)) [data-map-prov='92'],
-.prov-map-scope:has([data-prov='96']:is(:hover, :focus-visible)) [data-map-prov='96'] {
-  z-index: 1;
-  background: var(--color-cta);
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(2);
+@media (min-width: 1024px) {
+  .prov-index {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(var(--rows-4), auto);
+  }
+}
+.prov-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-brand);
+  text-decoration: none;
+}
+a.prov-link:hover {
+  background: var(--color-surface);
+}
+a.prov-link:hover .prov-name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prov-link.is-empty {
+  color: var(--color-muted);
+}
+.prov-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Số điện thoại «chạy số» sau khi xem quảng cáo (components/RollingNumber.jsx): mỗi chữ số là một cột

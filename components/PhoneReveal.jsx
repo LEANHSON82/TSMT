@@ -43,20 +43,23 @@ function useMinutesLeft(retryAt) {
   return Math.max(1, Math.ceil((retryAt - now) / 60000));
 }
 
-export default function PhoneReveal({ mst, hasPhone, phoneHidden, masked }) {
-  if (!hasPhone) return <span className="text-ink-2">{M.phone.noPhone}</span>;
+// indent: class cho DÒNG ĐẦU (số che / số đã hiện / câu «không có số») — bảng thông tin trên điện thoại cho khối
+// này phủ cả 2 cột (nút rộng hết ngang) và thụt dòng đầu sang cột giá trị, ngang hàng nhãn «Điện thoại».
+export default function PhoneReveal({ mst, hasPhone, phoneHidden, masked, indent = '' }) {
+  if (!hasPhone) return <span className={`block text-ink-2 ${indent}`}>{M.phone.noPhone}</span>;
   if (phoneHidden) {
     return (
-      <span className="inline-flex items-center gap-1.5 text-ink-2">
-        <IconEyeOff size={18} className="text-muted" />
-        {M.phone.hidden}
+      // items-baseline: chữ chung đường chân chữ với nhãn «Điện thoại»; icon canh theo dòng đầu (chữ có thể 2 dòng).
+      <span className={`flex items-baseline gap-1.5 text-ink-2 ${indent}`}>
+        <IconEyeOff size={18} className="mt-[3px] flex-none self-start text-muted" />
+        <span>{M.phone.hidden}</span>
       </span>
     );
   }
-  return <PhoneUnlocker mst={mst} masked={masked} />;
+  return <PhoneUnlocker mst={mst} masked={masked} indent={indent} />;
 }
 
-function PhoneUnlocker({ mst, masked }) {
+function PhoneUnlocker({ mst, masked, indent }) {
   const { state, phone, retryAt, start, confirm, cancel, retry } = usePhoneUnlock(mst);
   const minutesLeft = useMinutesLeft(state === 'rate_limited' ? retryAt : null);
   const confirmBtnRef = useRef(null);
@@ -101,22 +104,25 @@ function PhoneUnlocker({ mst, masked }) {
     const rise = animate ? 'motion-rise' : '';
     const delay = (i) => (animate ? { animationDelay: `${i * 60}ms` } : undefined);
     const btn =
-      // press: nhấn thu nhỏ như <button>; sm:min-w: «Sao chép» ↔ «Đã sao chép» không làm xô hàng nút.
-      'press inline-flex h-11 items-center justify-center gap-1 rounded-md border-[1.5px] border-brand bg-white px-1.5 text-sm font-semibold whitespace-nowrap text-brand no-underline hover:bg-brand-50 sm:min-w-[150px] sm:gap-1.5 sm:px-3 sm:text-body';
+      // Nút phụ kiểu A (viền xám đậm, chữ xanh, bo 4px; hover viền xanh). press: nhấn thu nhỏ như <button>;
+      // sm:min-w: «Sao chép» ↔ «Đã sao chép» không làm xô hàng nút.
+      'press inline-flex h-11 items-center justify-center gap-1 rounded border border-line-strong bg-white px-1.5 text-sm font-semibold whitespace-nowrap text-brand no-underline hover:border-brand hover:text-brand sm:min-w-[136px] sm:gap-1.5 sm:px-3 sm:text-body';
     return (
       <>
         {live}
         <div
-          className={`flex flex-col gap-2.5 ${animate ? 'motion-rise' : ''}`}
+          className={`flex flex-col gap-2 ${animate ? 'motion-rise' : ''}`}
           data-testid="phone-revealed"
           ref={revealedRef}
           tabIndex={-1}
         >
-          <span
-            className={`-mx-1.5 w-fit rounded px-1.5 text-lg font-semibold tracking-[0.02em] text-ink tabular-nums ${animate ? 'motion-highlight' : ''}`}
-          >
-            {animate ? <RollingNumber value={phone} /> : phone}
-          </span>
+          <div className={indent}>
+            <span
+              className={`-mx-1.5 block w-fit rounded-sm px-1.5 text-[20px] leading-7 font-semibold tracking-[0.02em] text-ink tabular-nums ${animate ? 'motion-highlight' : ''}`}
+            >
+              {animate ? <RollingNumber value={phone} /> : phone}
+            </span>
+          </div>
           <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
             <a
               href={`tel:${digits}`}
@@ -205,33 +211,35 @@ function PhoneUnlocker({ mst, masked }) {
     <>
       {live}
       <div>
-        {/* Số che, ngay dưới là nút chính «▶ Xem số điện thoại» (spec 4.1: nút chính, cam đặc như nút «Tìm») +
-            dòng chữ nhỏ. Mọi khổ màn hình cùng một bố cục: nút sát con số đang che. Điện thoại: nút rộng hết
-            chiều ngang (spec 7.3). */}
-        <div className="flex flex-col items-start gap-2">
-          <span className="font-semibold tracking-[0.02em] text-ink tabular-nums">
-            <span aria-hidden="true">{masked}</span>
-            <span className="sr-only">{M.phone.maskedLabel(masked)}</span>
+        {/* Kiểu A: số che ở dòng đầu (thẳng hàng nhãn «Điện thoại»), ngay dưới là nút cam «▶ Xem số điện thoại»
+            (spec 4.1) + dòng chữ nhỏ bên cạnh. Điện thoại: nút rộng hết chiều ngang (spec 7.3), chữ nhỏ xuống
+            dưới nút. */}
+        <span className={`block text-body tracking-[0.04em] text-ink tabular-nums ${indent}`}>
+          <span aria-hidden="true">{masked}</span>
+          <span className="sr-only">{M.phone.maskedLabel(masked)}</span>
+        </span>
+        <div className="mt-2 flex flex-col items-stretch gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2">
+          <button
+            type="button"
+            // Đang bận: aria-disabled (vẫn nhận focus — hộp thoại đóng trả focus về đây được) và giữ màu
+            // cam + con trỏ «đang xử lý»; chỉ khi bị khoá thật (429) mới dùng disabled, màu xám.
+            onClick={busy ? undefined : onClick}
+            disabled={locked}
+            aria-disabled={busy || undefined}
+            aria-describedby={`phone-note-${mst}`}
+            aria-busy={busy}
+            className="inline-flex h-12 w-full flex-none items-center justify-center gap-2 rounded bg-cta px-5 text-body font-semibold text-white hover:bg-cta-hover aria-busy:cursor-progress aria-busy:hover:bg-cta disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-2 sm:w-auto"
+          >
+            {icon}
+            {label}
+          </button>
+          <span
+            id={`phone-note-${mst}`}
+            aria-live="polite"
+            className={`min-w-0 text-sm sm:flex-1 ${noteTone}`}
+          >
+            {note}
           </span>
-          <div className="flex w-full flex-col gap-1 sm:w-auto">
-            <button
-              type="button"
-              // Đang bận: aria-disabled (vẫn nhận focus — hộp thoại đóng trả focus về đây được) và giữ màu
-              // cam + con trỏ «đang xử lý»; chỉ khi bị khoá thật (429) mới dùng disabled, màu xám.
-              onClick={busy ? undefined : onClick}
-              disabled={locked}
-              aria-disabled={busy || undefined}
-              aria-describedby={`phone-note-${mst}`}
-              aria-busy={busy}
-              className="inline-flex h-11 w-full flex-none items-center justify-center gap-2 rounded-md bg-cta px-5 text-body font-semibold text-white hover:bg-cta-hover aria-busy:cursor-progress aria-busy:hover:bg-cta disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-2 sm:w-auto"
-            >
-              {icon}
-              {label}
-            </button>
-            <span id={`phone-note-${mst}`} aria-live="polite" className={`text-meta ${noteTone}`}>
-              {note}
-            </span>
-          </div>
         </div>
 
         {/* Chặn quảng cáo: hướng dẫn ngắn (spec mục 4.2) thu gọn, bấm mới mở. */}
@@ -259,7 +267,7 @@ function PhoneUnlocker({ mst, masked }) {
               <button
                 type="button"
                 onClick={cancel}
-                className="h-11 rounded-md border-[1.5px] border-line bg-white px-4 text-body font-semibold text-ink-2 hover:bg-page"
+                className="h-11 rounded border border-line-strong bg-white px-4 text-body font-semibold text-ink-2 hover:border-field hover:bg-page"
               >
                 {M.phone.confirmCancel}
               </button>
@@ -267,7 +275,7 @@ function PhoneUnlocker({ mst, masked }) {
                 ref={confirmBtnRef}
                 type="button"
                 onClick={confirm}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-cta px-4 text-body font-semibold text-white hover:bg-cta-hover"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded bg-cta px-4 text-body font-semibold text-white hover:bg-cta-hover"
               >
                 <IconPlay size={14} />
                 {M.phone.confirmOk}
@@ -275,7 +283,7 @@ function PhoneUnlocker({ mst, masked }) {
             </div>
           }
         >
-          <p id={`phone-confirm-${mst}`} className="text-body leading-6 text-ink-2">
+          <p id={`phone-confirm-${mst}`} className="text-sm leading-6 text-ink-2 sm:text-body">
             {M.phone.confirmBody}
           </p>
         </Modal>

@@ -39,6 +39,16 @@ const MAX_ENTRIES = 5000;
 const cache = new Map(); // khoá → { value, at }
 
 /**
+ * Gốc URL để middleware gọi mock trong chính app. Có PORT (máy chủ chạy sau proxy, như Railway) → gọi thẳng
+ * 127.0.0.1:PORT: gọi qua tên miền công khai (request.nextUrl.origin) từ trong container bị lỗi, middleware coi là
+ * «API lỗi» và cho qua → MST không tồn tại trả 200 thay vì 404, /{mst} không 301 về URL có slug (2026-11-20).
+ * Không có PORT (next dev / next start -p trên máy) → dùng origin của request như cũ.
+ */
+function mockOrigin(origin) {
+  return process.env.PORT ? `http://127.0.0.1:${process.env.PORT}` : origin;
+}
+
+/**
  * GET {path} từ API (hoặc mock trong app), nhớ kết quả (404 nhớ ngắn hơn).
  * Trả { value, cached }: value là JSON nếu 200, null nếu 404, undefined nếu API lỗi (để trang tự xử lý).
  */
@@ -47,7 +57,7 @@ async function apiGet(path, origin, { fresh = false } = {}) {
   if (!fresh && hit && Date.now() - hit.at < (hit.value === null ? TTL_NOT_FOUND_MS : TTL_MS)) {
     return { value: hit.value, cached: true };
   }
-  const url = API_BASE ? `${API_BASE}${path}` : `${origin}/api/mock${path}`;
+  const url = API_BASE ? `${API_BASE}${path}` : `${mockOrigin(origin)}/api/mock${path}`;
   let value;
   try {
     const res = await fetch(url, { headers: { Accept: 'application/json' } });

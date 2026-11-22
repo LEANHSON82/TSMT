@@ -11,7 +11,7 @@ import { suggestCompanies } from '@/lib/api';
 import { companyPath, isValidMst, normalizeMst, searchQueryType } from '@/lib/mst';
 import { track } from '@/lib/analytics';
 import { M } from '@/lib/messages';
-import { suggestProvinces } from '@/lib/search-intent';
+import { matchedOtherName, suggestProvinces } from '@/lib/search-intent';
 import Highlight from './Highlight';
 import { IconSearch } from './Icons';
 import { startNavigation } from './NavigationProgress';
@@ -20,9 +20,8 @@ import { useProvinces } from './ProvincesContext';
 const MIN_CHARS = 2;
 const DEBOUNCE_MS = 300;
 
-// size: 'lg' (ô tìm lớn trong trang: trang chủ, 404…) | 'nav' (hàng 2 header). Hệ thiết kế A dùng CÙNG một
-// khuôn cho cả hai (cao 52px, điện thoại 48px, nút «Tìm» xanh bên phải) để ô tìm trang chủ và ô tìm header
-// trùng khít; size chỉ còn quyết định ô có tự focus không (do trang truyền autoFocusDesktop).
+// size: 'lg' (ô tìm lớn trong trang: trang chủ, 404… — cao 56px, điện thoại 52px) | 'nav' (header — cao 40px,
+// điện thoại 44px). Kiểu Pappers: ô nhập và nút «Tìm» xanh dính liền nhau thành một khối bo 8px.
 export default function SearchBox({
   size = 'lg',
   defaultValue = '',
@@ -248,74 +247,76 @@ export default function SearchBox({
     >
       {/* Ô nhập (kính lúp bên trong) + nút «Tìm» luôn cùng một hàng, kể cả điện thoại 360px. */}
       <div className="flex w-full gap-2">
-        <div className="relative min-w-0 flex-1">
-          <label
-            htmlFor={inputId}
-            className="sr-only"
-            id={labelledBy ? undefined : `${inputId}-label`}
-          >
-            {M.search.label}
-          </label>
-          <span className="pointer-events-none absolute top-1/2 left-3 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-muted md:left-3.5">
-            {loading ? spinner : <IconSearch size={20} strokeWidth={1.6} />}
-          </span>
-          <input
-            ref={inputRef}
-            id={inputId}
-            name="q"
-            type="search"
-            enterKeyHint="search"
-            autoComplete="off"
-            spellCheck={false}
-            role="combobox"
-            aria-autocomplete="list"
-            aria-expanded={showList}
-            aria-controls={listId}
-            aria-activedescendant={showList && active >= 0 ? `${listId}-${active}` : undefined}
-            aria-labelledby={labelledBy}
-            aria-busy={loading}
-            placeholder={
-              (wide && placeholderWide) ||
-              placeholder ||
-              (narrow
-                ? addon
-                  ? M.search.placeholderXs // 360px: ô chỉ còn ~170px chữ
-                  : M.search.placeholderNarrow
-                : M.search.placeholder)
-            }
-            value={value}
-            onChange={(e) => {
-              const v = e.target.value;
-              typedRef.current = true;
-              setValue(v);
-              // Chữ khác với gợi ý đang hiện: đóng danh sách cũ, bỏ dòng đang chọn (chờ gợi ý mới).
-              if (v.trim() !== lastQ) {
-                setOpen(false);
-                setActive(-1);
-                if (status === 'empty') setStatus('idle');
+        <div className="flex min-w-0 flex-1">
+          <div className="relative min-w-0 flex-1">
+            <label
+              htmlFor={inputId}
+              className="sr-only"
+              id={labelledBy ? undefined : `${inputId}-label`}
+            >
+              {M.search.label}
+            </label>
+            <span className="pointer-events-none absolute top-1/2 left-3 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-brand md:left-3.5">
+              {loading ? spinner : <IconSearch size={20} strokeWidth={2.2} />}
+            </span>
+            <input
+              ref={inputRef}
+              id={inputId}
+              name="q"
+              type="search"
+              enterKeyHint="search"
+              autoComplete="off"
+              spellCheck={false}
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={showList}
+              aria-controls={listId}
+              aria-activedescendant={showList && active >= 0 ? `${listId}-${active}` : undefined}
+              aria-labelledby={labelledBy}
+              aria-busy={loading}
+              placeholder={
+                (wide && placeholderWide) ||
+                placeholder ||
+                (narrow
+                  ? addon
+                    ? M.search.placeholderXs // 360px: ô chỉ còn ~170px chữ
+                    : M.search.placeholderNarrow
+                  : M.search.placeholder)
               }
-            }}
-            onKeyDown={onKeyDown}
-            onFocus={() => {
-              setFocused(true);
-              if (entries.length && fresh) setOpen(true);
-            }}
-            onBlur={() =>
-              setTimeout(() => {
-                setOpen(false);
-                setFocused(false);
-              }, 150)
-            }
-            data-size={size}
-            className="search-input h-12 w-full appearance-none rounded border border-field bg-white pr-1 pl-[38px] text-base text-ink text-ellipsis placeholder:text-[#6b7483] hover:border-ink-2 md:h-[52px] md:pr-4 md:pl-[46px]"
-          />
+              value={value}
+              onChange={(e) => {
+                const v = e.target.value;
+                typedRef.current = true;
+                setValue(v);
+                // Chữ khác với gợi ý đang hiện: đóng danh sách cũ, bỏ dòng đang chọn (chờ gợi ý mới).
+                if (v.trim() !== lastQ) {
+                  setOpen(false);
+                  setActive(-1);
+                  if (status === 'empty') setStatus('idle');
+                }
+              }}
+              onKeyDown={onKeyDown}
+              onFocus={() => {
+                setFocused(true);
+                if (entries.length && fresh) setOpen(true);
+              }}
+              onBlur={() =>
+                setTimeout(() => {
+                  setOpen(false);
+                  setFocused(false);
+                }, 150)
+              }
+              data-size={size}
+              className={`search-input w-full appearance-none rounded-l-lg rounded-r-none border border-r-0 border-field bg-white pr-1 pl-[40px] text-base text-ink text-ellipsis placeholder:text-[#6b7483] hover:border-ink-2 md:pr-4 md:pl-[44px] ${size === 'nav' ? 'h-11 md:h-10 md:text-[15px]' : 'h-[52px] md:h-14 md:text-[17px]'}`}
+            />
+          </div>
+          <button
+            type="submit"
+            className={`inline-flex flex-none items-center justify-center rounded-l-none rounded-r-lg bg-brand font-semibold text-white hover:bg-brand-hover ${size === 'nav' ? 'h-11 px-4 text-base md:h-10 md:text-[15px]' : 'h-[52px] px-5 text-[17px] md:h-14 md:px-8'}`}
+          >
+            {M.search.submit}
+          </button>
         </div>
-        <button
-          type="submit"
-          className="inline-flex h-12 flex-none items-center justify-center rounded bg-brand px-2.5 text-base font-semibold text-white hover:bg-brand-hover md:h-[52px] md:px-7"
-        >
-          {M.search.submit}
-        </button>
         {addon}
       </div>
 
@@ -324,7 +325,7 @@ export default function SearchBox({
         role="listbox"
         aria-label={M.search.suggestions}
         hidden={!showList}
-        className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1 max-h-[70vh] overflow-auto rounded border border-line-strong bg-white pt-1 text-left shadow-[0_8px_24px_rgba(22,27,38,0.12)] ${listClassName}`}
+        className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1.5 max-h-[70vh] overflow-auto rounded-lg border border-line bg-white pt-1 text-left shadow-[0_8px_24px_rgba(22,27,38,0.12)] ${listClassName}`}
       >
         {GROUPS.map(({ kind, label }) => {
           const group = entries.map((e, i) => ({ e, i })).filter(({ e }) => e.kind === kind);
@@ -387,7 +388,7 @@ export default function SearchBox({
       {showEmpty && (
         <p
           aria-hidden="true"
-          className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1 rounded border border-line-strong bg-white px-4 py-3 text-left text-sm text-ink-2 shadow-[0_8px_24px_rgba(22,27,38,0.12)] ${listClassName}`}
+          className={`motion-drop absolute top-full right-0 left-0 z-40 mt-1.5 rounded-lg border border-line bg-white px-4 py-3 text-left text-sm text-ink-2 shadow-[0_8px_24px_rgba(22,27,38,0.12)] ${listClassName}`}
         >
           {M.search.noSuggestions(value.trim())}
         </p>
@@ -421,6 +422,8 @@ function SuggestionRow({ entry: e, query }) {
           <Highlight text={e.p.name} query={query} />
         </span>
         <span className="text-meta text-muted">
+          {/* Gõ tên tỉnh cũ («binh duong») → nói rõ nay thuộc tỉnh nào, tránh tưởng gợi ý sai. */}
+          {matchedOtherName(query, e.p) && <>{M.search.formerProvince} · </>}
           {M.search.provinceCount(e.p.company_count ?? 0)}
         </span>
       </>

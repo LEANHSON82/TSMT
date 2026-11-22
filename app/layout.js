@@ -12,20 +12,19 @@ import { POPULAR_INDUSTRIES } from '@/lib/popular-industries';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import { M } from '@/lib/messages';
 
-// Một font đủ dấu tiếng Việt (spec mục 7.2): Inter theo hệ thiết kế A, chỉ dùng 2 độ đậm 400/600. Chữ số đều
-// nét, có số tabular (cột ngày thẳng hàng).
+// Một font đủ dấu tiếng Việt (spec mục 7.2): Hanken Grotesk (theo bản mẫu Pappers), chỉ dùng 2 độ đậm 400/700.
 // Tự lưu file font trong repo (next/font/local) thay cho next/font/google: lúc build, Google Fonts thỉnh thoảng trả
 // đường dẫn file không có đuôi .woff2 → next/font báo lỗi và build trên Railway hỏng (2026-11-19). File lấy từ
-// Google Fonts (Inter v20, bản biến thiên độ đậm), chia 3 phần theo bảng mã như Google: trình duyệt chỉ tải phần
+// Google Fonts (Hanken Grotesk v12, bản biến thiên độ đậm 400–700), chia 3 phần theo bảng mã như Google: trình duyệt chỉ tải phần
 // có ký tự trên trang. Mỗi phần là một họ font riêng (next/font/local không cho unicode-range theo từng file),
 // xếp nối nhau trong --font-sans (globals.css): tiếng Việt → latin-ext → latin. Chỉ phần latin (đứng cuối) có font
 // dự phòng chỉnh cỡ (giảm xô chữ khi font tải xong); hai phần kia không có, nếu không chữ có dấu sẽ rơi vào font
-// dự phòng đó trước khi tới phần Inter chứa nó.
-const interVi = localFont({
-  src: './fonts/inter-vietnamese.woff2',
-  weight: '100 900',
+// dự phòng đó trước khi tới phần Hanken chứa nó.
+const hankenVi = localFont({
+  src: './fonts/hanken-vietnamese.woff2',
+  weight: '400 700',
   display: 'swap',
-  variable: '--font-inter-vi',
+  variable: '--font-hanken-vi',
   adjustFontFallback: false,
   declarations: [
     {
@@ -35,11 +34,11 @@ const interVi = localFont({
     },
   ],
 });
-const interLatinExt = localFont({
-  src: './fonts/inter-latin-ext.woff2',
-  weight: '100 900',
+const hankenLatinExt = localFont({
+  src: './fonts/hanken-latin-ext.woff2',
+  weight: '400 700',
   display: 'swap',
-  variable: '--font-inter-latin-ext',
+  variable: '--font-hanken-latin-ext',
   adjustFontFallback: false,
   preload: false,
   declarations: [
@@ -50,11 +49,11 @@ const interLatinExt = localFont({
     },
   ],
 });
-const interLatin = localFont({
-  src: './fonts/inter-latin.woff2',
-  weight: '100 900',
+const hankenLatin = localFont({
+  src: './fonts/hanken-latin.woff2',
+  weight: '400 700',
   display: 'swap',
-  variable: '--font-inter-latin',
+  variable: '--font-hanken-latin',
   declarations: [
     {
       prop: 'unicode-range',
@@ -63,7 +62,7 @@ const interLatin = localFont({
     },
   ],
 });
-const fontVars = `${interVi.variable} ${interLatinExt.variable} ${interLatin.variable}`;
+const fontVars = `${hankenVi.variable} ${hankenLatinExt.variable} ${hankenLatin.variable}`;
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),

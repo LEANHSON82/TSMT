@@ -1,41 +1,42 @@
-// Khung chờ khi mở trang DN chưa có sẵn trong bộ đệm (vd. bấm gợi ý tìm kiếm): hiện ngay bố cục trang
-// (breadcrumb, tiêu đề, bảng thông tin kiểu A, cột quảng cáo) thay vì đứng yên ở trang cũ. Cùng lưới, cùng
-// khoảng cách với page.js để khi nội dung thật thay vào không bị nhảy. Trang đã prerender thì không thấy.
 import { BANNERS_ON } from '@/components/AdSlot';
 import { M } from '@/lib/messages';
 
-export default function CompanyLoading() {
+// Khung chờ trang DN: cùng bố cục trang thật (dải xanh, khối đầu trang tên DN + bảng thông tin, rồi các thẻ) để
+// khi dữ liệu về trang không xô lệch.
+export default function Loading() {
   return (
-    <div aria-busy="true" aria-live="polite" className="site-wrap">
+    <div aria-busy="true" aria-live="polite">
       <span className="sr-only">{M.common.loading}</span>
-      <div className="pt-3 md:pt-5">
-        <div className="skeleton h-5 w-56 max-w-full rounded-sm" />
-      </div>
-      <div className={`mt-3 md:mt-4 ${BANNERS_ON ? 'rail-grid' : ''}`}>
-        <div className="min-w-0">
-          <div className="mb-5 flex flex-col gap-2 md:mb-8">
-            <div className="skeleton h-[30px] w-full max-w-[560px] rounded-sm md:h-9" />
-            <div className="skeleton h-5 w-2/3 rounded-sm" />
+      <div className="bg-band pb-8 md:pb-12">
+        <div className="site-wrap">
+          <div className="flex h-12 items-center md:h-14">
+            <div className="h-4 w-56 max-w-full rounded-sm bg-white/30" />
           </div>
-          {/* Như SectionHeader: vạch 2px + tiêu đề. */}
-          <div className="border-t-2 border-ink pt-3 pb-2">
-            <div className="skeleton h-7 w-48 rounded-sm" />
-          </div>
-          <div>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-[104px_minmax(0,1fr)] gap-x-2.5 border-b border-line py-2 md:grid-cols-[208px_minmax(0,1fr)] md:gap-x-4 md:py-3.5"
-              >
-                <div className="skeleton h-5 w-20 rounded-sm md:h-6 md:w-28" />
+          <div className="card-hero px-5 pt-6 pb-4 md:px-10 md:pt-8 md:pb-6 xl:flex xl:items-center xl:gap-12">
+            <div className="flex flex-col items-center gap-3 xl:w-[340px] xl:flex-none">
+              <div className="skeleton h-8 w-4/5 rounded-sm md:h-10" />
+              <div className="skeleton h-8 w-3/5 rounded-sm md:h-10" />
+              <div className="skeleton h-5 w-2/3 rounded-sm" />
+            </div>
+            <div className="mt-5 flex min-w-0 flex-1 flex-col gap-3 border-t border-line pt-4 xl:mt-0 xl:border-t-0 xl:pt-0">
+              {Array.from({ length: 9 }).map((_, i) => (
                 <div
-                  className="skeleton h-6 rounded-sm"
-                  style={{ width: `${50 + ((i * 17) % 40)}%` }}
-                />
-              </div>
-            ))}
+                  key={i}
+                  className="grid grid-cols-1 gap-1 md:grid-cols-[150px_minmax(0,1fr)] md:gap-x-4"
+                >
+                  <div className="skeleton h-4 w-24 rounded-sm" />
+                  <div
+                    className="skeleton h-5 rounded-sm"
+                    style={{ width: `${55 + ((i * 17) % 40)}%` }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+      </div>
+      <div className={`site-wrap mt-8 pb-12 ${BANNERS_ON ? 'rail-grid' : ''}`}>
+        <div className="card h-48" />
         {BANNERS_ON && <div className="skeleton hidden h-[624px] xl:block" />}
       </div>
     </div>

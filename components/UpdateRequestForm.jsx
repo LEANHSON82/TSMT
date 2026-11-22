@@ -78,7 +78,7 @@ function Field({ id, label, required, hint, error, children }) {
 
 // Lỗi: viền đỏ dày 2px vẽ VÀO TRONG ô (inset) — cùng cách với viền focus (globals.css), ô không nhích.
 const inputCls = (err) =>
-  `h-12 w-full rounded border bg-white px-3 text-base text-ink ${err ? 'border-danger shadow-[inset_0_0_0_1px_var(--color-danger)]' : 'border-field hover:border-ink-2'}`;
+  `h-12 w-full rounded-lg border bg-white px-3 text-base text-ink ${err ? 'border-danger shadow-[inset_0_0_0_1px_var(--color-danger)]' : 'border-field hover:border-ink-2'}`;
 
 // initialCompany: { mst, name, path } khi mở từ trang DN — hiện tên DN dưới ô MST để chủ DN xác nhận đúng
 // công ty, và link quay lại trang DN ở màn cảm ơn.
@@ -179,7 +179,7 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
         ref={doneRef}
         tabIndex={-1}
         role="status"
-        className="motion-rise flex flex-col items-start gap-3 border-t-2 border-ink pt-6 outline-none"
+        className="card motion-rise flex flex-col items-start gap-3 px-5 py-6 outline-none md:px-8 md:py-8"
       >
         <h2 className="flex items-center gap-2 text-h2-m font-semibold text-ink md:text-h2">
           <IconCheckCircle size={24} strokeWidth={1.8} className="flex-none text-ok" />
@@ -225,7 +225,7 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
       ref={formRef}
       noValidate
       onSubmit={onSubmit}
-      className="flex flex-col gap-6 border-t-2 border-ink pt-6"
+      className="card flex flex-col gap-6 px-5 py-6 md:px-8 md:py-8"
     >
       {serverError && (
         <div
@@ -384,7 +384,7 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
               <p className="text-sm text-ink-2">{F.fileDrop}</p>
             </>
           )}
-          <label className="inline-flex h-11 cursor-pointer items-center rounded border border-line-strong bg-white px-4 text-body font-semibold text-brand hover:border-brand has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus">
+          <label className="inline-flex h-11 cursor-pointer items-center rounded-lg border border-field bg-white px-4 text-body font-semibold text-brand hover:border-brand has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus">
             <span id="f-file-btn">{file ? F.fileChooseOther : F.fileChoose}</span>
             <input
               ref={fileRef}
@@ -428,7 +428,7 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
         type="submit"
         disabled={submitting}
         aria-busy={submitting}
-        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded bg-brand px-8 text-base font-semibold text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-70 md:w-auto md:self-start"
+        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand px-8 text-base font-semibold text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-70 md:w-auto md:self-start"
       >
         {submitting && (
           <span

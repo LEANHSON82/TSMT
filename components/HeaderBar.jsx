@@ -88,7 +88,7 @@ export function AdvancedSearchLink({ href = '/tim-kiem', className = '' }) {
     <Link
       href={href}
       prefetch={false}
-      className={`inline-flex min-h-11 items-center gap-2 text-base font-semibold whitespace-nowrap no-underline hover:underline hover:underline-offset-[3px] ${className}`}
+      className={`inline-flex min-h-11 items-center gap-2 font-semibold whitespace-nowrap no-underline hover:underline hover:underline-offset-[3px] ${className}`}
     >
       <FilterIcon />
       {M.list.advancedFilter}
@@ -105,7 +105,7 @@ function AdvancedSearchIcon({ href, className = '' }) {
       prefetch={false}
       aria-label={M.list.advancedFilter}
       title={M.list.advancedFilter}
-      className={`inline-flex h-12 w-11 flex-none items-center justify-center rounded border border-field bg-white text-brand no-underline hover:border-ink-2 ${className}`}
+      className={`inline-flex h-11 w-11 flex-none items-center justify-center rounded-lg border border-field bg-white text-brand no-underline hover:border-ink-2 ${className}`}
     >
       <FilterIcon size={20} />
     </Link>
@@ -114,7 +114,7 @@ function AdvancedSearchIcon({ href, className = '' }) {
 
 // Mục menu hàng 1: chữ 16px đậm; mục của trang đang xem màu xanh + vạch 2px sát đáy vùng bấm.
 const NAV_ITEM =
-  'inline-flex min-h-11 items-center gap-1 text-base font-semibold whitespace-nowrap no-underline';
+  'inline-flex min-h-11 items-center gap-1 text-[15px] whitespace-nowrap no-underline';
 const CURRENT_BAR = 'text-brand shadow-[inset_0_-2px_0_var(--color-brand)]';
 
 function DesktopDropdown({ id, label, open, current, onToggle, onClose, children }) {
@@ -404,14 +404,33 @@ export default function HeaderBar({ provinces, industries }) {
       <header
         className={`site-header header-lift sticky z-30 bg-white ${
           // Trang chủ: viền dưới nằm ở cuối hero.
-          isHome ? '' : 'border-b border-line-strong'
+          isHome ? '' : 'border-b border-line'
         }`}
       >
         {/* Hàng 1: logo trái, menu phải (điện thoại: nút menu). */}
-        <div className="site-wrap flex h-14 items-center justify-between gap-4 max-md:pr-1.5 md:h-16">
+        <div className="site-wrap flex h-14 items-center justify-between gap-4 max-md:pr-1.5 md:h-16 lg:h-[76px] lg:gap-8">
           <SiteLogo />
 
-          <nav aria-label={M.nav.mainMenu} className="hidden items-center gap-8 md:flex">
+          {/* Từ 1024px (kiểu Pappers): ô tìm nằm ngay trên hàng logo, header chỉ còn một hàng. Trang chủ: ẩn khi ô
+              tìm lớn của hero còn trong tầm nhìn (vẫn giữ chỗ để menu không nhảy). */}
+          <div
+            data-header-search
+            inert={!showHeaderSearch}
+            className={`hidden min-w-0 flex-1 items-center gap-5 lg:flex ${showHeaderSearch ? '' : 'invisible'}`}
+          >
+            <div className="min-w-0 flex-1 lg:max-w-[520px]">
+              {pathname === '/tim-kiem' ? (
+                <Suspense fallback={<SearchBox {...navSearch(filterHref)} />}>
+                  <SearchWithQuery filterHref={filterHref} />
+                </Suspense>
+              ) : (
+                <SearchBox {...navSearch(filterHref)} />
+              )}
+            </div>
+            <AdvancedSearchLink href={filterHref} className="text-[15px]" />
+          </div>
+
+          <nav aria-label={M.nav.mainMenu} className="hidden flex-none items-center gap-7 md:flex">
             <DesktopDropdown
               id="menu-provinces"
               label={M.nav.provinces}
@@ -508,14 +527,14 @@ export default function HeaderBar({ provinces, industries }) {
           ref={findRef}
           data-header-search
           inert={!showHeaderSearch}
-          className={`${
+          className={`lg:hidden ${
             isHome
-              ? 'absolute inset-x-0 top-full border-b border-line-strong bg-white shadow-[0_4px_16px_rgba(22,27,38,0.08)] transition-opacity duration-150'
+              ? 'absolute inset-x-0 top-full border-b border-line bg-white shadow-[0_4px_16px_rgba(22,27,38,0.08)] transition-opacity duration-150'
               : ''
           } ${showHeaderSearch ? 'opacity-100' : 'invisible opacity-0'}`}
         >
           {/* Điện thoại: đệm đáy 8px → header 56 + 48 + 8 + viền 1 = 113px (trước: 160px với hàng «Lọc nâng cao»). */}
-          <div className="site-wrap find-grid pb-2 md:pt-1 md:pb-5">
+          <div className="site-wrap find-grid pb-2 md:pt-1 md:pb-3">
             {/* Trang kết quả: ô giữ sẵn từ khoá đang tìm. useSearchParams chỉ chạy trên /tim-kiem (trang vốn
               render động) — các trang tĩnh/ISR khác không bị chuyển sang render phía trình duyệt. */}
             {pathname === '/tim-kiem' ? (
@@ -525,8 +544,8 @@ export default function HeaderBar({ provinces, industries }) {
             ) : (
               <SearchBox {...navSearch(filterHref)} />
             )}
-            <div className="hidden h-[52px] items-center md:flex">
-              <AdvancedSearchLink href={filterHref} />
+            <div className="hidden h-10 items-center md:flex">
+              <AdvancedSearchLink href={filterHref} className="text-[15px]" />
             </div>
           </div>
         </div>

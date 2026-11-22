@@ -189,7 +189,7 @@ export default function ListFilters({ action, fields, hidden = {}, variant = 'pa
                 keyboardRef.current = false;
                 if (pendingRef.current === f.name) commit(f.name);
               }}
-              className={`select-chevron h-11 cursor-pointer rounded border border-line-strong bg-white px-3 text-body text-ink hover:border-ink-2 ${inline ? 'w-full min-w-0 md:w-auto md:min-w-[200px]' : 'w-full'}`}
+              className={`select-chevron h-11 cursor-pointer rounded-lg border border-field bg-white px-3 text-body text-ink hover:border-ink-2 ${inline ? 'w-full min-w-0 md:w-auto md:min-w-[200px]' : 'w-full'}`}
             >
               <option value="">{f.allLabel}</option>
               {f.options.map((o) => (
@@ -202,7 +202,7 @@ export default function ListFilters({ action, fields, hidden = {}, variant = 'pa
         ),
       )}
       <noscript>
-        <button type="submit" className="h-11 rounded bg-brand px-5 font-semibold text-white">
+        <button type="submit" className="h-11 rounded-lg bg-brand px-5 font-semibold text-white">
           {M.list.applyFilter}
         </button>
       </noscript>
@@ -237,7 +237,7 @@ export default function ListFilters({ action, fields, hidden = {}, variant = 'pa
     >
       {hiddenInputs}
       {/* Điện thoại: thu gọn sau nút «Lọc» (viền mảnh như nút phụ hệ A); máy tính: hiện ngay một hàng ô chọn. */}
-      <div className="rounded border border-line-strong bg-white md:border-0 md:bg-transparent">
+      <div className="rounded-lg border border-field bg-white md:border-0 md:bg-transparent">
         <button
           type="button"
           aria-expanded={open}

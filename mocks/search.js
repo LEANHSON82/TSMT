@@ -9,8 +9,9 @@
 //    có kết quả khớp nguyên chữ thì bỏ các kết quả chỉ khớp phần đầu — «Sơn» không kéo theo «Sông».
 //  - Gõ có dấu thì kết quả đúng dấu xếp trên. Cụm chữ chung («công ty», «TNHH»…) không tính khi so khớp.
 //  - Khớp tên DN xếp trên khớp người đại diện khi điểm bằng nhau; khớp cả cụm liền nhau được cộng điểm.
-//  - Từ khoá số: tiền tố MST, hoặc ≥ 6 số trong SĐT — KHÔNG BAO GIỜ khớp SĐT DN đã ẩn / không công khai.
+//  - Từ khoá số (bỏ nhãn «MST:», mọi kiểu gạch): tiền tố MST, hoặc ≥ 6 số trong SĐT — KHÔNG BAO GIỜ khớp SĐT DN đã ẩn / không công khai.
 //  - Mỗi kết quả kèm matched: 'name' | 'representative' | 'mst' | 'phone'.
+import { normalizeMst } from '../lib/mst.js';
 import { queryTokens, tokenize, wordScore } from '../lib/search-text.js';
 
 const NAME_BONUS = 1.5;
@@ -50,7 +51,8 @@ export function buildIndex(companies, phones) {
 export function search(index, q, { mode = 'search' } = {}) {
   const query = String(q || '').trim();
   if (!query) return [];
-  const digits = query.replace(/[\s.\-+]/g, '');
+  // «MST: 0101234567», «0101234567–001» (gạch dài), «0101234567_001» → chuỗi số (normalizeMst bỏ nhãn, đổi gạch).
+  const digits = normalizeMst(query).replace(/[-+]/g, '');
   if (/^\d{3,}$/.test(digits)) {
     const phoneDigits = digits.replace(/^84/, '0');
     const out = [];

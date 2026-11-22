@@ -11,7 +11,7 @@ import { suggestCompanies } from '@/lib/api';
 import { companyPath, isValidMst, normalizeMst, searchQueryType } from '@/lib/mst';
 import { track } from '@/lib/analytics';
 import { M } from '@/lib/messages';
-import { suggestProvinces } from '@/lib/search-intent';
+import { matchedOtherName, suggestProvinces } from '@/lib/search-intent';
 import Highlight from './Highlight';
 import { IconSearch } from './Icons';
 import { startNavigation } from './NavigationProgress';
@@ -421,6 +421,8 @@ function SuggestionRow({ entry: e, query }) {
           <Highlight text={e.p.name} query={query} />
         </span>
         <span className="text-meta text-muted">
+          {/* Gõ tên tỉnh cũ («binh duong») → nói rõ nay thuộc tỉnh nào, tránh tưởng gợi ý sai. */}
+          {matchedOtherName(query, e.p) && <>{M.search.formerProvince} · </>}
           {M.search.provinceCount(e.p.company_count ?? 0)}
         </span>
       </>

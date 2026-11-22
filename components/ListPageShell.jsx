@@ -43,83 +43,92 @@ export default function ListPageShell({
   const hints = emptyHints ?? (filters && filtered ? [M.list.emptyHint] : []);
   const showOther = !emptyHints && !(filters && filtered);
   return (
-    <main className="site-wrap">
-      {breadcrumb && (
-        <div className="pt-3 md:pt-5">
-          <Breadcrumb items={breadcrumb} />
-        </div>
-      )}
-      <header className={breadcrumb ? 'mt-3 md:mt-4' : 'pt-4 md:pt-6'}>
-        <h1 className="text-h1-m font-semibold text-pretty text-ink md:text-h1">
-          {title}
-          {data.page > 1 && (
-            <span className="font-normal text-muted"> – {M.pagination.page(data.page)}</span>
-          )}
-        </h1>
-        {/* Rộng tối đa 852 = cột chính: mép phải trùng mép phải nút «Tìm» trên header. */}
-        {description && (
-          <p className="mt-2 max-w-[852px] text-body text-pretty text-ink-2">{description}</p>
-        )}
-      </header>
-      {intro && <div className="mt-5 flex flex-col gap-4 md:mt-6">{intro}</div>}
-      {/* data-list-content: mờ đi khi đang chuyển trang / đổi bộ lọc (NavigationProgress). */}
-      <div data-list-content className="mt-5 md:mt-8">
-        {/* Thanh công cụ: khung cao 44px cố định (= ô chọn) ở mọi trang, chữ canh giữa dọc → chữ số đếm và chữ trong
-            ô chọn cùng đường chân chữ (dòng chữ cao 44px như ô chọn); bảng bắt đầu cùng y dù trang có bộ lọc hay không. Không có DN nào: bỏ dòng
-            «0 doanh nghiệp» (thông báo rỗng ngay dưới đã nói), vẫn giữ ô lọc để đổi lựa chọn. */}
-        {(total > 0 || filters) && (
-          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 pb-4">
-            {total > 0 && (
-              <p className="text-body leading-11 text-ink-2">
-                <span className="text-h2 leading-none font-semibold text-ink tabular-nums">
-                  {formatNumber(total)}
-                </span>{' '}
-                {M.list.countUnit}
-                {count > 0 && (
-                  <>
-                    <span aria-hidden="true" className="px-2 text-line-strong">
-                      ·
-                    </span>
-                    <span className="tabular-nums">
-                      {M.list.showing(formatNumber(from), formatNumber(from + count - 1))}
-                    </span>
-                  </>
-                )}
-              </p>
-            )}
-            {filters && <div className="ml-auto flex min-w-0 gap-2 max-md:w-full">{filters}</div>}
+    <main className="flex flex-col">
+      {/* Kiểu CafeF: breadcrumb, rồi khung trắng chứa H1 (đỏ), mô tả và phần đầu riêng của trang (tab, bộ lọc…);
+          bên dưới là thanh số đếm + khung danh sách. */}
+      <div className="site-wrap">
+        {breadcrumb && (
+          <div className="pt-3 md:pt-4">
+            <Breadcrumb items={breadcrumb} />
           </div>
         )}
-        {count ? (
-          <>
-            <CompanyList
-              items={data.items}
-              slotPrefix={slotPrefix}
-              highlight={highlight}
-              showNew={showNew}
-              showProvince={showProvince}
-            />
-            <Pagination
-              page={data.page}
-              totalPages={totalPages}
-              basePath={basePath}
-              params={params}
-            />
-          </>
-        ) : (
-          <EmptyState title={emptyTitle} hints={hints}>
-            {showOther && (
-              <p className="text-body text-ink-2">
-                <Link
-                  href="/#prov-title"
-                  className="inline-flex min-h-11 items-center font-semibold"
-                >
-                  {M.list.otherProvinces}
-                </Link>
+        <div
+          className={`card px-4 py-3.5 md:px-6 md:py-5 ${breadcrumb ? 'mt-2 md:mt-3' : 'mt-4 md:mt-6'}`}
+        >
+          <header>
+            <h1 className="text-[22px] leading-7 font-semibold text-pretty text-title md:text-[28px] md:leading-[34px]">
+              {title}
+              {data.page > 1 && (
+                <span className="font-normal text-muted"> – {M.pagination.page(data.page)}</span>
+              )}
+            </h1>
+            {description && (
+              <p className="mt-1.5 max-w-[760px] text-sm text-pretty text-muted md:text-[15px]">
+                {description}
               </p>
             )}
-          </EmptyState>
-        )}
+          </header>
+          {intro && <div className="mt-4 flex flex-col gap-4 md:mt-5">{intro}</div>}
+        </div>
+      </div>
+      <div className="site-wrap pb-12 md:pb-16">
+        {/* data-list-content: mờ đi khi đang chuyển trang / đổi bộ lọc (NavigationProgress). */}
+        <div data-list-content className="mt-3 md:mt-4">
+          {/* Thanh công cụ: khung cao 44px cố định (= ô chọn) ở mọi trang, chữ canh giữa dọc → chữ số đếm và chữ trong
+            ô chọn cùng đường chân chữ (dòng chữ cao 44px như ô chọn); bảng bắt đầu cùng y dù trang có bộ lọc hay không. Không có DN nào: bỏ dòng
+            «0 doanh nghiệp» (thông báo rỗng ngay dưới đã nói), vẫn giữ ô lọc để đổi lựa chọn. */}
+          {(total > 0 || filters) && (
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 pb-3 md:pb-4">
+              {total > 0 && (
+                <p className="text-sm leading-11 text-muted">
+                  <span className="font-semibold text-ink tabular-nums">{formatNumber(total)}</span>{' '}
+                  {M.list.countUnit}
+                  {count > 0 && (
+                    <>
+                      <span aria-hidden="true" className="px-2 text-line-strong">
+                        ·
+                      </span>
+                      <span className="tabular-nums">
+                        {M.list.showing(formatNumber(from), formatNumber(from + count - 1))}
+                      </span>
+                    </>
+                  )}
+                </p>
+              )}
+              {filters && <div className="ml-auto flex min-w-0 gap-2 max-md:w-full">{filters}</div>}
+            </div>
+          )}
+          {count ? (
+            <>
+              <CompanyList
+                items={data.items}
+                slotPrefix={slotPrefix}
+                highlight={highlight}
+                showNew={showNew}
+                showProvince={showProvince}
+              />
+              <Pagination
+                page={data.page}
+                totalPages={totalPages}
+                basePath={basePath}
+                params={params}
+              />
+            </>
+          ) : (
+            <EmptyState title={emptyTitle} hints={hints}>
+              {showOther && (
+                <p className="text-body text-ink-2">
+                  <Link
+                    href="/#prov-title"
+                    className="inline-flex min-h-11 items-center font-semibold"
+                  >
+                    {M.list.otherProvinces}
+                  </Link>
+                </p>
+              )}
+            </EmptyState>
+          )}
+        </div>
       </div>
     </main>
   );

@@ -88,7 +88,7 @@ export function AdvancedSearchLink({ href = '/tim-kiem', className = '' }) {
     <Link
       href={href}
       prefetch={false}
-      className={`inline-flex min-h-11 items-center gap-2 text-base font-semibold whitespace-nowrap no-underline hover:underline hover:underline-offset-[3px] ${className}`}
+      className={`inline-flex min-h-11 items-center gap-2 font-semibold whitespace-nowrap no-underline hover:underline hover:underline-offset-[3px] ${className}`}
     >
       <FilterIcon />
       {M.list.advancedFilter}
@@ -105,7 +105,7 @@ function AdvancedSearchIcon({ href, className = '' }) {
       prefetch={false}
       aria-label={M.list.advancedFilter}
       title={M.list.advancedFilter}
-      className={`inline-flex h-12 w-11 flex-none items-center justify-center rounded border border-field bg-white text-brand no-underline hover:border-ink-2 ${className}`}
+      className={`inline-flex h-11 w-11 flex-none items-center justify-center rounded-full border border-field bg-white text-brand no-underline hover:border-ink-2 ${className}`}
     >
       <FilterIcon size={20} />
     </Link>
@@ -113,9 +113,10 @@ function AdvancedSearchIcon({ href, className = '' }) {
 }
 
 // Mục menu hàng 1: chữ 16px đậm; mục của trang đang xem màu xanh + vạch 2px sát đáy vùng bấm.
+// Dải menu navy kiểu CafeF: chữ trắng in hoa 13px; mục của trang đang xem có vạch cam 3px sát đáy.
 const NAV_ITEM =
-  'inline-flex min-h-11 items-center gap-1 text-base font-semibold whitespace-nowrap no-underline';
-const CURRENT_BAR = 'text-brand shadow-[inset_0_-2px_0_var(--color-brand)]';
+  'inline-flex h-11 items-center gap-1 px-4 text-[13px] tracking-[0.02em] whitespace-nowrap text-white uppercase no-underline hover:bg-white/10 hover:text-white';
+const CURRENT_BAR = 'font-semibold shadow-[inset_0_-3px_0_#f5a623]';
 
 function DesktopDropdown({ id, label, open, current, onToggle, onClose, children }) {
   const btnRef = useRef(null);
@@ -153,21 +154,21 @@ function DesktopDropdown({ id, label, open, current, onToggle, onClose, children
         aria-current={current ? 'true' : undefined}
         onClick={onToggle}
         className={`${NAV_ITEM} cursor-pointer bg-transparent ${
-          current ? CURRENT_BAR : open ? 'text-brand' : 'text-ink hover:text-brand'
+          current ? CURRENT_BAR : open ? 'bg-white/10' : ''
         }`}
       >
         {label}
         <IconChevronDown
           size={16}
           strokeWidth={1.6}
-          className={`text-muted transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+          className={`text-white/70 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
         />
       </button>
       <div
         ref={panelRef}
         id={id}
         hidden={!open}
-        className="motion-drop absolute top-16 right-0 left-0 z-30 border-y border-line-strong bg-white shadow-[0_8px_24px_rgba(22,27,38,0.10)]"
+        className="motion-drop absolute top-full right-0 left-0 z-30 border-b border-line bg-white text-ink normal-case shadow-[0_8px_24px_rgba(22,27,38,0.12)]"
       >
         <div className="site-wrap pt-5 pb-6">{children}</div>
       </div>
@@ -404,90 +405,31 @@ export default function HeaderBar({ provinces, industries }) {
       <header
         className={`site-header header-lift sticky z-30 bg-white ${
           // Trang chủ: viền dưới nằm ở cuối hero.
-          isHome ? '' : 'border-b border-line-strong'
+          isHome ? '' : 'border-b border-line'
         }`}
       >
         {/* Hàng 1: logo trái, menu phải (điện thoại: nút menu). */}
-        <div className="site-wrap flex h-14 items-center justify-between gap-4 max-md:pr-1.5 md:h-16">
+        <div className="site-wrap flex h-14 items-center justify-between gap-4 max-md:pr-1.5 md:h-16 lg:gap-8">
           <SiteLogo />
 
-          <nav aria-label={M.nav.mainMenu} className="hidden items-center gap-8 md:flex">
-            <DesktopDropdown
-              id="menu-provinces"
-              label={M.nav.provinces}
-              open={dropdown === 'provinces'}
-              current={pathname.startsWith('/tinh/')}
-              onToggle={() => setDropdown((d) => (d === 'provinces' ? null : 'provinces'))}
-              onClose={closeDropdown}
-            >
-              <div className="mb-3 flex items-baseline gap-3">
-                {/* Không dùng h2: bảng nằm trước H1 của trang (sai thứ bậc heading). */}
-                <p className="text-base font-semibold text-ink">{M.nav.provincesHeading}</p>
-                <span className="text-meta text-muted">
-                  {M.nav.provincesNote(provinces.length)}
-                </span>
-              </div>
-              {/* A–Z theo CỘT dọc (đọc hết cột 1 rồi sang cột 2) — cùng chiều đọc với bảng tỉnh trang chủ. */}
-              <ul
-                className="grid auto-cols-fr grid-flow-col grid-rows-[repeat(var(--rows-md),auto)] gap-x-8 lg:grid-rows-[repeat(var(--rows-lg),auto)]"
-                style={{
-                  '--rows-md': Math.ceil(sortedProvinces.length / 4),
-                  '--rows-lg': Math.ceil(sortedProvinces.length / 6),
-                }}
-              >
-                {sortedProvinces.map((p) => (
-                  <li key={p.code}>
-                    <Link
-                      href={`/tinh/${p.slug}`}
-                      aria-current={pathname === `/tinh/${p.slug}` ? 'page' : undefined}
-                      className={`flex min-h-11 items-center border-b border-line text-base no-underline hover:underline hover:underline-offset-[3px] ${
-                        pathname === `/tinh/${p.slug}` ? 'font-semibold text-brand' : ''
-                      }`}
-                    >
-                      {p.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </DesktopDropdown>
-            <DesktopDropdown
-              id="menu-industries"
-              label={M.nav.industries}
-              open={dropdown === 'industries'}
-              current={pathname.startsWith('/nganh/')}
-              onToggle={() => setDropdown((d) => (d === 'industries' ? null : 'industries'))}
-              onClose={closeDropdown}
-            >
-              <div className="mb-3 flex items-baseline gap-3">
-                <p className="text-base font-semibold text-ink">{M.nav.industriesHeading}</p>
-                <span className="text-meta text-muted">{M.nav.industriesNote}</span>
-              </div>
-              <ul className="grid grid-cols-2 gap-x-12">
-                {industries.map((n) => (
-                  <li key={n.code}>
-                    <Link
-                      href={n.href}
-                      className="flex min-h-12 items-center gap-3 border-b border-line py-1 no-underline hover:bg-page"
-                    >
-                      <IndustryCode code={n.code} />
-                      <span className="text-base text-ink">{n.name}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </DesktopDropdown>
-            <Link
-              href="/doanh-nghiep-moi-thanh-lap"
-              aria-current={pathname === '/doanh-nghiep-moi-thanh-lap' ? 'page' : undefined}
-              className={`${NAV_ITEM} ${
-                pathname === '/doanh-nghiep-moi-thanh-lap'
-                  ? CURRENT_BAR
-                  : 'text-ink hover:text-brand'
-              }`}
-            >
-              {M.nav.newCompaniesShort}
-            </Link>
-          </nav>
+          {/* Từ 1024px (kiểu Pappers): ô tìm nằm ngay trên hàng logo, header chỉ còn một hàng. Trang chủ: ẩn khi ô
+              tìm lớn của hero còn trong tầm nhìn (vẫn giữ chỗ để menu không nhảy). */}
+          <div
+            data-header-search
+            inert={!showHeaderSearch}
+            className={`ml-auto hidden min-w-0 flex-1 items-center justify-end gap-5 lg:flex ${showHeaderSearch ? '' : 'invisible'}`}
+          >
+            <div className="min-w-0 flex-1 lg:max-w-[440px]">
+              {pathname === '/tim-kiem' ? (
+                <Suspense fallback={<SearchBox {...navSearch(filterHref)} />}>
+                  <SearchWithQuery filterHref={filterHref} />
+                </Suspense>
+              ) : (
+                <SearchBox {...navSearch(filterHref)} />
+              )}
+            </div>
+            <AdvancedSearchLink href={filterHref} className="text-[15px]" />
+          </div>
 
           <button
             ref={menuBtnRef}
@@ -508,14 +450,14 @@ export default function HeaderBar({ provinces, industries }) {
           ref={findRef}
           data-header-search
           inert={!showHeaderSearch}
-          className={`${
+          className={`lg:hidden ${
             isHome
-              ? 'absolute inset-x-0 top-full border-b border-line-strong bg-white shadow-[0_4px_16px_rgba(22,27,38,0.08)] transition-opacity duration-150'
+              ? 'absolute inset-x-0 top-full border-b border-line bg-white shadow-[0_4px_16px_rgba(22,27,38,0.08)] transition-opacity duration-150'
               : ''
           } ${showHeaderSearch ? 'opacity-100' : 'invisible opacity-0'}`}
         >
           {/* Điện thoại: đệm đáy 8px → header 56 + 48 + 8 + viền 1 = 113px (trước: 160px với hàng «Lọc nâng cao»). */}
-          <div className="site-wrap find-grid pb-2 md:pt-1 md:pb-5">
+          <div className="site-wrap find-grid pb-2 md:pt-1 md:pb-3">
             {/* Trang kết quả: ô giữ sẵn từ khoá đang tìm. useSearchParams chỉ chạy trên /tim-kiem (trang vốn
               render động) — các trang tĩnh/ISR khác không bị chuyển sang render phía trình duyệt. */}
             {pathname === '/tim-kiem' ? (
@@ -525,9 +467,119 @@ export default function HeaderBar({ provinces, industries }) {
             ) : (
               <SearchBox {...navSearch(filterHref)} />
             )}
-            <div className="hidden h-[52px] items-center md:flex">
-              <AdvancedSearchLink href={filterHref} />
+            <div className="hidden h-10 items-center md:flex">
+              <AdvancedSearchLink href={filterHref} className="text-[15px]" />
             </div>
+          </div>
+        </div>
+
+        {/* Dải menu navy (≥ 768px), kiểu CafeF: ô «nhà» · Tỉnh/thành · Ngành nghề · DN mới · Yêu cầu ẩn/sửa. Bảng
+            thả xuống của Tỉnh/thành và Ngành nghề mở ngay dưới dải (relative). */}
+        <div className="relative hidden bg-brand md:block">
+          <div className="site-wrap flex h-11 items-stretch">
+            <Link
+              href="/"
+              aria-label={M.nav.home}
+              aria-current={pathname === '/' ? 'page' : undefined}
+              className="flex w-11 flex-none items-center justify-center bg-[#0b5a8e] text-white hover:bg-[#0d6aa6] hover:text-white"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 11 12 4l9 7" />
+                <path d="M5 10v10h14V10" />
+              </svg>
+            </Link>
+            <nav aria-label={M.nav.mainMenu} className="flex items-stretch">
+              <DesktopDropdown
+                id="menu-provinces"
+                label={M.nav.provinces}
+                open={dropdown === 'provinces'}
+                current={pathname.startsWith('/tinh/')}
+                onToggle={() => setDropdown((d) => (d === 'provinces' ? null : 'provinces'))}
+                onClose={closeDropdown}
+              >
+                <div className="mb-3 flex items-baseline gap-3">
+                  {/* Không dùng h2: bảng nằm trước H1 của trang (sai thứ bậc heading). */}
+                  <p className="text-base font-semibold text-ink">{M.nav.provincesHeading}</p>
+                  <span className="text-meta text-muted">
+                    {M.nav.provincesNote(provinces.length)}
+                  </span>
+                </div>
+                {/* A–Z theo CỘT dọc (đọc hết cột 1 rồi sang cột 2) — cùng chiều đọc với bảng tỉnh trang chủ. */}
+                <ul
+                  className="grid auto-cols-fr grid-flow-col grid-rows-[repeat(var(--rows-md),auto)] gap-x-8 lg:grid-rows-[repeat(var(--rows-lg),auto)]"
+                  style={{
+                    '--rows-md': Math.ceil(sortedProvinces.length / 4),
+                    '--rows-lg': Math.ceil(sortedProvinces.length / 6),
+                  }}
+                >
+                  {sortedProvinces.map((p) => (
+                    <li key={p.code}>
+                      <Link
+                        href={`/tinh/${p.slug}`}
+                        aria-current={pathname === `/tinh/${p.slug}` ? 'page' : undefined}
+                        className={`flex min-h-11 items-center border-b border-line text-base no-underline hover:underline hover:underline-offset-[3px] ${
+                          pathname === `/tinh/${p.slug}` ? 'font-semibold text-brand' : ''
+                        }`}
+                      >
+                        {p.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </DesktopDropdown>
+              <DesktopDropdown
+                id="menu-industries"
+                label={M.nav.industries}
+                open={dropdown === 'industries'}
+                current={pathname.startsWith('/nganh/')}
+                onToggle={() => setDropdown((d) => (d === 'industries' ? null : 'industries'))}
+                onClose={closeDropdown}
+              >
+                <div className="mb-3 flex items-baseline gap-3">
+                  <p className="text-base font-semibold text-ink">{M.nav.industriesHeading}</p>
+                  <span className="text-meta text-muted">{M.nav.industriesNote}</span>
+                </div>
+                <ul className="grid grid-cols-2 gap-x-12">
+                  {industries.map((n) => (
+                    <li key={n.code}>
+                      <Link
+                        href={n.href}
+                        className="flex min-h-12 items-center gap-3 border-b border-line py-1 no-underline hover:bg-page"
+                      >
+                        <IndustryCode code={n.code} />
+                        <span className="text-base text-ink">{n.name}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </DesktopDropdown>
+              <Link
+                href="/doanh-nghiep-moi-thanh-lap"
+                aria-current={pathname === '/doanh-nghiep-moi-thanh-lap' ? 'page' : undefined}
+                className={`${NAV_ITEM} ${
+                  pathname === '/doanh-nghiep-moi-thanh-lap' ? CURRENT_BAR : ''
+                }`}
+              >
+                {M.nav.newCompaniesShort}
+              </Link>
+            </nav>
+            <Link
+              href="/yeu-cau-cap-nhat"
+              prefetch={false}
+              className="ml-auto hidden items-center text-[13px] whitespace-nowrap text-[#d7e4ef] no-underline hover:text-white lg:flex"
+            >
+              {M.nav.updateRequest}
+            </Link>
           </div>
         </div>
 

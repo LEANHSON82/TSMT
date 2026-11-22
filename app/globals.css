@@ -1,9 +1,9 @@
 @import 'tailwindcss';
 
-/* Hệ thiết kế A «Cổng tra cứu chính thống» (bản mẫu: scratchpad/concepts/A/styles.css).
-   Giữ tên token cũ (brand, ink, line…) để class đang dùng vẫn chạy, chỉ đổi giá trị cho khớp A.
-   Chữ: Inter 400/600 · thang 13 · 14 · 16 · 20 · 28 (H1 điện thoại 22).
-   Khoảng cách: 4 · 8 · 12 · 16 · 24 · 32 · 48. Khung 1200 = cột chính 852 + khe 48 + cột phải 300. */
+/* Hệ thiết kế «CafeF» (bản mẫu: .design/cafef-design, theo trang dữ liệu doanh nghiệp của cafef.vn): dải menu
+   xanh navy, tên DN chữ đỏ, nội dung trong các khung trắng viền mảnh bo 10px, tiêu đề khung dạng tab nền navy.
+   Chữ: Inter, đúng 2 độ đậm 400/600. Nền trang xám nhạt #F5F6F8.
+   Khung 1160 = cột chính + khe 20 + cột phải 300. */
 @theme {
   --font-sans:
     var(--font-inter-vi), var(--font-inter-latin-ext), var(--font-inter-latin), system-ui,
@@ -30,47 +30,50 @@
   --default-transition-duration: 150ms;
   --default-transition-timing-function: ease-out;
 
-  /* Xanh: link, nút Tìm, mục đang xem. */
-  --color-brand: #133f8c;
-  --color-brand-hover: #0c2d66;
-  --color-brand-50: #e9eef7;
-  /* navy: tên cũ của màu tiêu đề — A dùng cùng màu chữ đậm. */
-  --color-navy: #161b26;
-  /* Cam: CHỈ chữ «T» của logo và nút «Xem số điện thoại». */
-  --color-cta: #b53e0e;
-  --color-cta-hover: #96320b;
-  --color-cta-50: #fbefe9;
+  /* Xanh navy: menu, link, nút chính (Tìm, Xem số điện thoại), tiêu đề khung. */
+  --color-brand: #004370;
+  --color-brand-hover: #002b49;
+  --color-brand-50: #e6eef5;
+  /* Đỏ: tên doanh nghiệp (H1), nhãn «Ngành chính». */
+  --color-title: #c32022;
+  --color-title-50: #fdecec;
+  --color-navy: #004370;
+  --color-cta: #004370;
+  --color-cta-hover: #002b49;
+  --color-cta-50: #e6eef5;
+  /* Chữ «T» của logo (spec: T cam, MST xanh). */
+  --color-logo-t: #e8610e;
 
-  /* page: nền xám rất nhạt (hover dòng, footer, khung quảng cáo). Nền trang là trắng (body). */
-  --color-page: #f5f7f9;
-  --color-surface: #f5f7f9;
-  --color-ink: #161b26;
-  --color-ink-2: #3d4757;
-  --color-muted: #566070;
-  /* Kẻ: line mảnh (giữa các dòng), line-strong đậm hơn (viền header, đầu bảng, nút phụ), line-soft nhạt nhất. */
-  --color-line: #e1e5ea;
-  --color-line-strong: #c3cad3;
+  --color-page: #f5f6f8;
+  --color-surface: #f5f6f8;
+  --color-card: #ffffff;
+  --color-ink: #222222;
+  --color-ink-2: #444444;
+  --color-muted: #666666;
+  --color-line: #e1e4ea;
+  --color-line-strong: #c9d0da;
   --color-line-soft: #eef0f3;
-  /* Viền ô nhập liệu (tương phản ≥ 3:1 với nền trắng). */
-  --color-field: #737d8c;
+  --color-field: #858c99;
   --color-focus: #1d5fd1;
 
-  /* Tình trạng: nhãn chữ nhật, không chấm. */
-  --color-ok: #17603a;
-  --color-ok-bg: #e5f2ea;
-  --color-off: #4a5361;
+  --color-ok: #0a7c33;
+  --color-ok-bg: #e6f4ea;
+  --color-off: #666666;
   --color-off-bg: #eceef1;
   --color-danger: #b42318;
   --color-danger-bg: #fef3f2;
-  --color-warn: #b45309;
-  --color-warn-bg: #fffaeb;
+  --color-warn: #6b4500;
+  --color-warn-bg: #fff6e5;
+  --color-new: #ffffff;
+  --color-new-bg: #e8610e;
 
-  --color-ad: #eceff2;
+  --color-ad: #e7eaee;
 
-  /* Lưới: khung nội dung 1200, cột phải 300, khe 48 (dùng qua .site-wrap / .rail-grid bên dưới). */
-  --container-site: 1200px;
+  --container-site: 1160px;
   --width-rail: 300px;
-  --spacing-rail-gap: 48px;
+  --spacing-rail-gap: 20px;
+
+  --radius-card: 10px;
 }
 
 @layer base {
@@ -81,10 +84,10 @@
   }
 
   body {
-    background: #ffffff;
+    background: var(--color-page);
     color: var(--color-ink);
-    /* Inter: cv11 = chữ a một tầng, ss01 = số 0/1 dễ phân biệt (đọc MST) — như bản mẫu A. */
-    font-feature-settings: 'cv11', 'ss01';
+    font-size: 15px;
+    line-height: 1.55;
   }
 
   a {
@@ -226,15 +229,42 @@
     }
   }
 
-  /* Nhãn chữ nhật bo 2px, không chấm (tình trạng, «Ngành chính», «Mới»). */
+  /* Khung trắng viền mảnh (CafeF). .card-hero: cùng kiểu (giữ tên cho các trang dùng chung). */
+  .card,
+  .card-hero {
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+  }
+  /* Khung có tiêu đề dạng tab: cắt góc nền navy của tab theo bo khung. */
+  .panel {
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+
+  /* Nhãn nhỏ bo 4px, không chấm («Ngành chính», «Mới», «Khớp SĐT»). */
   .tag {
     display: inline-block;
-    padding: 1px 6px;
-    border-radius: 2px;
-    font-size: 0.8125rem;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
     line-height: 18px;
     font-weight: 600;
     white-space: nowrap;
+  }
+  .tag-title {
+    background: var(--color-title-50);
+    color: var(--color-title);
+  }
+  .tag-new {
+    background: var(--color-new-bg);
+    color: var(--color-new);
+    border-radius: 3px;
+    padding: 0 5px;
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
   }
   .tag-ok {
     background: var(--color-ok-bg);
@@ -258,6 +288,12 @@
 @media (min-width: 768px) {
   .site-header {
     top: -56px;
+  }
+}
+/* Từ 1024px header chỉ một hàng (ô tìm nằm trên hàng logo) → dính nguyên khối. */
+@media (min-width: 1024px) {
+  .site-header {
+    top: 0;
   }
 }
 /* Ô tìm hệ A: nút xoá (×) của Chrome giữ chỗ cả khi ô trống → chữ gợi ý 360px bị cắt. Chỉ hiện khi đã gõ. */
@@ -538,12 +574,12 @@ html[data-navigating] [data-list-content] {
   justify-content: space-between;
   gap: 12px;
   min-height: 44px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line-soft);
   color: var(--color-brand);
   text-decoration: none;
 }
 a.prov-link:hover {
-  background: var(--color-surface);
+  color: var(--color-brand);
 }
 a.prov-link:hover .prov-name {
   text-decoration: underline;

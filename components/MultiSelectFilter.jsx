@@ -114,13 +114,13 @@ export default function MultiSelectFilter({
         <summary
           ref={summaryRef}
           aria-labelledby={`${uid}-label ${uid}-value`}
-          className="select-chevron flex h-11 w-full cursor-pointer list-none items-center rounded border border-line-strong bg-white px-3 text-body text-ink hover:border-ink-2 [&::-webkit-details-marker]:hidden"
+          className="select-chevron flex h-11 w-full cursor-pointer list-none items-center rounded-lg border border-field bg-white px-3 text-body text-ink hover:border-ink-2 [&::-webkit-details-marker]:hidden"
         >
           <span id={`${uid}-value`} className="truncate">
             {summary}
           </span>
         </summary>
-        <div className="motion-drop absolute top-full left-0 z-30 mt-1 flex w-full min-w-[min(320px,calc(100vw-2rem))] flex-col rounded border border-line-strong bg-white shadow-[0_6px_20px_rgba(22,27,38,0.12)]">
+        <div className="motion-drop absolute top-full left-0 z-30 mt-1 flex w-full min-w-[min(320px,calc(100vw-2rem))] flex-col rounded-lg border border-field bg-white shadow-[0_8px_24px_rgba(22,27,38,0.12)]">
           <div className="border-b border-line p-2">
             <input
               ref={searchRef}
@@ -137,7 +137,7 @@ export default function MultiSelectFilter({
               aria-label={searchLabel}
               placeholder={searchLabel}
               autoComplete="off"
-              className="h-11 w-full rounded border border-line-strong px-3 text-body text-ink placeholder:text-muted"
+              className="h-11 w-full rounded-lg border border-field px-3 text-body text-ink placeholder:text-muted"
             />
           </div>
           <fieldset className="max-h-64 overflow-y-auto overscroll-contain p-1">
@@ -175,7 +175,7 @@ export default function MultiSelectFilter({
             <button
               type="button"
               onClick={apply}
-              className="press h-11 rounded bg-brand px-4 text-body font-semibold text-white hover:bg-brand-hover"
+              className="press h-11 rounded-lg bg-brand px-4 text-body font-semibold text-white hover:bg-brand-hover"
             >
               {M.search.multiApply}
               {draft.length ? ` (${draft.length})` : ''}

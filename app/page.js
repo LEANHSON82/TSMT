@@ -59,22 +59,24 @@ export default async function HomePage() {
       {/* Thứ tự theo yêu cầu: tỉnh/thành → ô quảng cáo → DN mới thành lập. Spec 3.1 liệt kê
           DN mới (mục 4) trước tỉnh/thành (mục 5); ô quảng cáo vẫn nằm giữa hai khối (mục 6). */}
       <main className="flex w-full flex-col">
-        {/* Hero = «hàng 2» của header trên trang chủ: cùng khung .site-wrap và lưới .find-grid với hàng ô tìm
-            của header (components/HeaderBar.jsx) → ô tìm trùng khít vị trí ngang, bề rộng, chiều cao với ô tìm
-            header ở mọi trang khác. Viền dưới đậm như viền dưới header. */}
-        <section aria-labelledby="home-title" className="border-b border-line-strong bg-white">
-          <div className="site-wrap find-grid pt-4 pb-4 md:pt-8 md:pb-10">
-            <div className="min-w-0">
-              <h1 id="home-title" className="text-h1-m font-semibold text-ink md:text-h1">
+        {/* Hero: nền trắng, tiêu đề + dòng số liệu + ô tìm lớn (viên tròn, nút «Tìm» navy). Từ 1024px ô tìm của header
+            ẩn cho tới khi ô tìm này cuộn khuất (data-hero-search). */}
+        <section aria-labelledby="home-title" className="border-b border-line bg-white">
+          <div className="site-wrap">
+            <div className="mx-auto max-w-[820px] pt-6 pb-7 md:pt-12 md:pb-12">
+              <h1
+                id="home-title"
+                className="text-[26px] leading-8 font-semibold tracking-[-0.01em] text-balance text-title md:text-[34px] md:leading-[42px]"
+              >
                 {M.home.title}
               </h1>
               {/* Dòng số liệu: tổng DN và số tỉnh/thành (đã có sẵn từ danh mục tỉnh, không gọi thêm API). */}
               {provinces.length > 0 && (
-                <p className="mt-1 mb-3 text-sm text-muted tabular-nums md:mb-5">
+                <p className="mt-2 text-base text-muted tabular-nums md:text-[18px] md:leading-7">
                   <span className="whitespace-nowrap">
                     {M.search.provinceCount(formatNumber(totalCompanies))}
                   </span>
-                  <span aria-hidden="true" className="px-1 text-line-strong">
+                  <span aria-hidden="true" className="px-1.5 text-line-strong">
                     ·
                   </span>
                   <span className="whitespace-nowrap">
@@ -82,20 +84,21 @@ export default async function HomePage() {
                   </span>
                 </p>
               )}
-              <div data-hero-search className={provinces.length > 0 ? '' : 'mt-5'}>
+              <div data-hero-search className="mt-6 md:mt-8">
                 <SearchBox size="lg" autoFocusDesktop />
               </div>
-            </div>
-            <div className="mt-1 flex items-center md:mt-0 md:h-[52px]">
-              <AdvancedSearchLink />
+              <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1">
+                <p className="text-sm text-muted">{M.home.mstHint}</p>
+                <AdvancedSearchLink className="text-sm" />
+              </div>
             </div>
           </div>
         </section>
 
         {/* Phần dưới hero: cùng khung .site-wrap với header/hero → mép trái mọi khối x=120 ở 1440. Nhịp dọc hệ A:
             đầu trang 40 (điện thoại 24), giữa các khối 48 (điện thoại 40). Footer tự có mt-12 nên không đệm đáy. */}
-        <div className="site-wrap flex flex-col gap-10 pt-6 md:gap-12 md:pt-10">
-          <section aria-labelledby="prov-title">
+        <div className="site-wrap flex flex-col gap-5 pt-5 pb-12 md:gap-6 md:pt-6 md:pb-16">
+          <section aria-labelledby="prov-title" className="panel">
             <SectionHeader
               id="prov-title"
               title={M.home.provincesTitle}
@@ -107,7 +110,7 @@ export default async function HomePage() {
                 vần A–Z bị đứt. Xem .prov-index trong globals.css. Tỉnh chưa có DN: chữ xám, không làm link (bấm vào
                 chỉ ra trang rỗng). */}
             <ul
-              className="prov-index"
+              className="prov-index px-4 pt-1 pb-3 md:px-[22px] md:pb-4"
               style={{
                 '--rows-3': Math.ceil(sorted.length / 3),
                 '--rows-4': Math.ceil(sorted.length / 4),
@@ -141,7 +144,7 @@ export default async function HomePage() {
 
           <AdSlot slotId="home-mid" />
 
-          <section aria-labelledby="new-title">
+          <section aria-labelledby="new-title" className="panel">
             <SectionHeader
               id="new-title"
               title={M.home.newTitle}
@@ -151,9 +154,9 @@ export default async function HomePage() {
                 Lưới 4 cột thành «bức tường» 20 tên in hoa san sát; 2 cột thoáng, thẻ đủ rộng để hiện dạng thẻ A
                 (nhãn tình trạng cùng hàng tên, hàng Mã số thuế · Ngày · Đại diện có nhãn — xem CompanyCard). Thẻ
                 không hộp, ngăn nhau bằng kẻ mảnh dưới; khe ngang 48 như khe cột chính – cột phải (tablet 24). */}
-            <ul className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-6 lg:gap-x-12">
+            <ul className="grid grid-cols-1 px-4 md:grid-cols-2 md:gap-x-10 md:px-[22px]">
               {newest.map((c) => (
-                <li key={c.mst} className="min-w-0">
+                <li key={c.mst} className="min-w-0 border-b border-line-soft">
                   <CompanyCard company={c} variant="card" showNew={false} />
                 </li>
               ))}

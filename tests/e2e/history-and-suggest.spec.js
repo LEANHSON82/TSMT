@@ -4,7 +4,7 @@ import { DETAIL, acceptCookies } from './helpers';
 
 // Ô tìm hàng 2 header (trang tỉnh): trang chủ / 404 còn ô tìm khác cùng tên trong nội dung.
 const headerBox = (page) =>
-  page.locator('[data-header-search]:visible').getByRole('combobox', { name: 'Tìm doanh nghiệp' });
+  page.locator('[data-header-search]').getByRole('combobox', { name: 'Tìm doanh nghiệp' });
 
 test.beforeEach(async ({ page }) => acceptCookies(page));
 

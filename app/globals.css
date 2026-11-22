@@ -1,17 +1,13 @@
 @import 'tailwindcss';
 
-/* Hệ thiết kế «Pappers» (bản mẫu: .design/claude-design, thông số đo trên pappers.fr 22/11/2026 —
-   .design/claude-design/TOKENS.md). Giữ tên token cũ (brand, ink, line…) để class đang dùng vẫn chạy.
-   Nền trang xám #F4F5F7, nội dung trong thẻ trắng bo 12 viền mảnh 0,5px; khối đầu trang DN nằm trên dải xanh.
-   Chữ: Hanken Grotesk, đúng 2 độ đậm 400/700 (font-semibold được ánh xạ sang 700 bên dưới).
-   Khung 1200 = cột chính + khe 32 + cột phải 300. */
+/* Hệ thiết kế A «Cổng tra cứu chính thống» (bản mẫu: scratchpad/concepts/A/styles.css).
+   Giữ tên token cũ (brand, ink, line…) để class đang dùng vẫn chạy, chỉ đổi giá trị cho khớp A.
+   Chữ: Inter 400/600 · thang 13 · 14 · 16 · 20 · 28 (H1 điện thoại 22).
+   Khoảng cách: 4 · 8 · 12 · 16 · 24 · 32 · 48. Khung 1200 = cột chính 852 + khe 48 + cột phải 300. */
 @theme {
   --font-sans:
-    var(--font-hanken-vi), var(--font-hanken-latin-ext), var(--font-hanken-latin), system-ui,
+    var(--font-inter-vi), var(--font-inter-latin-ext), var(--font-inter-latin), system-ui,
     -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-  /* Spec 7.2: tối đa 2 độ đậm. Mọi class font-semibold/medium trong code dùng chung độ đậm 700 của bản mẫu. */
-  --font-weight-medium: 700;
-  --font-weight-semibold: 700;
 
   /* Thang chữ A: meta 14 (nhãn, chú thích; trước 13) · sm 14 (chữ phụ) · base/body 16 (nội dung) · xl 20 (tiêu đề
      khối) · h1 28 (tiêu đề trang; điện thoại dùng h1-m 22). text-body giữ tên cũ, nay = 16px như A
@@ -34,57 +30,47 @@
   --default-transition-duration: 150ms;
   --default-transition-timing-function: ease-out;
 
-  /* Xanh: link, nút chính (Tìm, Xem số điện thoại), mục đang xem. */
-  --color-brand: #1146a6;
-  --color-brand-hover: #0b3480;
-  --color-brand-50: #e7ebf6;
-  /* Dải xanh sau khối đầu trang DN (Pappers #3065BC). */
-  --color-band: #2f63ba;
-  --color-navy: #0c0d10;
-  /* Nút «Xem số điện thoại»: bản mẫu Pappers dùng chung xanh chính (một màu nhấn duy nhất). */
-  --color-cta: #1146a6;
-  --color-cta-hover: #0b3480;
-  --color-cta-50: #e7ebf6;
-  /* Chữ «T» của logo (spec: T cam, MST xanh). */
-  --color-logo-t: #e8610e;
+  /* Xanh: link, nút Tìm, mục đang xem. */
+  --color-brand: #133f8c;
+  --color-brand-hover: #0c2d66;
+  --color-brand-50: #e9eef7;
+  /* navy: tên cũ của màu tiêu đề — A dùng cùng màu chữ đậm. */
+  --color-navy: #161b26;
+  /* Cam: CHỈ chữ «T» của logo và nút «Xem số điện thoại». */
+  --color-cta: #b53e0e;
+  --color-cta-hover: #96320b;
+  --color-cta-50: #fbefe9;
 
-  /* page: nền trang xám; surface: nền phụ trong thẻ trắng (hover dòng, đầu bảng). */
-  --color-page: #f4f5f7;
-  --color-surface: #f4f5f7;
-  --color-card: #ffffff;
-  --color-ink: #0c0d10;
-  --color-ink-2: #3a3f48;
-  --color-muted: #505661;
-  /* Kẻ: line (viền thẻ, đường chia), line-strong (viền nút phụ), line-soft (chia dòng trong thẻ). */
-  --color-line: #dde0e7;
-  --color-line-strong: #c9ced8;
-  --color-line-soft: #eef0f4;
+  /* page: nền xám rất nhạt (hover dòng, footer, khung quảng cáo). Nền trang là trắng (body). */
+  --color-page: #f5f7f9;
+  --color-surface: #f5f7f9;
+  --color-ink: #161b26;
+  --color-ink-2: #3d4757;
+  --color-muted: #566070;
+  /* Kẻ: line mảnh (giữa các dòng), line-strong đậm hơn (viền header, đầu bảng, nút phụ), line-soft nhạt nhất. */
+  --color-line: #e1e5ea;
+  --color-line-strong: #c3cad3;
+  --color-line-soft: #eef0f3;
   /* Viền ô nhập liệu (tương phản ≥ 3:1 với nền trắng). */
-  --color-field: #848ea0;
+  --color-field: #737d8c;
   --color-focus: #1d5fd1;
 
-  /* Tình trạng: chữ + icon (không nền) như Pappers; xanh lá đậm hơn Pappers để đạt AA. */
-  --color-ok: #2b7a0b;
-  --color-ok-bg: #eaf4e4;
-  --color-off: #505661;
+  /* Tình trạng: nhãn chữ nhật, không chấm. */
+  --color-ok: #17603a;
+  --color-ok-bg: #e5f2ea;
+  --color-off: #4a5361;
   --color-off-bg: #eceef1;
   --color-danger: #b42318;
   --color-danger-bg: #fef3f2;
-  --color-warn: #6b4500;
-  --color-warn-bg: #fff6e5;
-  --color-new: #b4480a;
-  --color-new-bg: #fff1e6;
+  --color-warn: #b45309;
+  --color-warn-bg: #fffaeb;
 
-  --color-ad: #e9ebef;
+  --color-ad: #eceff2;
 
-  /* Lưới: khung nội dung 1200, cột phải 300, khe 32 (dùng qua .site-wrap / .rail-grid bên dưới). */
+  /* Lưới: khung nội dung 1200, cột phải 300, khe 48 (dùng qua .site-wrap / .rail-grid bên dưới). */
   --container-site: 1200px;
   --width-rail: 300px;
-  --spacing-rail-gap: 32px;
-
-  --radius-card: 12px;
-  --shadow-card: 0 0 0 0.5px #dde0e7;
-  --shadow-hero: 8px 8px 40px rgba(0, 0, 0, 0.1);
+  --spacing-rail-gap: 48px;
 }
 
 @layer base {
@@ -95,10 +81,10 @@
   }
 
   body {
-    background: var(--color-page);
+    background: #ffffff;
     color: var(--color-ink);
-    font-size: 15px;
-    line-height: 24px;
+    /* Inter: cv11 = chữ a một tầng, ss01 = số 0/1 dễ phân biệt (đọc MST) — như bản mẫu A. */
+    font-feature-settings: 'cv11', 'ss01';
   }
 
   a {
@@ -240,32 +226,15 @@
     }
   }
 
-  /* Thẻ trắng trên nền xám (Pappers): bo 12, viền mảnh 0,5px vẽ bằng bóng (không chiếm chỗ). */
-  .card {
-    background: var(--color-card);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-card);
-  }
-  /* Khối đầu trang DN: bóng mềm, không viền. */
-  .card-hero {
-    background: var(--color-card);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-hero);
-  }
-
-  /* Nhãn nhỏ bo 4px, không chấm («Ngành chính», «Mới», «Khớp SĐT»). */
+  /* Nhãn chữ nhật bo 2px, không chấm (tình trạng, «Ngành chính», «Mới»). */
   .tag {
     display: inline-block;
     padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 0.75rem;
+    border-radius: 2px;
+    font-size: 0.8125rem;
     line-height: 18px;
     font-weight: 600;
     white-space: nowrap;
-  }
-  .tag-new {
-    background: var(--color-new-bg);
-    color: var(--color-new);
   }
   .tag-ok {
     background: var(--color-ok-bg);
@@ -289,12 +258,6 @@
 @media (min-width: 768px) {
   .site-header {
     top: -56px;
-  }
-}
-/* Từ 1024px header chỉ một hàng (ô tìm nằm trên hàng logo) → dính nguyên khối. */
-@media (min-width: 1024px) {
-  .site-header {
-    top: 0;
   }
 }
 /* Ô tìm hệ A: nút xoá (×) của Chrome giữ chỗ cả khi ô trống → chữ gợi ý 360px bị cắt. Chỉ hiện khi đã gõ. */
@@ -575,12 +538,12 @@ html[data-navigating] [data-list-content] {
   justify-content: space-between;
   gap: 12px;
   min-height: 44px;
-  border-top: 1px solid var(--color-line-soft);
-  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-brand);
   text-decoration: none;
 }
 a.prov-link:hover {
-  color: var(--color-brand);
+  background: var(--color-surface);
 }
 a.prov-link:hover .prov-name {
   text-decoration: underline;

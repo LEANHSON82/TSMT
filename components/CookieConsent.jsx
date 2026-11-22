@@ -141,7 +141,7 @@ export default function CookieConsent() {
             <button
               type="button"
               onClick={acceptAll}
-              className="h-11 rounded-lg bg-brand px-4 text-body font-semibold text-white hover:bg-brand-hover"
+              className="h-11 rounded bg-brand px-4 text-body font-semibold text-white hover:bg-brand-hover"
             >
               {M.cookie.acceptAll}
             </button>

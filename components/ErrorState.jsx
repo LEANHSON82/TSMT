@@ -14,10 +14,10 @@ export default function ErrorState({
   return (
     <div
       role="alert"
-      className={`card flex flex-col items-start px-5 py-5 md:px-8 md:py-7 ${page ? 'max-w-[760px]' : ''}`}
+      className={`flex flex-col items-start ${page ? 'max-w-[852px]' : 'max-w-[640px] border-t-2 border-ink pt-3'}`}
     >
       <Tag
-        className={`font-semibold text-pretty text-ink ${page ? 'text-h1-m md:text-h1' : 'text-[18px] leading-7'}`}
+        className={`font-semibold text-pretty text-ink ${page ? 'text-h1-m md:text-h1' : 'text-h2-m md:text-h2'}`}
       >
         {title}
       </Tag>
@@ -26,7 +26,7 @@ export default function ErrorState({
         <button
           type="button"
           onClick={onRetry}
-          className="mt-5 h-11 rounded-lg bg-brand px-5 text-base font-semibold text-white hover:bg-brand-hover"
+          className="mt-6 h-12 rounded bg-brand px-6 text-base font-semibold text-white hover:bg-brand-hover"
         >
           {M.list.retry}
         </button>

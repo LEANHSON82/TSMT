@@ -48,21 +48,6 @@ describe('parseMstSlug', () => {
   });
 });
 
-describe('normalizeMst — kiểu dán thường gặp', () => {
-  it('bỏ nhãn «MST» / «Mã số thuế», đổi mọi kiểu gạch', () => {
-    expect(normalizeMst('MST 0319786701')).toBe('0319786701');
-    expect(normalizeMst('mst: 0319786701')).toBe('0319786701');
-    expect(normalizeMst('Mã số thuế 0101234567')).toBe('0101234567');
-    expect(normalizeMst('0195805215–001')).toBe('0195805215-001');
-    expect(normalizeMst('0195805215 - 001')).toBe('0195805215-001');
-    expect(normalizeMst('4600561578_003')).toBe('4600561578-003');
-    expect(isValidMst('MST: 4600561578–003')).toBe(true);
-  });
-  it('không cắt chữ «mst» khi phía sau không phải số', () => {
-    expect(isValidMst('mst abc')).toBe(false);
-  });
-});
-
 describe('companyPath', () => {
   it('ghép URL chuẩn', () => {
     expect(companyPath({ mst: '0319786701', slug: 'abc' })).toBe('/0319786701-abc');

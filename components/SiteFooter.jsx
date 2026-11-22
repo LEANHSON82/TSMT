@@ -12,8 +12,8 @@ const LINKS = [
 ];
 
 // Footer gọn hệ A (spec mục 3): logo + «Dữ liệu tổng hợp từ nguồn công khai.» · link trang tĩnh · «Yêu cầu
-// ẩn/sửa thông tin»; dòng © bên dưới, ngăn bằng đường kẻ mảnh. Nền trắng, viền trên mảnh (kiểu Pappers).
-// Trang tự đệm đáy (pb-12 / md:pb-16) trước footer.
+// ẩn/sửa thông tin»; dòng © bên dưới, ngăn bằng đường kẻ mảnh. Nền xám rất nhạt, viền trên đậm.
+// Cách khối cuối của trang 64px (điện thoại 48px) — trang KHÔNG cần thêm padding đáy.
 // Bố cục: điện thoại xếp dọc; 768–1279 hai hàng có chủ đích (hàng 1: logo + mô tả trái, «Yêu cầu ẩn/sửa» phải;
 // hàng 2: link trang tĩnh) thay vì để một link rớt dòng lẻ loi; từ 1280 đủ chỗ cho một hàng.
 export default function SiteFooter() {
@@ -21,7 +21,7 @@ export default function SiteFooter() {
   const linkCls =
     'inline-flex min-h-11 items-center text-sm text-ink-2 no-underline hover:text-brand';
   return (
-    <footer className="border-t border-line bg-white">
+    <footer className="mt-12 border-t border-line-strong bg-page md:mt-16">
       <div className="site-wrap flex flex-col items-start gap-2 pt-6 pb-2 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-x-8 md:gap-y-1 md:pt-7 md:pb-5 xl:flex xl:flex-row xl:justify-between">
         <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:gap-4">
           <Logo title={SITE_NAME} className="h-[15px] w-auto" />

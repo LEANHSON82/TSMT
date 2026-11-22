@@ -56,38 +56,55 @@ const IconArrow = () => (
   </svg>
 );
 
-// Hành động của một dòng (Sao chép, Xem bản đồ, Đại diện của N DN): chữ xanh đậm 14px + icon. Máy tính: cột riêng
-// sát mép phải bảng — mọi hành động (kể cả nút «Xem số điện thoại») thẳng một cột như cột nút của Pappers.
-// Điện thoại: ngay bên phải giá trị (MST) hoặc xuống dưới giá trị (địa chỉ, layout="stack").
-// Vùng bấm 44px bằng py-3 + margin âm -my-3 → không làm dòng cao thêm.
+// Hành động của một dòng (Sao chép, Xem bản đồ, Đại diện của N DN): chữ xanh đậm 14px + icon, nằm NGAY SAU giá
+// trị (cùng dòng chữ, gần chỗ mắt đang đọc) chứ không dạt ra mép phải. Vùng bấm 44px bằng py-3 + margin âm
+// -my-3 → không làm dòng cao thêm. items-baseline: chữ của hành động chung đường chân chữ với giá trị (icon
+// tự canh giữa, không tham gia baseline). CopyButton variant="text" có sẵn class riêng → đè bằng COPY_FIX.
 const ACT =
-  'group inline-flex items-center gap-1.5 py-3 -my-3 text-sm leading-5 font-semibold whitespace-nowrap text-brand no-underline hover:text-brand-hover hover:underline hover:underline-offset-[3px]';
-const COPY_FIX = '-my-3! py-3 leading-5 max-md:gap-1';
+  'group inline-flex items-baseline gap-1.5 py-3 -my-3 text-sm leading-5 font-semibold whitespace-nowrap text-brand no-underline hover:text-brand-hover hover:underline hover:underline-offset-[3px] [&>svg]:self-center';
+const COPY_FIX = 'items-baseline! -my-3! py-3 leading-5 max-md:gap-1 [&>svg]:self-center';
 
-// Bảng thông tin DN (spec mục 3.4), kiểu Pappers: không kẻ dòng, chỉ khoảng trắng; trường trống thì ẩn dòng.
-//   ≥ 768px: [icon + nhãn 150px] [giá trị] [hành động, dạt phải], các dòng cách nhau 6px.
-//   < 768px: nhãn (icon + chữ xám 14px) ở trên, giá trị ở dưới; hành động bên phải giá trị (pair) hoặc dưới
-//            giá trị (stack); dòng điện thoại (phone): khối PhoneReveal tự xếp số che + nút rộng hết ngang.
-function Row({ icon: Icon, label, children, action, layout = 'pair' }) {
-  const full = layout === 'phone' || !action;
+// Khoảng cách giá trị → hành động là MỘT DẤU CÁCH giãn chữ (word-spacing) chứ không phải margin: khi hành động
+// phải xuống dòng (tên người đại diện, màn hẹp), dấu cách cuối dòng bị bỏ → hành động thẳng mép trái giá trị,
+// không thụt 12px. inline-block để cụm hành động không bị ngắt giữa chừng.
+function Action({ children }) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 py-2 md:grid-cols-[150px_minmax(0,1fr)_auto] md:gap-x-4 md:py-[5px]">
-      <dt className="col-span-2 flex items-baseline gap-2 text-sm leading-5 text-muted md:col-span-1 md:gap-3 md:text-body md:leading-6">
-        <Icon className="h-4 w-4 flex-none self-center text-field md:h-[18px] md:w-[18px]" />
+    <>
+      <span className="[word-spacing:6px] md:[word-spacing:12px]"> </span>
+      <span className="inline-block">{children}</span>
+    </>
+  );
+}
+
+// Bảng thông tin DN (spec mục 3.4), kiểu A «sổ đăng ký»: dòng kẻ mảnh, nhãn và giá trị chung đường chân chữ
+// (items-baseline) ở mọi dòng. Trường trống thì ẩn dòng.
+//   ≥ 768px: cột nhãn (icon + nhãn) 208px → mọi giá trị thẳng một cột.
+//   < 768px: gọn để nút «Xem số điện thoại» lọt màn hình đầu — trường ngắn 2 cột «nhãn 104px | giá trị»
+//            (không icon, nhãn 13px không xuống dòng: «Ngày hoạt động» 106px lấn 2px vào khe 10px — nới cột
+//            thì MST + «Sao chép» không còn vừa một dòng ở 360px); trường dài (layout="stack": địa chỉ, đơn vị
+//            chủ quản) nhãn ở trên.
+//            layout="phone": nhãn | số che cùng dòng, nút xem số rộng hết ngang ở dưới (dd phủ cả 2 cột,
+//            dòng đầu thụt 114px = 104 + khe 10 qua prop indent của PhoneReveal).
+const PHONE_INDENT = 'max-md:pl-[114px]';
+function Row({ icon: Icon, label, children, action, layout = 'pair' }) {
+  const mobile =
+    layout === 'stack' ? 'grid-cols-1 gap-y-0.5' : 'grid-cols-[104px_minmax(0,1fr)] gap-x-2.5';
+  return (
+    <div
+      className={`grid items-baseline border-b border-line py-2 first:pt-2 md:grid-cols-[208px_minmax(0,1fr)] md:gap-x-4 md:py-3.5 md:first:pt-2.5 ${mobile}`}
+    >
+      <dt
+        className={`flex items-baseline gap-3 text-meta text-muted md:text-sm md:leading-6 ${layout === 'phone' ? 'max-md:col-start-1 max-md:row-start-1' : ''} ${layout === 'stack' ? '' : 'max-md:whitespace-nowrap'}`}
+      >
+        <Icon className="mt-[3px] hidden h-[18px] w-[18px] flex-none self-start text-field md:block" />
         <span>{label}</span>
       </dt>
       <dd
-        className={`mt-1 min-w-0 text-body leading-6 break-words text-ink md:mt-0 ${full ? 'col-span-2' : layout === 'stack' ? 'col-span-2 md:col-span-1' : ''}`}
+        className={`min-w-0 text-body leading-6 break-words text-ink ${layout === 'phone' ? 'max-md:col-span-2 max-md:col-start-1 max-md:row-start-1' : ''}`}
       >
         {children}
+        {action && <Action>{action}</Action>}
       </dd>
-      {action && layout !== 'phone' && (
-        <dd
-          className={`justify-self-start md:justify-self-end ${layout === 'stack' ? 'col-span-2 mt-1 md:col-span-1 md:mt-0' : 'mt-1 md:mt-0'}`}
-        >
-          {action}
-        </dd>
-      )}
     </div>
   );
 }
@@ -96,7 +113,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address || '')}`;
   const repHref = `/tim-kiem?q=${encodeURIComponent(c.representative || '')}`;
   return (
-    <dl className="py-1">
+    <dl>
       <Row
         icon={IconHash}
         label={M.company.mst}
@@ -106,9 +123,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
       >
         {/* Không tabular-nums / giãn chữ: số «1» Inter dạng bảng rộng bằng số khác → MST trông như hai cụm.
             Điện thoại 18px: MST + «Sao chép» vừa một dòng cả ở 360px. */}
-        <span className="text-[18px] leading-6 font-semibold tracking-[0.02em] whitespace-nowrap">
-          {c.mst}
-        </span>
+        <span className="text-[18px] font-semibold whitespace-nowrap md:text-[20px]">{c.mst}</span>
       </Row>
 
       {c.parent_mst && (
@@ -156,7 +171,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
           <Link
             href={repHref}
             rel="nofollow"
-            className="-my-2.5 inline-block py-2.5 text-ink underline decoration-line-strong underline-offset-[3px] hover:text-brand hover:decoration-brand"
+            className="-my-2.5 inline-block py-2.5 no-underline hover:underline hover:underline-offset-[3px]"
           >
             {c.representative}
           </Link>
@@ -165,6 +180,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
 
       <Row icon={IconPhone} label={M.company.phone} layout="phone">
         <PhoneReveal
+          indent={PHONE_INDENT}
           mst={c.mst}
           hasPhone={c.has_phone}
           phoneHidden={c.phone_hidden}

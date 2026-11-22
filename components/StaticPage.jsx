@@ -29,17 +29,17 @@ export default function StaticPage({ title, intro, sections, updated = '15/11/20
     </li>
   ));
   return (
-    <main className="site-wrap pb-12 md:pb-16">
+    <main className="site-wrap">
       <div className="pt-3 pb-3 md:pt-5 md:pb-4">
         <Breadcrumb items={[{ name: title }]} />
       </div>
       <div className="rail-grid">
-        <article className="card min-w-0 px-5 py-6 md:px-10 md:py-9">
+        <article className="min-w-0">
           <header className={`flex flex-col gap-2 ${MEASURE}`}>
             <h1 className="text-h1-m font-semibold text-pretty text-ink md:text-h1">{title}</h1>
             <p className="text-sm text-muted tabular-nums">{M.staticPage.updated(updated)}</p>
             {/* Ghi chú bản nháp: một dòng có vạch trái màu cảnh báo — đủ thấy, không thành hộp to giữa trang. */}
-            <p className="mt-2 rounded-lg bg-warn-bg px-3 py-2 text-sm text-warn">
+            <p className="mt-2 border-l-2 border-warn pl-3 text-sm text-ink-2">
               {M.staticPage.draftNote}
             </p>
             {intro && <p className="mt-2 text-body leading-7 text-ink-2">{intro}</p>}
@@ -64,7 +64,9 @@ export default function StaticPage({ title, intro, sections, updated = '15/11/20
               </details>
             </nav>
           )}
-          <div className={`border-t border-line ${MEASURE} ${hasToc ? 'xl:mt-8' : 'mt-5 md:mt-8'}`}>
+          <div
+            className={`border-t-2 border-ink ${MEASURE} ${hasToc ? 'xl:mt-8' : 'mt-5 md:mt-8'}`}
+          >
             {sections.map((s, i) => (
               <section
                 key={s.id}
@@ -87,9 +89,12 @@ export default function StaticPage({ title, intro, sections, updated = '15/11/20
         </article>
 
         {hasToc && (
-          <aside className="card hidden px-4 pt-1 pb-2 xl:sticky xl:top-24 xl:block">
+          <aside className="hidden xl:sticky xl:top-24 xl:block">
             <nav aria-labelledby="toc-title">
-              <p id="toc-title" className="pt-3 pb-2 text-body font-semibold text-ink">
+              <p
+                id="toc-title"
+                className="border-t-2 border-ink pt-3 pb-2 text-body font-semibold text-ink"
+              >
                 {M.staticPage.toc}
               </p>
               <ol className="border-t border-line pt-1">{tocItems}</ol>

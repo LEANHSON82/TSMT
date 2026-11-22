@@ -21,7 +21,7 @@ function pageList(page, total) {
 // ≥ 44px, spec 7.3), trang hiện tại nền xanh. Điện thoại: «Trước/Sau» chỉ còn mũi tên, ẩn bớt số trang xa,
 // «Trang x / y» xuống dòng dưới.
 const box =
-  'press inline-flex h-11 min-w-11 items-center justify-center gap-1 rounded-lg border px-3 text-body font-semibold tabular-nums no-underline';
+  'press inline-flex h-11 min-w-11 items-center justify-center gap-1 rounded border px-3 text-body font-semibold tabular-nums no-underline';
 const live = `${box} border-line-strong bg-white text-brand hover:border-brand hover:text-brand`;
 const off = `${box} border-line text-[#8a929e]`;
 

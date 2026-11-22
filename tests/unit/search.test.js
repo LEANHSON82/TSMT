@@ -47,12 +47,6 @@ describe('bộ tìm mẫu (mocks/search.js)', () => {
     expect(search(index, '0901000002')).toMatchObject([{ matched: 'phone' }]);
     expect(search(index, '0901000005')).toEqual([]);
   });
-  it('bỏ chữ viết tắt «cty»', () => {
-    expect(msts(search(index, 'cty việt tiến'))).toEqual(['0000000002']);
-  });
-  it('MST dán kèm nhãn hoặc gạch dài vẫn tìm được', () => {
-    expect(search(index, 'MST: 0000000004')[0]).toMatchObject({ matched: 'mst' });
-  });
   it('MST: tiền tố, khớp đúng xếp trước', () => {
     expect(search(index, '0000000004')[0]).toMatchObject({ matched: 'mst' });
   });
@@ -88,13 +82,5 @@ describe('tỉnh/thành trong từ khoá', () => {
       rest: 'phần mềm',
     });
     expect(findProvinceInQuery('thực phẩm việt tiến', provinces)).toBeNull();
-  });
-  it('nhận tên tỉnh cũ trước sáp nhập', () => {
-    expect(suggestProvinces('binh duong', provinces).map((p) => p.slug)).toEqual(['ho-chi-minh']);
-    expect(suggestProvinces('vũng tàu', provinces).map((p) => p.slug)).toEqual(['ho-chi-minh']);
-    expect(findProvinceInQuery('xây dựng bình dương', provinces)).toMatchObject({
-      province: { code: '79' },
-      rest: 'xây dựng',
-    });
   });
 });

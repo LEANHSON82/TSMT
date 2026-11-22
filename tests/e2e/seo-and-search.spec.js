@@ -185,7 +185,7 @@ test('header dính đầu trang: ô tìm luôn trong màn hình (trang chủ: hi
   isMobile,
 }) => {
   await page.goto('/');
-  const headerSearch = page.locator('[data-header-search]:visible');
+  const headerSearch = page.locator('[data-header-search]');
   await expect(headerSearch).toBeHidden(); // ô tìm lớn ở hero đang hiện
   // Máy tính: ô tìm lớn tự focus sau khi trang tải (spec 3.1) và kéo trang về đầu — chờ xong rồi mới cuộn.
   if (!isMobile) await expect(page.locator('[data-hero-search] input')).toBeFocused();
@@ -239,7 +239,7 @@ test('gõ vào ô tìm trên nav không làm trang tự cuộn (header dính)', 
   // Máy tính: ô tìm lớn tự focus sau khi trang tải (spec 3.1) — chờ xong rồi mới cuộn.
   if (!isMobile) await expect(page.locator('[data-hero-search] input')).toBeFocused();
   await page.evaluate(() => window.scrollTo(0, 900));
-  const headerInput = page.locator('[data-header-search]:visible input');
+  const headerInput = page.locator('[data-header-search] input');
   await expect(headerInput).toBeVisible();
   const before = await page.evaluate(() => window.scrollY);
   await headerInput.click();

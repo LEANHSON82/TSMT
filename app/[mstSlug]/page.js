@@ -103,117 +103,107 @@ export default async function CompanyPage({ params }) {
   };
 
   return (
-    <>
+    <div className="site-wrap">
       <JsonLd data={orgLd} />
       <TrackOnMount name="view_company" params={{ mst: c.mst, province: c.province?.slug }} />
-      {/* Kiểu Pappers: dải xanh dưới header; breadcrumb chữ trắng trên dải; khối đầu trang (thẻ trắng bóng mềm)
-          nằm trên dải, gồm H1 + dòng phụ (bên trái từ 1280px, căn giữa) và bảng thông tin (spec 3.4 mục 1–3,
-          không chèn khối nào giữa H1 và bảng). Dải xanh dài quá đáy thẻ 48px. */}
-      <div className="bg-band pb-8 md:pb-12">
-        <div className="site-wrap">
-          <div className="on-dark py-3 md:py-4 [&_a]:text-white [&_li]:text-[#d5e0f5] [&_span[aria-current]]:text-[#d5e0f5]">
-            <Breadcrumb
-              items={[
-                ...(c.province
-                  ? [{ name: c.province.name, href: `/tinh/${c.province.slug}` }]
-                  : []),
-                { name: c.name },
-              ]}
-            />
+      {/* Hệ A: breadcrumb cách header 20px (điện thoại 12), tới H1 16px (12). */}
+      <div className="pt-3 md:pt-5">
+        <Breadcrumb
+          items={[
+            ...(c.province ? [{ name: c.province.name, href: `/tinh/${c.province.slug}` }] : []),
+            { name: c.name },
+          ]}
+        />
+      </div>
+
+      {/* Cột chính 852 + cột phải 300 quảng cáo (.rail-grid, từ 1280px — ở 1024 cột chính chỉ còn ~628 nên
+          dưới 1280 không có cột phải, ô cột phải ẩn hẳn; vẫn còn ô trong bài dưới bảng thông tin). Cột phải kéo
+          cao bằng hàng (self-stretch) để ô 300×600 bên trong dính khi cuộn; cột chính canh đầu (không bị kéo
+          giãn). Chưa có nguồn banner: bỏ cột phải, cột chính rộng hết khung (không để cột trống). */}
+      <div className={`mt-3 md:mt-4 ${BANNERS_ON ? 'rail-grid' : ''}`}>
+        <main className="min-w-0">
+          <div className="mb-5 md:mb-8">
+            <h1 className="text-h1-m font-semibold text-pretty break-words text-ink md:text-h1">
+              {c.name}
+            </h1>
+            {(c.name_en || c.name_short) && (
+              <dl className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-ink-2">
+                {c.name_en && (
+                  <div>
+                    <dt className="mr-1 inline text-muted">{M.company.nameEn}</dt>
+                    <dd className="inline">{c.name_en}</dd>
+                  </div>
+                )}
+                {c.name_short && (
+                  <div>
+                    <dt className="mr-1 inline text-muted">{M.company.nameShort}</dt>
+                    <dd className="inline">{c.name_short}</dd>
+                  </div>
+                )}
+              </dl>
+            )}
           </div>
-          <section
-            aria-labelledby="company-name"
-            className="card-hero px-5 pt-6 pb-3 md:px-10 md:pt-8 md:pb-6 xl:flex xl:items-center xl:gap-12"
-          >
-            <div className="flex flex-col items-center gap-2 text-center xl:w-[340px] xl:flex-none">
-              <h1
-                id="company-name"
-                className="text-[26px] leading-8 font-semibold tracking-[-0.01em] text-balance break-words text-ink md:text-[32px] md:leading-10"
-              >
-                {c.name}
-              </h1>
-              {(c.name_en || c.name_short) && (
-                <dl className="flex flex-col items-center gap-0.5 text-body text-muted md:text-base">
-                  {c.name_en && (
-                    <div>
-                      <dt className="sr-only">{M.company.nameEn}</dt>
-                      <dd className="text-balance">{c.name_en}</dd>
-                    </div>
-                  )}
-                  {c.name_short && (
-                    <div>
-                      <dt className="mr-1 inline">{M.company.nameShort}:</dt>
-                      <dd className="inline">{c.name_short}</dd>
-                    </div>
-                  )}
-                </dl>
-              )}
-            </div>
-            <div className="mt-5 min-w-0 flex-1 border-t border-line pt-2 xl:mt-0 xl:border-t-0 xl:pt-0">
-              <h2 className="sr-only">{M.company.info}</h2>
-              <CompanyInfoTable company={c} parent={parent} />
-            </div>
+
+          <section aria-labelledby="info-title">
+            <SectionHeader id="info-title" title={M.company.info} />
+            <CompanyInfoTable company={c} parent={parent} />
           </section>
-        </div>
-      </div>
 
-      <div className="site-wrap pb-12 md:pb-16">
-        <AdSlot slotId="detail-below-info" className="mt-6 md:mt-8" />
+          <AdSlot slotId="detail-below-info" className="mt-10 md:mt-12" />
 
-        {/* Cột chính + cột phải 300 quảng cáo (.rail-grid, từ 1280px). Cột phải kéo cao bằng hàng (self-stretch) để
-            ô 300×600 bên trong dính khi cuộn. Chưa có nguồn banner: bỏ cột phải, cột chính rộng hết khung. */}
-        <div className={`mt-6 md:mt-8 ${BANNERS_ON ? 'rail-grid' : ''}`}>
-          <main className="flex min-w-0 flex-col gap-6">
-            {c.industries?.length > 0 && (
-              <section aria-labelledby="ind-title" className="card px-4 pt-4 pb-3">
-                <SectionHeader
-                  id="ind-title"
-                  divider
-                  title={M.company.industries}
-                  meta={M.company.industryCount(c.industries.length)}
-                />
-                <IndustryTable industries={c.industries} />
-              </section>
-            )}
-
-            <p className="-mt-2 flex flex-wrap items-center gap-x-6 gap-y-1 px-1 text-sm text-muted">
-              <span className="tabular-nums">
-                {M.company.updatedAt}: {formatDateTime(c.updated_at)}
-              </span>
-              <Link
-                href={`/yeu-cau-cap-nhat?mst=${encodeURIComponent(c.mst)}`}
-                className="-my-3 inline-flex min-h-11 items-center font-semibold no-underline hover:underline hover:underline-offset-[3px]"
-              >
-                {M.company.requestUpdate}
-              </Link>
-            </p>
-
-            {related.length > 0 && (
-              <section aria-labelledby="rel-title" className="card px-4 pt-4 pb-1">
-                <SectionHeader
-                  id="rel-title"
-                  divider
-                  title={M.company.related(c.province?.name || '')}
-                  meta={M.company.relatedCount(related.length)}
-                />
-                <ul>
-                  {related.map((r) => (
-                    <li key={r.mst}>
-                      <CompanyCard company={r} variant="card" bare />
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-          </main>
-
-          {BANNERS_ON && (
-            <div className="hidden self-stretch xl:block">
-              <AdSlot slotId="detail-rail" variant="rail" className="h-full" />
-            </div>
+          {c.industries?.length > 0 && (
+            <section aria-labelledby="ind-title" className="mt-10 md:mt-12">
+              <SectionHeader
+                id="ind-title"
+                title={M.company.industries}
+                meta={M.company.industryCount(c.industries.length)}
+              />
+              <IndustryTable industries={c.industries} />
+            </section>
           )}
-        </div>
+
+          {/* Ngay dưới bảng ngành (thuộc cùng khối như bản mẫu A); DN không có ngành thì đứng riêng. */}
+          <p
+            className={`flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-muted ${c.industries?.length > 0 ? 'mt-4' : 'mt-10 md:mt-12'}`}
+          >
+            <span className="tabular-nums">
+              {M.company.updatedAt}: {formatDateTime(c.updated_at)}
+            </span>
+            <Link
+              href={`/yeu-cau-cap-nhat?mst=${encodeURIComponent(c.mst)}`}
+              className="-my-3 inline-flex min-h-11 items-center font-semibold no-underline hover:underline hover:underline-offset-[3px]"
+            >
+              {M.company.requestUpdate}
+            </Link>
+          </p>
+
+          {related.length > 0 && (
+            <section aria-labelledby="rel-title" className="mt-10 md:mt-12">
+              <SectionHeader
+                id="rel-title"
+                title={M.company.related(c.province?.name || '')}
+                meta={M.company.relatedCount(related.length)}
+              />
+              {/* Đúng số DN API trả về (1 DN = 1 thẻ), lưới 2 cột từ 640px (thẻ ~410px như lưới trang chủ) — một
+                  cột trong khung 852 bỏ trống quá nửa bề ngang. Không chèn ô giữ chỗ: số lẻ thì ô cuối để trống. */}
+              <ul className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-8">
+                {related.map((r) => (
+                  <li key={r.mst}>
+                    <CompanyCard company={r} variant="card" />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </main>
+
+        {/* AdSlot rail tự ẩn dưới 1024 (hidden lg:block); bọc thêm để ẩn cả 1024–1279 (chưa có cột phải). */}
+        {BANNERS_ON && (
+          <div className="hidden self-stretch xl:block">
+            <AdSlot slotId="detail-rail" variant="rail" className="h-full" />
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }

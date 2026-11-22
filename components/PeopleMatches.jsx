@@ -49,7 +49,7 @@ export default function PeopleMatches({ people, q, tab, params }) {
               prefetch={false}
               className="group inline-flex min-h-11 items-center no-underline"
             >
-              <span className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line-strong bg-white px-2.5 text-sm text-brand group-hover:border-brand">
+              <span className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-line-strong bg-white px-2.5 text-sm text-brand group-hover:border-brand">
                 <span className="font-semibold">{p.name}</span>
                 {p.count > 1 && (
                   <span className="text-muted tabular-nums">· {M.search.peopleCount(p.count)}</span>

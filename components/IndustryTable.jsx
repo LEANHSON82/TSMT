@@ -1,6 +1,6 @@
 'use client';
 
-// Ngành nghề kinh doanh (spec mục 3.4), kiểu Pappers: bảng không kẻ dòng hai cột Mã ngành · Tên ngành, mã ngành là link
+// Ngành nghề kinh doanh (spec mục 3.4), kiểu A: bảng kẻ mảnh hai cột Mã ngành · Tên ngành, mã ngành là link
 // chữ xanh (cột thẳng, số tabular), ngành chính đứng đầu, in đậm + nhãn «Ngành chính». Quá 10 ngành thì thu
 // gọn, nút «Xem thêm N ngành». Toàn bộ ngành vẫn có trong HTML server trả về để Google đọc được.
 import Link from 'next/link';
@@ -24,11 +24,11 @@ export default function IndustryTable({ industries }) {
           <tr className="text-left text-meta text-muted">
             <th
               scope="col"
-              className="w-20 pt-3 pr-4 pb-1 font-normal whitespace-nowrap md:w-[110px]"
+              className="w-24 border-b border-line-strong py-2.5 pr-4 font-semibold whitespace-nowrap md:w-[120px]"
             >
               {M.company.industryCode}
             </th>
-            <th scope="col" className="pt-3 pb-1 font-normal">
+            <th scope="col" className="border-b border-line-strong py-2.5 font-semibold">
               {M.company.industryName}
             </th>
           </tr>
@@ -40,9 +40,7 @@ export default function IndustryTable({ industries }) {
               hidden={!expanded && i >= VISIBLE}
               className={`align-top ${i >= VISIBLE ? 'motion-fade' : ''}`}
             >
-              <td
-                className={`py-1.5 pr-4 leading-6 tabular-nums ${ind.is_main ? 'font-semibold' : ''}`}
-              >
+              <td className="border-b border-line py-3 pr-4 leading-6 tabular-nums">
                 {/* Vùng bấm 44px bằng padding + margin âm: dòng không cao thêm. */}
                 <Link
                   href={`/nganh/${ind.code}-${toSlug(ind.name)}`}
@@ -52,11 +50,11 @@ export default function IndustryTable({ industries }) {
                   {ind.code}
                 </Link>
               </td>
-              <td className="py-1.5 leading-6 text-ink">
+              <td className="border-b border-line py-3 leading-6 text-ink">
                 <span className={ind.is_main ? 'font-semibold' : ''}>{ind.name}</span>
                 {/* Máy tính: nhãn ngay sau tên trên cùng dòng; điện thoại: xuống dòng dưới tên (cột tên hẹp). */}
                 {ind.is_main && (
-                  <span className="tag tag-brand mt-1 table align-[1px] md:mt-0 md:ml-2.5 md:inline-block">
+                  <span className="tag tag-brand mt-1 table align-[1px] md:mt-0 md:ml-3 md:inline-block">
                     {M.company.mainIndustry}
                   </span>
                 )}

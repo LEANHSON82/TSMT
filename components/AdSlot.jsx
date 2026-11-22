@@ -13,15 +13,15 @@ const provider = process.env.NEXT_PUBLIC_AD_PROVIDER;
 export const BANNERS_ON =
   provider === 'gpt' ? Boolean(process.env.NEXT_PUBLIC_GPT_BANNER_PATH) : provider !== 'fallback';
 
-// Kiểu Pappers: nhãn «Quảng cáo» 12px xám căn giữa trên ô; ô nền xám, không bo góc, không viền — khác hẳn thẻ
-// trắng nội dung; cột phải là ô 300×600 trơn, dính khi cuộn (dưới hàng ô tìm dính).
+// Hệ A: nhãn «Quảng cáo» 13px xám (không in hoa) trên khung; ô trong bài là khung nền xám nhạt viền mảnh
+// rộng đúng khung nội dung, banner nằm giữa; cột phải là ô 300×600 trơn, dính khi cuộn (dưới hàng ô tìm dính).
 export default function AdSlot({ slotId, variant = 'inline', className = '' }) {
   if (!BANNERS_ON) return null;
   if (variant === 'rail') {
     return (
       <div data-ad-wrap className={`hidden lg:block ${className}`}>
         <div className="sticky top-24 flex flex-col gap-1">
-          <span className="text-xs leading-4 text-muted">{M.ad.label}</span>
+          <span className="text-meta text-muted">{M.ad.label}</span>
           <AdUnit
             slotId={slotId}
             size="rail"
@@ -33,12 +33,12 @@ export default function AdSlot({ slotId, variant = 'inline', className = '' }) {
     );
   }
   return (
-    <div data-ad-wrap className={`flex flex-col items-center gap-1 ${className}`}>
-      <span className="text-xs leading-4 text-muted">{M.ad.label}</span>
+    <div data-ad-wrap className={`flex flex-col gap-1 ${className}`}>
+      <span className="text-meta text-muted">{M.ad.label}</span>
       {/* Container query trên khung: chỉ đổi sang 728×90 khi lòng khung đủ 728px (cột chính trang DN ở 1024px
           hẹp hơn), banner thật không bị ép / tràn ngang. AdUnit rộng đúng cỡ banner nên clientWidth (AdUnit
           dùng để chọn cỡ khi đổ GPT) khớp với khung giữ chỗ. */}
-      <div className="@container flex w-full justify-center">
+      <div className="@container flex justify-center border border-line bg-page p-3 md:p-4">
         <AdUnit
           slotId={slotId}
           data-ad-size="300x250,728x90"

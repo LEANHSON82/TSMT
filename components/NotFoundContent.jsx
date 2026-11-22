@@ -28,9 +28,9 @@ export default function NotFoundContent() {
     setMst(parseMstSlug(window.location.pathname.replace(/^\//, ''))?.mst || null);
   }, []);
   return (
-    <main className="site-wrap pt-6 pb-12 md:pt-12 md:pb-16">
-      <div className="card-hero mx-auto max-w-[760px] px-5 py-6 md:px-12 md:py-10">
-        <p className="pb-1 text-sm font-semibold text-muted">{M.notFound.code}</p>
+    <main className="site-wrap">
+      <p className="pt-3 pb-3 text-sm text-muted md:pt-5 md:pb-4">{M.notFound.code}</p>
+      <div className="max-w-[852px]">
         <h1 className="text-h1-m font-semibold break-words text-pretty text-ink md:text-h1">
           {mst ? M.notFound.mstTitle(mst) : M.notFound.title}
         </h1>
@@ -45,7 +45,7 @@ export default function NotFoundContent() {
           suggestPrefilled={false}
           className="mt-5"
         />
-        <nav aria-label={M.notFound.linksLabel} className="mt-6 border-t border-line md:mt-8">
+        <nav aria-label={M.notFound.linksLabel} className="mt-8 border-t-2 border-ink md:mt-10">
           <ul>
             {LINKS.map((l) => (
               <li key={l.href} className="border-b border-line">

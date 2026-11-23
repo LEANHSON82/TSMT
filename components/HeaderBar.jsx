@@ -550,7 +550,10 @@ export default function HeaderBar({ provinces, industries }) {
                   pathname === '/doanh-nghiep-moi-thanh-lap' ? CURRENT_BAR : ''
                 }`}
               >
-                {M.nav.newCompaniesShort}
+                {/* Ghi đủ chữ khi đủ chỗ; chỗ hẹp mới rút gọn để ô tìm bên phải không bị bóp. */}
+                <span className="lg:hidden">{M.nav.newCompaniesShort}</span>
+                <span className="max-lg:hidden xl:hidden">{M.nav.newCompaniesMid}</span>
+                <span className="max-xl:hidden">{M.nav.newCompanies}</span>
               </Link>
             </nav>
             {/* Ô tìm bên phải dải menu. Trang chủ: ẩn khi ô tìm lớn của hero còn trong tầm nhìn (vẫn giữ chỗ). */}

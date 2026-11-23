@@ -213,8 +213,10 @@ test('header đánh dấu trang đang xem (aria-current)', async ({ page, isMobi
   await page.goto('/doanh-nghiep-moi-thanh-lap');
   if (isMobile) await page.getByRole('button', { name: 'Mở menu' }).click();
   await expect(
-    // Máy tính: «DN mới» (spec mục 3); menu điện thoại: «DN mới thành lập».
-    page.getByRole('link', { name: /^DN mới( thành lập)?$/ }).locator('visible=true'),
+    // Máy tính 1280: «Doanh nghiệp mới thành lập»; menu điện thoại: «Doanh nghiệp mới thành lập».
+    page
+      .getByRole('link', { name: /^(DN|Doanh nghiệp) mới( thành lập)?$/ })
+      .locator('visible=true'),
   ).toHaveAttribute('aria-current', 'page');
 });
 

@@ -428,7 +428,7 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
         type="submit"
         disabled={submitting}
         aria-busy={submitting}
-        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand px-8 text-base font-semibold text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-70 md:w-auto md:self-start"
+        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand px-8 text-base font-semibold text-white hover:bg-chrome-2 disabled:cursor-not-allowed disabled:opacity-70 md:w-auto md:self-start"
       >
         {submitting && (
           <span

@@ -62,8 +62,8 @@ export async function IndustryList({ params, searchParams }) {
 
   return (
     <ListPageShell
-      breadcrumb={[{ name: M.list.industry.crumb(industry.code) }]}
-      title={M.list.industry.title(industry.code, industry.name)}
+      breadcrumb={[{ name: industry.name }]}
+      title={industry.name}
       description={M.list.industry.lead(where)}
       // Tìm / lọc trong ngành → trang kết quả với ngành (và tỉnh đang chọn) chọn sẵn. Bộ lọc tỉnh của spec 3.5 vẫn ở
       // hàng số đếm, giữ người dùng trên trang ngành.

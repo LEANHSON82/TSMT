@@ -32,6 +32,7 @@ export default function ListPageShell({
   highlight,
   showNew = true,
   showProvince = true,
+  showTotal = true, // false: H1 đã ghi tổng số (trang kết quả «Tìm thấy N kết quả…») — không lặp lại ở thanh công cụ
 }) {
   const size = data.page_size || 20;
   const total = data.total || 0;
@@ -79,15 +80,21 @@ export default function ListPageShell({
               <p role="status" className="text-sm leading-11 text-muted">
                 {total > 0 && (
                   <>
-                    <span className="font-semibold text-ink tabular-nums">
-                      {formatNumber(total)}
-                    </span>{' '}
-                    {M.list.countUnit}
+                    {showTotal && (
+                      <>
+                        <span className="font-semibold text-ink tabular-nums">
+                          {formatNumber(total)}
+                        </span>{' '}
+                        {M.list.countUnit}
+                      </>
+                    )}
                     {range && (
                       <span className="whitespace-nowrap">
-                        <span aria-hidden="true" className="px-2 text-line-strong">
-                          ·
-                        </span>
+                        {showTotal && (
+                          <span aria-hidden="true" className="px-2 text-line-strong">
+                            ·
+                          </span>
+                        )}
                         <span className="tabular-nums">{range}</span>
                       </span>
                     )}

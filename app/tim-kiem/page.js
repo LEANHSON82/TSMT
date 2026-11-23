@@ -250,7 +250,7 @@ export default async function SearchPage({ searchParams }) {
           ...(f.selIndustries.length === 1
             ? [
                 {
-                  name: M.list.industry.crumb(f.selIndustries[0].code),
+                  name: f.selIndustries[0].name,
                   href: `/nganh/${f.selIndustries[0].code}-${f.selIndustries[0].slug || toSlug(f.selIndustries[0].name)}`,
                 },
               ]
@@ -301,6 +301,7 @@ export default async function SearchPage({ searchParams }) {
                 : M.search.emptyHints
         }
         emptyActions={emptyActions}
+        showTotal={!q && !f.hasFilter}
         slotPrefix="search"
       />
     </>

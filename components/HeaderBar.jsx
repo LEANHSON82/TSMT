@@ -83,8 +83,8 @@ export function AdvancedSearchLink({ href = '/tim-kiem', className = '' }) {
   );
 }
 
-// Điện thoại: cùng lối vào nhưng chỉ icon, rộng 44px, cao bằng ô tìm (48px), viền như ô nhập. Tên đọc + tooltip
-// = «Lọc nâng cao».
+// Điện thoại: cùng lối vào nhưng chỉ icon, 44×44, trong suốt viền trắng mờ như ô tìm trên dải than chì. Tên đọc +
+// tooltip = «Lọc nâng cao».
 function AdvancedSearchIcon({ href, className = '' }) {
   return (
     <Link
@@ -92,7 +92,7 @@ function AdvancedSearchIcon({ href, className = '' }) {
       prefetch={false}
       aria-label={M.list.advancedFilter}
       title={M.list.advancedFilter}
-      className={`inline-flex h-11 w-11 flex-none items-center justify-center rounded-md border border-field bg-white text-brand no-underline hover:border-ink-2 hover:bg-page ${className}`}
+      className={`inline-flex h-11 w-11 flex-none items-center justify-center rounded-md border border-white/35 text-white no-underline hover:bg-white/13 hover:text-white ${className}`}
     >
       <FilterIcon size={20} />
     </Link>

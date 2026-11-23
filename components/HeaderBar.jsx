@@ -11,9 +11,11 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { M } from '@/lib/messages';
+import { SITE_NAME } from '@/lib/site';
 import { buildHref } from '@/lib/url';
 import IndustryCode from './IndustryCode';
 import { trapTab } from './focusTrap';
+import Logo from './Logo';
 import SearchBox from './SearchBox';
 import {
   IconBriefcase,
@@ -409,52 +411,61 @@ export default function HeaderBar({ provinces, industries }) {
             tìm (kèm nút icon «Lọc nâng cao») và nút menu. Từ 768px: chỉ còn dải menu xanh, ô tìm nằm bên phải dải. */}
         {/* Hàng header điện thoại: nền trắng (trang chủ: chỉ có nút menu cho tới khi ô tìm lớn của hero cuộn khuất). */}
         <div ref={findRef} className="md:hidden">
-          <div className="site-wrap relative flex items-center gap-1.5 py-2 max-md:pr-2">
-            {/* Trang chủ: ô tìm ẩn (vẫn giữ chỗ, nút menu vẫn hiện) cho tới khi ô tìm lớn của hero cuộn khuất. Chỗ
+          <div className="site-wrap flex items-center gap-2 py-2 max-md:pr-2">
+            <Link
+              href="/"
+              aria-label={`${SITE_NAME} – ${M.nav.home}`}
+              className="flex h-11 flex-none items-center no-underline"
+            >
+              <Logo title={SITE_NAME} className="h-[16px] w-auto" />
+            </Link>
+            <div className="relative flex min-w-0 flex-1 items-center gap-1.5">
+              {/* Trang chủ: ô tìm ẩn (vẫn giữ chỗ, nút menu vẫn hiện) cho tới khi ô tìm lớn của hero cuộn khuất. Chỗ
                 trống đó hiện lối tắt Tỉnh/thành · Ngành nghề · DN mới (không để một dải trắng chỉ có nút menu). */}
-            {!showHeaderSearch && (
-              <nav
-                aria-label={M.nav.mainMenu}
-                className="absolute inset-y-0 right-16 left-4 flex items-center gap-5 overflow-x-auto"
+              {!showHeaderSearch && (
+                <nav
+                  aria-label={M.nav.mainMenu}
+                  className="absolute inset-y-0 right-12 left-1 flex items-center gap-4 overflow-x-auto"
+                >
+                  <a
+                    href="#prov-title"
+                    className="text-sm font-semibold whitespace-nowrap text-title hover:text-brand"
+                  >
+                    {M.nav.provinces}
+                  </a>
+                  <a
+                    href="#ind-title"
+                    className="text-sm font-semibold whitespace-nowrap text-title hover:text-brand"
+                  >
+                    {M.nav.industries}
+                  </a>
+                  <Link
+                    href="/doanh-nghiep-moi-thanh-lap"
+                    className="text-sm font-semibold whitespace-nowrap text-title hover:text-brand"
+                  >
+                    {M.nav.newCompaniesShort}
+                  </Link>
+                </nav>
+              )}
+              <div
+                data-header-search
+                inert={!showHeaderSearch}
+                className={`min-w-0 flex-1 ${showHeaderSearch ? '' : 'invisible'}`}
               >
-                <a
-                  href="#prov-title"
-                  className="text-[15px] font-semibold whitespace-nowrap text-title hover:text-brand"
-                >
-                  {M.nav.provinces}
-                </a>
-                <a
-                  href="#ind-title"
-                  className="text-[15px] font-semibold whitespace-nowrap text-title hover:text-brand"
-                >
-                  {M.nav.industries}
-                </a>
-                <Link
-                  href="/doanh-nghiep-moi-thanh-lap"
-                  className="text-[15px] font-semibold whitespace-nowrap text-title hover:text-brand"
-                >
-                  {M.nav.newCompaniesShort}
-                </Link>
-              </nav>
-            )}
-            <div
-              data-header-search
-              inert={!showHeaderSearch}
-              className={`min-w-0 flex-1 ${showHeaderSearch ? '' : 'invisible'}`}
-            >
-              {search}
+                {search}
+              </div>
+              <button
+                ref={menuBtnRef}
+                type="button"
+                aria-label={M.nav.openMenu}
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-menu"
+                onClick={() => setMobileOpen(true)}
+                className="inline-flex h-11 w-11 flex-none items-center justify-center rounded text-title hover:bg-silver-2"
+              >
+                <IconMenu size={24} />
+              </button>
             </div>
-            <button
-              ref={menuBtnRef}
-              type="button"
-              aria-label={M.nav.openMenu}
-              aria-expanded={mobileOpen}
-              aria-controls="mobile-menu"
-              onClick={() => setMobileOpen(true)}
-              className="inline-flex h-11 w-11 flex-none items-center justify-center rounded text-title hover:bg-silver-2"
-            >
-              <IconMenu size={24} />
-            </button>
           </div>
         </div>
 
@@ -462,28 +473,14 @@ export default function HeaderBar({ provinces, industries }) {
             thả xuống của Tỉnh/thành và Ngành nghề mở ngay dưới hàng (relative). */}
         <div className="relative hidden md:block">
           <div className="site-wrap flex h-14 items-stretch">
+            {/* Logo chữ «TMST» (spec mục 3) — cũng là link về trang chủ, thay ô «nhà». */}
             <Link
               href="/"
-              aria-label={M.nav.home}
+              aria-label={`${SITE_NAME} – ${M.nav.home}`}
               aria-current={pathname === '/' ? 'page' : undefined}
-              className={`nav-item -ml-3 flex w-12 flex-none items-center justify-center hover:bg-silver-2 ${
-                pathname === '/' ? CURRENT_BAR : 'text-title hover:text-brand'
-              }`}
+              className="mr-5 flex flex-none items-center no-underline"
             >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M3 11 12 4l9 7" />
-                <path d="M5 10v10h14V10" />
-              </svg>
+              <Logo title={SITE_NAME} className="h-[20px] w-auto" />
             </Link>
             <nav aria-label={M.nav.mainMenu} className="flex items-stretch">
               <DesktopDropdown

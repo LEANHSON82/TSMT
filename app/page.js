@@ -83,15 +83,19 @@ export default async function HomePage() {
               </h1>
               {/* Dòng số liệu: tổng DN và số tỉnh/thành (đã có sẵn từ danh mục tỉnh, không gọi thêm API). */}
               {provinces.length > 0 && (
-                <p className="mt-2 text-center text-base text-muted tabular-nums md:text-[18px] md:leading-7">
+                // Số liệu là thứ đáng khoe nhất của trang dữ liệu: số to, đậm, màu tiêu đề; nhãn nhỏ xám.
+                <p className="mt-3 flex items-baseline justify-center gap-x-6 text-base text-muted tabular-nums md:gap-x-8 md:text-[17px]">
                   <span className="whitespace-nowrap">
-                    {M.search.provinceCount(formatNumber(totalCompanies))}
-                  </span>
-                  <span aria-hidden="true" className="px-1.5 text-line-strong">
-                    ·
+                    <span className="mr-1.5 text-[24px] leading-8 font-bold text-title md:text-[28px]">
+                      {formatNumber(totalCompanies)}
+                    </span>
+                    {M.home.statCompanies}
                   </span>
                   <span className="whitespace-nowrap">
-                    {provinces.length} {M.nav.provinces.toLowerCase()}
+                    <span className="mr-1.5 text-[24px] leading-8 font-bold text-title md:text-[28px]">
+                      {provinces.length}
+                    </span>
+                    {M.nav.provinces.toLowerCase()}
                   </span>
                 </p>
               )}
@@ -107,78 +111,91 @@ export default async function HomePage() {
 
         {/* Phần dưới hero: cùng khung .site-wrap với header/hero → mép trái mọi khối x=120 ở 1440. Nhịp dọc hệ A:
             đầu trang 40 (điện thoại 24), giữa các khối 48 (điện thoại 40). Footer tự có mt-12 nên không đệm đáy. */}
-        <div className="site-wrap flex flex-col gap-5 pt-5 pb-12 md:gap-6 md:pt-6 md:pb-16">
-          {/* Hai khối duyệt kiểu BizLookup («Browse by City / Industry»): tiêu đề giữa, lưới ô trắng viền mảnh bo góc,
-              chữ giữa ô. Tỉnh/thành (spec 3.1 mục 5: 34 tỉnh kèm số DN) xếp A–Z theo hàng; tỉnh chưa có DN: chữ xám,
-              không làm link. Ngành nghề phổ biến ngay dưới (mã VSIC + tên). */}
-          <section aria-labelledby="prov-title" className="pt-4 md:pt-6">
-            <h2 id="prov-title" className="browse-title">
-              {M.home.provincesTitle}
-            </h2>
-            {sorted.length === 0 && <HomeEmpty text={M.home.emptyProvinces} />}
-            {sorted.length > 0 && (
-              <MobileMore moreLabel={M.home.moreProvinces(sorted.length)}>
+        {/* Nhịp nền: hero xanh nhạt → dải TRẮNG rộng hết màn hình (tỉnh/thành, ngành nghề) → nền xám (quảng cáo, DN
+            mới trong khung trắng). Tiêu đề khối căn trái, 24px; link «Xem tất cả» ở đầu khối bên phải. */}
+        <div className="border-y border-line bg-white">
+          <div className="site-wrap flex flex-col gap-10 py-8 md:gap-12 md:py-12">
+            <section aria-labelledby="prov-title">
+              <h2 id="prov-title" className="block-title">
+                {M.home.provincesTitle}
+              </h2>
+              {sorted.length === 0 && <HomeEmpty text={M.home.emptyProvinces} />}
+              {sorted.length > 0 && (
+                <MobileMore moreLabel={M.home.moreProvinces(sorted.length)}>
+                  <ul className="browse-grid is-dense">
+                    {sorted.map((p, i) => (
+                      // Tỉnh nào cũng là link (tỉnh chưa có DN mở trang báo «chưa có doanh nghiệp»), không có ô xám.
+                      <li key={p.code} className={`min-w-0 ${i >= 12 ? 'mobile-extra' : ''}`}>
+                        <Link
+                          href={`/tinh/${p.slug}`}
+                          prefetch={false}
+                          className="browse-tile is-row"
+                        >
+                          <span className="browse-name">{p.name}</span>
+                          <span className="browse-count">
+                            {formatNumber(p.company_count || 0)}
+                            <span className="sr-only">{M.home.companiesSr}</span>
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </MobileMore>
+              )}
+            </section>
+
+            {/* Ngành nghề: tên gọn (tên VSIC đầy đủ ở tooltip và trên trang ngành) để mọi ô hiện đủ chữ. */}
+            <section aria-labelledby="ind-title">
+              <h2 id="ind-title" className="block-title">
+                {M.home.industriesTitle}
+              </h2>
+              <MobileMore moreLabel={M.home.moreIndustries}>
                 <ul className="browse-grid">
-                  {sorted.map((p, i) => (
-                    // Tỉnh nào cũng là link (tỉnh chưa có DN mở trang báo «chưa có doanh nghiệp»), không có ô xám.
-                    <li key={p.code} className={`min-w-0 ${i >= 12 ? 'mobile-extra' : ''}`}>
-                      <Link
-                        href={`/tinh/${p.slug}`}
-                        prefetch={false}
-                        className="browse-tile is-row"
-                      >
-                        <span className="browse-name">{p.name}</span>
-                        <span className="browse-count">
-                          {formatNumber(p.company_count || 0)}
-                          <span className="sr-only">{M.home.companiesSr}</span>
-                        </span>
+                  {POPULAR_INDUSTRIES.map((n, i) => (
+                    <li key={n.code} className={`min-w-0 ${i >= 8 ? 'mobile-extra' : ''}`}>
+                      <Link href={n.href} prefetch={false} className="browse-tile" title={n.name}>
+                        <span className="browse-name">{n.short || n.name}</span>
                       </Link>
                     </li>
                   ))}
                 </ul>
               </MobileMore>
-            )}
-          </section>
+            </section>
+          </div>
+        </div>
 
-          {/* Ngành nghề: tên gọn (tên VSIC đầy đủ ở tooltip và trên trang ngành) để mọi ô hiện đủ chữ. */}
-          <section aria-labelledby="ind-title" className="pt-4 md:pt-6">
-            <h2 id="ind-title" className="browse-title">
-              {M.home.industriesTitle}
-            </h2>
-            <MobileMore moreLabel={M.home.moreIndustries}>
-              <ul className="browse-grid">
-                {POPULAR_INDUSTRIES.map((n, i) => (
-                  <li key={n.code} className={`min-w-0 ${i >= 8 ? 'mobile-extra' : ''}`}>
-                    <Link href={n.href} prefetch={false} className="browse-tile" title={n.name}>
-                      <span className="browse-name">{n.short || n.name}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </MobileMore>
-          </section>
-
+        <div className="site-wrap flex flex-col gap-8 pt-8 pb-12 md:gap-10 md:pt-10 md:pb-16">
           <AdSlot slotId="home-mid" />
 
           {/* Khối DN mới (spec 3.1 mục 4: 20 DN mới nhất, thẻ DN mục 3.3 + link xem tất cả), cùng kiểu hai khối duyệt ở
               trên: tiêu đề giữa, dòng tóm tắt, rồi danh sách liệt kê gọn. */}
-          <section aria-labelledby="new-title" className="pt-4 md:pt-6">
-            <h2 id="new-title" className="browse-title">
+          <section aria-labelledby="new-title">
+            <h2 id="new-title" className="block-title mb-1!">
               {M.home.newTitle}
             </h2>
-            {newest.length === 0 && <HomeEmpty text={M.home.emptyNew} />}
+            {/* Dòng tóm tắt + «Xem tất cả» cùng một hàng dưới tiêu đề (điện thoại không đẩy tiêu đề xuống 2 dòng). */}
             {newest.length > 0 && (
-              <div className="mb-5 flex flex-col items-center gap-3 md:mb-6">
-                {newTotal != null && (
-                  <p className="text-center text-body text-ink-2">
-                    <span className="font-semibold text-title tabular-nums">
-                      {formatNumber(newTotal)}
-                    </span>{' '}
-                    {M.home.newCount}
-                  </p>
-                )}
+              <div className="mb-3 flex items-center justify-between gap-x-4 md:mb-4">
+                <p className="min-w-0 text-sm text-ink-2 md:text-[15px]">
+                  {newTotal != null && (
+                    <>
+                      <span className="font-semibold text-title tabular-nums">
+                        {formatNumber(newTotal)}
+                      </span>{' '}
+                      {M.home.newCount}
+                    </>
+                  )}
+                </p>
+                <Link
+                  href="/doanh-nghiep-moi-thanh-lap"
+                  className="inline-flex min-h-11 flex-none items-center gap-1 text-sm font-semibold whitespace-nowrap text-brand no-underline hover:text-brand-hover md:text-[15px]"
+                >
+                  {M.home.seeAll} <span aria-hidden="true">→</span>
+                  <span className="sr-only">{M.home.newTitle.toLowerCase()}</span>
+                </Link>
               </div>
             )}
+            {newest.length === 0 && <HomeEmpty text={M.home.emptyNew} />}
             {/* Cùng kiểu danh sách với trang DN mới / tỉnh / ngành: máy tính mỗi DN một hàng ngang (bảng), điện thoại
                 mỗi DN một thẻ «Nhãn │ Giá trị». Không chèn quảng cáo (ô quảng cáo trang chủ nằm giữa các khối). */}
             {newest.length > 0 && (
@@ -191,16 +208,6 @@ export default async function HomePage() {
                   mobileLimit={8}
                 />
               </MobileMore>
-            )}
-            {newest.length > 0 && (
-              <p className="mt-5 text-center md:mt-6">
-                <Link
-                  href="/doanh-nghiep-moi-thanh-lap"
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-line-strong bg-white px-5 font-semibold no-underline hover:border-brand"
-                >
-                  {M.home.newSeeAll} →
-                </Link>
-              </p>
             )}
           </section>
         </div>

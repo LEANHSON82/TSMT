@@ -662,7 +662,7 @@ html[data-navigating] [data-list-content] {
 
 /* Hero trang chủ: nền xanh xám nhạt chuyển dần xuống màu nền trang. */
 .hero-tint {
-  background: linear-gradient(180deg, #e8f0fb 0%, #f3f6fa 100%);
+  background: linear-gradient(180deg, #dde8f8 0%, #edf2f9 100%);
 }
 /* Dải đầu trang danh sách (DN mới / tỉnh / ngành / kết quả tìm): cùng tông hero trang chủ, đáy có vạch mảnh để tách
    phần danh sách bên dưới. Ô tìm / ô chọn trên dải: nền trắng, bóng nhẹ cho nổi lên. */
@@ -791,24 +791,25 @@ details[open] > :not(summary) {
   }
 }
 
-/* Khối duyệt trang chủ (Tra cứu theo tỉnh/thành, ngành nghề) kiểu BizLookup: tiêu đề giữa, lưới ô trắng viền mảnh bo
-   10px, chữ giữa ô (tên đậm + dòng phụ xám). 2 cột điện thoại · 3 cột ≥ 640 · 4 cột ≥ 900 · 5 cột ≥ 1100. */
-.browse-title {
+/* Tiêu đề khối trang chủ: căn trái, 22/26px đậm, màu tiêu đề. */
+.block-title {
   margin-bottom: 16px;
-  text-align: center;
-  font-size: 20px;
-  line-height: 28px;
-  font-weight: 600;
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--color-title);
-  text-wrap: balance;
 }
 @media (min-width: 768px) {
-  .browse-title {
+  .block-title {
     margin-bottom: 20px;
-    font-size: 24px;
-    line-height: 32px;
+    font-size: 26px;
+    line-height: 34px;
   }
 }
+
+/* Khối duyệt trang chủ (Tra cứu theo tỉnh/thành, ngành nghề) kiểu BizLookup: tiêu đề giữa, lưới ô trắng viền mảnh bo
+   10px, chữ giữa ô (tên đậm + dòng phụ xám). 2 cột điện thoại · 3 cột ≥ 640 · 4 cột ≥ 900 · 5 cột ≥ 1100. */
 .browse-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -833,20 +834,25 @@ details[open] > :not(summary) {
   .browse-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
+  /* Lưới tỉnh: 6 cột, ô thấp (tên trái, số phải) — đủ 34 tỉnh trong 6 hàng. */
+  .browse-grid.is-dense {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+  }
 }
 .browse-tile {
   display: flex;
   height: 100%;
   min-height: 54px;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   gap: 1px;
-  padding: 8px 10px;
+  padding: 8px 12px;
   border: 1px solid var(--color-line);
   border-radius: 10px;
   background: #ffffff;
-  text-align: center;
+  text-align: left;
   text-decoration: none;
   color: var(--color-ink);
   transition:
@@ -872,12 +878,22 @@ a.browse-tile:hover {
 }
 .browse-tile.is-row {
   flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
+  min-height: 46px;
+  padding: 8px 12px;
+  text-align: left;
+}
+.browse-tile.is-row .browse-name {
+  min-width: 0; /* tên dài + số lớn (TP Hồ Chí Minh 612.345) thì xuống dòng, không cắt */
 }
 .browse-count {
+  flex: none;
   font-size: 13px;
   line-height: 18px;
-  color: #94a3b8;
+  font-weight: 600;
+  color: var(--color-ink-2);
   font-variant-numeric: tabular-nums;
 }
 a.browse-tile:hover .browse-count {

@@ -236,6 +236,20 @@
     }
   }
 
+  /* Trang chi tiết DN: cột phải quảng cáo 300×600 (spec 5.4 «máy tính») từ 1024px — laptop 1024–1279 cũng thấy ô
+     này. Cột chính còn ~670px, đủ cho bảng ngành nghề và danh sách DN cùng ngành (bảng thông tin nằm trên, rộng hết). */
+  .rail-grid-lg {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+  @media (min-width: 1024px) {
+    .rail-grid-lg {
+      grid-template-columns: minmax(0, 1fr) var(--width-rail);
+      column-gap: var(--spacing-rail-gap);
+    }
+  }
+
   /* Hàng tìm kiếm: ô tìm (cột trái) + «Lọc nâng cao» (cột phải). Dùng chung cho hàng 2 header và hero
      trang chủ → ô tìm hai nơi trùng khít vị trí ngang, bề rộng, chiều cao. ≥ 1280px (cùng mốc .rail-grid):
      cột phải đúng bằng cột phải trang (300, khe 48) nên ô tìm rộng đúng bằng cột chính. 768–1279: trang một

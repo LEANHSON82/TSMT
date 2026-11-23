@@ -20,7 +20,8 @@ export default function AdSlot({ slotId, variant = 'inline', className = '' }) {
   if (variant === 'rail') {
     return (
       <div data-ad-wrap className={`hidden lg:block ${className}`}>
-        <div className="sticky top-24 flex flex-col gap-1">
+        {/* Dính ngay dưới header (cao 56px) + khe 16px. */}
+        <div className="sticky top-[72px] flex flex-col gap-1">
           <span className="text-xs leading-4 text-muted">{M.ad.label}</span>
           <AdUnit
             slotId={slotId}

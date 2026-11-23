@@ -163,7 +163,7 @@ export default async function CompanyPage({ params }) {
 
       <AdSlot slotId="detail-below-info" className="mt-4 md:mt-5" />
 
-      <div className={`mt-4 md:mt-5 ${BANNERS_ON ? 'rail-grid' : ''}`}>
+      <div className={`mt-4 md:mt-5 ${BANNERS_ON ? 'rail-grid-lg' : ''}`}>
         <div className="flex min-w-0 flex-col gap-4 md:gap-5">
           {c.industries?.length > 0 ? (
             <section aria-labelledby="ind-title" className="panel">
@@ -202,7 +202,7 @@ export default async function CompanyPage({ params }) {
         </div>
 
         {BANNERS_ON && (
-          <div className="hidden self-stretch xl:block">
+          <div className="hidden self-stretch lg:block">
             <AdSlot slotId="detail-rail" variant="rail" className="h-full" />
           </div>
         )}

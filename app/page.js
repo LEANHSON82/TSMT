@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import AdSlot from '@/components/AdSlot';
 import CompanyList from '@/components/CompanyList';
+import MobileMore from '@/components/MobileMore';
 import JsonLd from '@/components/JsonLd';
 import SearchBox from '@/components/SearchBox';
 import { AdvancedSearchLink } from '@/components/HeaderBar';
@@ -75,14 +76,14 @@ export default async function HomePage() {
             <div className="mx-auto max-w-[820px] pt-6 pb-7 md:pt-12 md:pb-12">
               <h1
                 id="home-title"
-                className="text-[26px] leading-8 font-semibold tracking-[-0.01em] text-pretty text-title md:text-[34px] md:leading-[42px]"
+                className="text-center text-[26px] leading-8 font-semibold tracking-[-0.01em] text-pretty text-title md:text-[34px] md:leading-[42px]"
               >
                 {/* «thông tin» không bị tách đôi khi tiêu đề xuống dòng trên điện thoại. */}
                 {M.home.title.replace('thông tin', 'thông\u00a0tin')}
               </h1>
               {/* Dòng số liệu: tổng DN và số tỉnh/thành (đã có sẵn từ danh mục tỉnh, không gọi thêm API). */}
               {provinces.length > 0 && (
-                <p className="mt-2 text-base text-muted tabular-nums md:text-[18px] md:leading-7">
+                <p className="mt-2 text-center text-base text-muted tabular-nums md:text-[18px] md:leading-7">
                   <span className="whitespace-nowrap">
                     {M.search.provinceCount(formatNumber(totalCompanies))}
                   </span>
@@ -97,7 +98,7 @@ export default async function HomePage() {
               <div data-hero-search className="mt-6 md:mt-8">
                 <SearchBox size="lg" autoFocusDesktop />
               </div>
-              <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1">
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-1">
                 <AdvancedSearchLink className="text-sm" />
               </div>
             </div>
@@ -115,35 +116,28 @@ export default async function HomePage() {
               {M.home.provincesTitle}
             </h2>
             {sorted.length === 0 && <HomeEmpty text={M.home.emptyProvinces} />}
-            <ul hidden={sorted.length === 0} className="browse-grid">
-              {sorted.map((p) => {
-                // Một dòng: tên tỉnh + số DN nhỏ, xám nhạt (spec 3.1 mục 5 «kèm số DN»).
-                const inner = (
-                  <>
-                    <span className="browse-name">{p.name}</span>
-                    <span className="browse-count">
-                      {formatNumber(p.company_count || 0)}
-                      <span className="sr-only">{M.home.companiesSr}</span>
-                    </span>
-                  </>
-                );
-                return (
-                  <li key={p.code} className="min-w-0">
-                    {p.company_count > 0 ? (
+            {sorted.length > 0 && (
+              <MobileMore moreLabel={M.home.moreProvinces(sorted.length)}>
+                <ul className="browse-grid">
+                  {sorted.map((p, i) => (
+                    // Tỉnh nào cũng là link (tỉnh chưa có DN mở trang báo «chưa có doanh nghiệp»), không có ô xám.
+                    <li key={p.code} className={`min-w-0 ${i >= 12 ? 'mobile-extra' : ''}`}>
                       <Link
                         href={`/tinh/${p.slug}`}
                         prefetch={false}
                         className="browse-tile is-row"
                       >
-                        {inner}
+                        <span className="browse-name">{p.name}</span>
+                        <span className="browse-count">
+                          {formatNumber(p.company_count || 0)}
+                          <span className="sr-only">{M.home.companiesSr}</span>
+                        </span>
                       </Link>
-                    ) : (
-                      <span className="browse-tile is-row is-empty">{inner}</span>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+                    </li>
+                  ))}
+                </ul>
+              </MobileMore>
+            )}
           </section>
 
           {/* Ngành nghề: tên gọn (tên VSIC đầy đủ ở tooltip và trên trang ngành) để mọi ô hiện đủ chữ. */}
@@ -151,15 +145,17 @@ export default async function HomePage() {
             <h2 id="ind-title" className="browse-title">
               {M.home.industriesTitle}
             </h2>
-            <ul className="browse-grid">
-              {POPULAR_INDUSTRIES.map((n) => (
-                <li key={n.code} className="min-w-0">
-                  <Link href={n.href} prefetch={false} className="browse-tile" title={n.name}>
-                    <span className="browse-name">{n.short || n.name}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <MobileMore moreLabel={M.home.moreIndustries}>
+              <ul className="browse-grid">
+                {POPULAR_INDUSTRIES.map((n, i) => (
+                  <li key={n.code} className={`min-w-0 ${i >= 8 ? 'mobile-extra' : ''}`}>
+                    <Link href={n.href} prefetch={false} className="browse-tile" title={n.name}>
+                      <span className="browse-name">{n.short || n.name}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </MobileMore>
           </section>
 
           <AdSlot slotId="home-mid" />
@@ -186,7 +182,15 @@ export default async function HomePage() {
             {/* Cùng kiểu danh sách với trang DN mới / tỉnh / ngành: máy tính mỗi DN một hàng ngang (bảng), điện thoại
                 mỗi DN một thẻ «Nhãn │ Giá trị». Không chèn quảng cáo (ô quảng cáo trang chủ nằm giữa các khối). */}
             {newest.length > 0 && (
-              <CompanyList items={newest} ads={false} headingLevel={3} showNew={false} />
+              <MobileMore moreLabel={M.home.moreNew(Math.max(0, newest.length - 8))}>
+                <CompanyList
+                  items={newest}
+                  ads={false}
+                  headingLevel={3}
+                  showNew={false}
+                  mobileLimit={8}
+                />
+              </MobileMore>
             )}
             {newest.length > 0 && (
               <p className="mt-5 text-center md:mt-6">

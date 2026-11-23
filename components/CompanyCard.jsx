@@ -35,7 +35,7 @@ function isNew(foundedDate) {
 
 /** Cột của dạng bảng — CompanyList dùng cùng giá trị cho hàng tiêu đề cột. */
 export const TABLE_COLS =
-  'lg:grid-cols-[minmax(0,1fr)_108px_minmax(0,170px)_minmax(0,180px)_120px_148px]';
+  'lg:grid-cols-[minmax(0,1fr)_132px_minmax(0,160px)_minmax(0,210px)_104px_128px]';
 
 export default function CompanyCard({
   company: c,
@@ -48,9 +48,13 @@ export default function CompanyCard({
   const H = `h${headingLevel}`;
   const href = companyPath(c);
   // Địa chỉ rút gọn: phường/xã + tỉnh (trang tỉnh: chỉ phường/xã).
+  // Địa chỉ rút gọn = phường/xã + tỉnh. Dạng bảng thiếu chỗ thì cắt phần phường/xã, KHÔNG cắt tên tỉnh.
+  const ward = areaAddress(c.address, c.province?.name, { withProvince: false });
+  const provinceName = showProvince ? c.province?.name || '' : '';
   const area =
     areaAddress(c.address, c.province?.name, { withProvince: showProvince }) ||
     shortAddress(c.address);
+  const splitArea = Boolean(provinceName && ward && ward !== area);
   const date = formatDate(c.founded_date);
   const fresh = showNew && isNew(c.founded_date);
   const phone = c.matched === 'phone';
@@ -95,7 +99,8 @@ export default function CompanyCard({
       <dl className="contents">
         <div className={field('lg:col-start-2')}>
           <dt className={label}>{M.company.mst}</dt>
-          <dd className={`${value} relative z-10 font-semibold tabular-nums`}>
+          {/* MST không bao giờ cắt (MST chi nhánh 14 ký tự vừa cột 132px). */}
+          <dd className="relative z-10 min-w-0 text-sm leading-6 font-semibold whitespace-nowrap text-ink tabular-nums">
             <Highlight text={c.mst} query={hl('mst')} />
           </dd>
         </div>
@@ -111,8 +116,21 @@ export default function CompanyCard({
         </div>
         <div className={field('lg:col-start-4')}>
           <dt className={label}>{M.company.addressShort}</dt>
-          <dd className={`${value} text-ink-2`} title={table ? c.address : undefined}>
-            {area || <span className="text-muted">—</span>}
+          <dd
+            className={`min-w-0 text-sm leading-6 text-ink-2 ${table && splitArea ? 'lg:flex' : table ? 'lg:truncate' : ''}`}
+            title={table ? c.address : undefined}
+          >
+            {table && splitArea ? (
+              <>
+                <span className="lg:truncate">{ward},</span>
+                <span className="lg:flex-none lg:pl-1 lg:whitespace-nowrap">
+                  <span className="lg:hidden"> </span>
+                  {provinceName}
+                </span>
+              </>
+            ) : (
+              area || <span className="text-muted">—</span>
+            )}
           </dd>
         </div>
         <div className={field('lg:col-start-5')}>
@@ -122,7 +140,7 @@ export default function CompanyCard({
         <div className={`${field('lg:col-start-6')} ${table ? 'lg:justify-self-end' : ''}`}>
           <dt className={label}>{M.company.status}</dt>
           <dd className="min-w-0">
-            <StatusBadge status={c.status} />
+            <StatusBadge status={c.status} plain={table} />
           </dd>
         </div>
       </dl>

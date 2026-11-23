@@ -18,6 +18,7 @@ import { provinceOptions } from '@/lib/provinces';
 import { findProvinceInQuery } from '@/lib/search-intent';
 import { searchQueryType } from '@/lib/mst';
 import { buildHref, firstParam, pageNumber } from '@/lib/url';
+import { toSlug } from '@/lib/slug';
 
 export const dynamic = 'force-dynamic';
 
@@ -240,7 +241,22 @@ export default async function SearchPage({ searchParams }) {
         <TrackOnMount name="search" params={{ query_type: queryType, result_count: data.total }} />
       )}
       <ListPageShell
-        breadcrumb={[{ name: q || !f.hasFilter ? M.search.pageTitle : M.search.filterTitle }]}
+        // Tìm từ trang tỉnh / ngành (một tỉnh hoặc một ngành đang lọc): breadcrumb chỉ về trang đó để người dùng
+        // biết mình vẫn đang tìm trong tỉnh / ngành ấy và quay lại được.
+        breadcrumb={[
+          ...(f.selProvinces.length === 1 && !f.selIndustries.length
+            ? [{ name: f.selProvinces[0].name, href: `/tinh/${f.selProvinces[0].slug}` }]
+            : []),
+          ...(f.selIndustries.length === 1
+            ? [
+                {
+                  name: M.list.industry.crumb(f.selIndustries[0].code),
+                  href: `/nganh/${f.selIndustries[0].code}-${f.selIndustries[0].slug || toSlug(f.selIndustries[0].name)}`,
+                },
+              ]
+            : []),
+          { name: q || !f.hasFilter ? M.search.pageTitle : M.search.filterTitle },
+        ]}
         highlight={q}
         title={
           !q && !f.hasFilter

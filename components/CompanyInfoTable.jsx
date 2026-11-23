@@ -66,14 +66,21 @@ const COPY_FIX = '-my-3! py-3 leading-5 max-md:gap-1';
 // trường cùng một dạng hàng ngang «Nhãn │ Giá trị │ hành động», ở mọi cỡ màn hình — mắt chỉ đọc từ trên xuống, mỗi
 // hàng trái → phải. Tình trạng hiện một lần, dưới tên DN ở đầu trang.
 //   ≥ 768px: [icon + nhãn 180px] [giá trị] [hành động, dạt phải — thẳng một cột].
-//   < 768px: [icon + nhãn 136px] [giá trị; hành động ngay dưới giá trị]. Dòng điện thoại: số che + nút rộng hết cột
+//   < 768px: [icon + nhãn 112px — nhãn dài dùng tên ngắn] [giá trị; hành động ngay dưới giá trị]. Dòng điện thoại: số che + nút rộng hết cột
 //            giá trị (PhoneReveal).
-function Row({ icon: Icon, label, children, action }) {
+function Row({ icon: Icon, label, short, children, action }) {
   return (
-    <div className="grid grid-cols-[136px_minmax(0,1fr)] items-baseline gap-x-3 border-b border-line-soft py-3 last:border-b-0 md:grid-cols-[180px_minmax(0,1fr)_auto] md:gap-x-5 md:py-3.5">
+    <div className="grid grid-cols-[112px_minmax(0,1fr)] items-baseline gap-x-3 border-b border-line-soft py-3 last:border-b-0 md:grid-cols-[180px_minmax(0,1fr)_auto] md:gap-x-5 md:py-3.5">
       <dt className="flex items-baseline gap-2 text-[13px] leading-6 whitespace-nowrap text-muted md:gap-2.5 md:text-sm">
         <Icon className="h-4 w-4 flex-none self-center text-field md:h-[18px] md:w-[18px]" />
-        <span>{label}</span>
+        {short ? (
+          <>
+            <span className="md:hidden">{short}</span>
+            <span className="max-md:hidden">{label}</span>
+          </>
+        ) : (
+          <span>{label}</span>
+        )}
       </dt>
       <dd className="min-w-0 text-[15px] leading-6 break-words text-ink">{children}</dd>
       {action && (
@@ -135,7 +142,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
         <Row
           icon={IconUser}
           label={M.company.representative}
-
+          short={M.company.repShort}
           action={
             // Người này (cùng họ tên) đại diện thêm DN khác: link xem tất cả (API trả representative_company_count).
             c.representative_company_count > 1 ? (
@@ -192,7 +199,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
         </Row>
       )}
       {c.founded_date && (
-        <Row icon={IconCalendar} label={M.company.foundedDate}>
+        <Row icon={IconCalendar} label={M.company.foundedDate} short={M.list.activeLabelShort}>
           <span className="tabular-nums">{formatDate(c.founded_date)}</span>
         </Row>
       )}
@@ -202,7 +209,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
         </Row>
       )}
       {c.business_type && (
-        <Row icon={IconLayers} label={M.company.businessType}>
+        <Row icon={IconLayers} label={M.company.businessType} short={M.company.businessTypeShort}>
           {c.business_type}
         </Row>
       )}

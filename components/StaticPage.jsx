@@ -1,4 +1,4 @@
-import Breadcrumb from './Breadcrumb';
+import PageHero, { PAGE_H1 } from './PageHero';
 import { IconChevronDown } from './Icons';
 import { M } from '@/lib/messages';
 
@@ -19,6 +19,7 @@ const MEASURE = 'max-w-[680px]';
 
 export default function StaticPage({ title, intro, sections, updated = '15/11/2026' }) {
   const hasToc = sections.length > 2;
+  const hasHeader = Boolean(SHOW_DRAFT_NOTE || intro); // H1 + ngày cập nhật đã ở dải đầu trang
   const tocItems = sections.map((s, i) => (
     <li key={s.id}>
       <a
@@ -31,29 +32,34 @@ export default function StaticPage({ title, intro, sections, updated = '15/11/20
     </li>
   ));
   return (
-    <main className="site-wrap pb-12 md:pb-16">
-      <div className="pt-3 pb-3 md:pt-5 md:pb-4">
-        <Breadcrumb items={[{ name: title }]} />
-      </div>
-      <div className="rail-grid">
+    <main className="pb-12 md:pb-16">
+      {/* Dải đầu trang dùng chung (PageHero): breadcrumb, H1, ngày cập nhật. */}
+      <PageHero breadcrumb={[{ name: title }]}>
+        <h1 className={PAGE_H1}>{title}</h1>
+        <p className="mt-2 text-sm text-ink-2 tabular-nums">{M.staticPage.updated(updated)}</p>
+      </PageHero>
+      <div className="site-wrap rail-grid mt-5 md:mt-8">
         <article className="card min-w-0 px-5 py-6 md:px-10 md:py-9">
-          <header className={`flex flex-col gap-2 ${MEASURE}`}>
-            <h1 className="text-h1-m font-semibold text-pretty text-ink md:text-h1">{title}</h1>
-            <p className="text-sm text-muted tabular-nums">{M.staticPage.updated(updated)}</p>
-            {/* Ghi chú bản nháp: chỉ hiện ở môi trường duyệt nội dung (NEXT_PUBLIC_SHOW_DRAFT_NOTE=1), không hiện cho
+          {hasHeader && (
+            <header className={`flex flex-col gap-2 ${MEASURE}`}>
+              {/* Ghi chú bản nháp: chỉ hiện ở môi trường duyệt nội dung (NEXT_PUBLIC_SHOW_DRAFT_NOTE=1), không hiện cho
                 người dùng thật. */}
-            {SHOW_DRAFT_NOTE && (
-              <p className="mt-2 rounded-lg bg-warn-bg px-3 py-2 text-sm text-warn">
-                {M.staticPage.draftNote}
-              </p>
-            )}
-            {intro && <p className="mt-2 text-body leading-7 text-ink-2">{intro}</p>}
-          </header>
+              {SHOW_DRAFT_NOTE && (
+                <p className="mt-2 rounded-lg bg-warn-bg px-3 py-2 text-sm text-warn">
+                  {M.staticPage.draftNote}
+                </p>
+              )}
+              {intro && <p className="mt-2 text-body leading-7 text-ink-2">{intro}</p>}
+            </header>
+          )}
 
           {/* Dưới 1280px: mục lục thu gọn ngay trên bài (chưa có cột phải); vạch 2px của bài khép đáy hàng
               «Mục lục» nên không thành hai đường kẻ chồng nhau. */}
           {hasToc && (
-            <nav aria-label={M.staticPage.toc} className={`mt-5 md:mt-8 xl:hidden ${MEASURE}`}>
+            <nav
+              aria-label={M.staticPage.toc}
+              className={`xl:hidden ${hasHeader ? 'mt-5 md:mt-8' : ''} ${MEASURE}`}
+            >
               <details className="group border-t border-line">
                 <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 font-semibold text-ink">
                   {M.staticPage.toc}
@@ -69,7 +75,15 @@ export default function StaticPage({ title, intro, sections, updated = '15/11/20
               </details>
             </nav>
           )}
-          <div className={`border-t border-line ${MEASURE} ${hasToc ? 'xl:mt-8' : 'mt-5 md:mt-8'}`}>
+          <div
+            className={`${MEASURE} ${
+              hasHeader
+                ? `border-t border-line ${hasToc ? 'xl:mt-8' : 'mt-5 md:mt-8'}`
+                : hasToc
+                  ? 'border-t border-line xl:border-t-0'
+                  : ''
+            } [&>section:first-child]:pt-0`}
+          >
             {sections.map((s, i) => (
               <section
                 key={s.id}

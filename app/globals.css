@@ -653,6 +653,13 @@ html[data-navigating] [data-list-content] {
   }
 }
 
+/* Thu gọn trên điện thoại (components/MobileMore.jsx). */
+@media (max-width: 767.98px) {
+  [data-collapsed] .mobile-extra {
+    display: none;
+  }
+}
+
 /* Hero trang chủ: nền xanh xám nhạt chuyển dần xuống màu nền trang. */
 .hero-tint {
   background: linear-gradient(180deg, #e8f0fb 0%, #f3f6fa 100%);

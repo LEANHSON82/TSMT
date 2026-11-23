@@ -2,13 +2,19 @@ import { STATUS_LABELS } from '@/lib/messages';
 
 // Tình trạng DN (spec mục 3.3), kiểu BizLookup: nhãn tròn viền mảnh — xanh lá (xanh ngọc) khi đang hoạt động (✓),
 // xám khi ngừng / đóng MST (⊘). Chữ + icon cùng báo trạng thái nên không phụ thuộc riêng vào màu (WCAG 1.4.1).
-export default function StatusBadge({ status, className = '' }) {
+// plain: chỉ icon + chữ màu (không nền / viền) — dùng trong bảng danh sách để 20 nhãn liền nhau không thành một cột
+// khối xanh gây nhiễu. Vẫn xanh lá (đang hoạt động) / xám (ngừng, đóng) theo spec 3.3.
+export default function StatusBadge({ status, plain = false, className = '' }) {
   const code = status?.code || 'active';
   const label = status?.label || STATUS_LABELS[code] || code;
   const active = code === 'active';
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-px text-xs leading-5 md:px-2.5 md:text-[13px] font-semibold whitespace-nowrap ${active ? 'border-ok-line bg-ok-bg text-ok' : 'border-off-line bg-off-bg text-off'} ${className}`}
+      className={`inline-flex items-center gap-1 font-semibold whitespace-nowrap ${
+        plain
+          ? `text-[13px] leading-5 ${active ? 'text-ok' : 'text-off'}`
+          : `rounded-full border px-2 py-px text-xs leading-5 md:px-2.5 md:text-[13px] ${active ? 'border-ok-line bg-ok-bg text-ok' : 'border-off-line bg-off-bg text-off'}`
+      } ${className}`}
     >
       <svg
         width="13"

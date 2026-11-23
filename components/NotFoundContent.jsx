@@ -8,6 +8,7 @@
 // Hệ A: «Lỗi 404» nằm đúng chỗ breadcrumb ở các trang khác → H1 cùng vị trí dọc; ô tìm và danh sách lối đi tiếp
 // rộng đúng cột chính (852, thẳng mép với ô tìm header); câu chữ giữ ~75 ký tự/dòng. Không hình minh hoạ.
 import { useEffect, useState } from 'react';
+import PageHero, { PAGE_H1 } from './PageHero';
 import SearchBox from './SearchBox';
 import { LinkList } from './States';
 import { suggestCompanies } from '@/lib/api';
@@ -39,13 +40,11 @@ export default function NotFoundContent() {
     return () => ctrl.abort();
   }, [mst]);
   return (
-    <main className="site-wrap pt-6 pb-12 md:pt-12 md:pb-16">
-      <div className="card-hero mx-auto max-w-[760px] px-5 py-6 md:px-12 md:py-10">
-        <p className="pb-1 text-sm font-semibold text-muted">{M.notFound.code}</p>
-        <h1 className="text-h1-m font-semibold break-words text-pretty text-ink md:text-h1">
-          {mst ? M.notFound.mstTitle(mst) : M.notFound.title}
-        </h1>
-        <p className="mt-2 max-w-[680px] text-body leading-7 text-pretty text-ink-2">
+    // Dải đầu trang dùng chung (PageHero): «Lỗi 404» thay breadcrumb, H1, câu giải thích, ô tìm. Lối đi tiếp bên dưới.
+    <main className="pb-12 md:pb-16">
+      <PageHero eyebrow={M.notFound.code}>
+        <h1 className={PAGE_H1}>{mst ? M.notFound.mstTitle(mst) : M.notFound.title}</h1>
+        <p className="mt-2 max-w-[680px] text-sm text-pretty text-ink-2 md:text-[15px]">
           {mst ? M.notFound.mstBody : M.notFound.body}
         </p>
         {/* key: biết MST (sau khi chạy ở trình duyệt) thì dựng lại ô với MST điền sẵn. */}
@@ -54,24 +53,28 @@ export default function NotFoundContent() {
           defaultValue={mst || ''}
           autoFocusDesktop={mst !== undefined}
           suggestPrefilled={false}
-          className="mt-5"
+          className="mt-5 max-w-[820px]"
         />
-        {near.length > 0 && (
-          <section aria-labelledby="near-mst" className="mt-6 md:mt-8">
-            <h2 id="near-mst" className="pb-2 text-base font-semibold text-ink">
-              {M.notFound.nearTitle(mst.slice(0, 8))}
-            </h2>
-            <LinkList
-              label={M.notFound.nearTitle(mst.slice(0, 8))}
-              links={near.map((c) => ({
-                href: companyPath(c),
-                label: c.name,
-                note: `MST ${c.mst}`,
-              }))}
-            />
-          </section>
-        )}
-        <LinkList label={M.notFound.linksLabel} links={LINKS} className="mt-6 md:mt-8" />
+      </PageHero>
+      <div className="site-wrap mt-6 md:mt-8">
+        <div className="max-w-[820px]">
+          {near.length > 0 && (
+            <section aria-labelledby="near-mst" className="mb-6 md:mb-8">
+              <h2 id="near-mst" className="pb-2 text-base font-semibold text-ink">
+                {M.notFound.nearTitle(mst.slice(0, 8))}
+              </h2>
+              <LinkList
+                label={M.notFound.nearTitle(mst.slice(0, 8))}
+                links={near.map((c) => ({
+                  href: companyPath(c),
+                  label: c.name,
+                  note: `MST ${c.mst}`,
+                }))}
+              />
+            </section>
+          )}
+          <LinkList label={M.notFound.linksLabel} links={LINKS} />
+        </div>
       </div>
     </main>
   );

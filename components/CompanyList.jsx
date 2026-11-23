@@ -21,6 +21,7 @@ export default function CompanyList({
   showProvince = true,
   ads = true, // false: không chèn quảng cáo (khối DN mới trang chủ — quảng cáo trang chủ nằm giữa các khối)
   headingLevel = 2,
+  mobileLimit, // số DN hiện sẵn trên điện thoại (phần còn lại «mobile-extra», mở bằng MobileMore)
 }) {
   const last = items.length - 1;
   const adAfter = (i) => ads && BANNERS_ON && AD_AFTER.includes(i) && i < last;
@@ -41,7 +42,9 @@ export default function CompanyList({
       <ol>
         {items.map((c, i) => (
           <Fragment key={c.mst}>
-            <li className="border-b border-line-soft last:border-b-0">
+            <li
+              className={`border-b border-line-soft last:border-b-0 ${mobileLimit && i >= mobileLimit ? 'mobile-extra' : ''}`}
+            >
               <CompanyCard
                 company={c}
                 variant="row"

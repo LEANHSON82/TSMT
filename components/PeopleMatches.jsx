@@ -29,13 +29,13 @@ export default function PeopleMatches({ people, q, tab, params }) {
   return (
     <section
       aria-labelledby="people-title"
-      className="flex flex-col md:flex-row md:flex-wrap md:items-center md:gap-x-3"
+      className="flex flex-col md:flex-row md:items-center md:gap-x-3"
     >
-      <h2 id="people-title" className="text-sm font-semibold text-ink-2">
+      <h2 id="people-title" className="flex-none text-sm font-semibold text-ink-2">
         {M.search.peopleTitle(q)}
       </h2>
-      {/* Điện thoại: thẻ tên xếp một hàng cuộn ngang (không chiếm cả màn hình đầu, đẩy kết quả xuống). */}
-      <ul className="flex flex-wrap gap-x-2 max-md:-mx-4 max-md:flex-nowrap max-md:overflow-x-auto max-md:px-4">
+      {/* Thẻ tên xếp MỘT hàng cuộn ngang ở mọi cỡ màn hình — không chiếm nhiều hàng, đẩy kết quả xuống. */}
+      <ul className="flex min-w-0 flex-nowrap gap-x-2 overflow-x-auto max-md:-mx-4 max-md:px-4">
         {people.slice(0, 10).map((p) => (
           <li key={p.name} className="flex-none">
             <Link

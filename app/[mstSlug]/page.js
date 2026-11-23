@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
 import AdSlot, { BANNERS_ON } from '@/components/AdSlot';
-import Breadcrumb from '@/components/Breadcrumb';
 import CompanyCard from '@/components/CompanyCard';
 import CompanyInfoTable from '@/components/CompanyInfoTable';
 import IndustryTable from '@/components/IndustryTable';
 import JsonLd from '@/components/JsonLd';
+import PageHero, { PAGE_H1 } from '@/components/PageHero';
 import SectionHeader from '@/components/SectionHeader';
 import StatusBadge from '@/components/StatusBadge';
 import TrackOnMount from '@/components/TrackOnMount';
@@ -108,27 +108,22 @@ export default async function CompanyPage({ params }) {
 
   return (
     // <main> bọc toàn bộ nội dung (H1, bảng thông tin…) — landmark «nội dung chính» không bỏ sót phần quan trọng nhất.
-    <main className="site-wrap pb-12 md:pb-16">
+    <main className="pb-12 md:pb-16">
       <JsonLd data={orgLd} />
       <TrackOnMount name="view_company" params={{ mst: c.mst, province: c.province?.slug }} />
-      <div className="pt-3 md:pt-4">
-        <Breadcrumb
-          items={[
-            ...(c.province ? [{ name: c.province.name, href: `/tinh/${c.province.slug}` }] : []),
-            { name: c.name },
-          ]}
-        />
-      </div>
 
       {/* Spec 3.4, đúng thứ tự: tên DN (H1 + tên quốc tế / viết tắt + tình trạng) → khung «Thông tin doanh
           nghiệp» (bảng thông tin) rộng hết khung → quảng cáo dưới bảng → cột chính (ngành nghề + dòng cập
           nhật, DN cùng ngành) cạnh cột phải 300×600. Cột phải bắt đầu dưới bảng thông tin để ô quảng cáo không nằm
           sát nút «Xem số điện thoại». */}
-      {/* Đầu trang: tên DN trực tiếp trên nền trang (không bọc khung) + tên quốc tế / viết tắt + nhãn tình trạng. */}
-      <header className="mt-3 md:mt-4">
-        <h1 className="text-[24px] leading-[30px] font-semibold text-pretty break-words text-title md:text-[30px] md:leading-[38px]">
-          {c.name}
-        </h1>
+      {/* Đầu trang: dải đầu trang dùng chung (PageHero) — breadcrumb, tên DN, tên quốc tế / viết tắt, tình trạng. */}
+      <PageHero
+        breadcrumb={[
+          ...(c.province ? [{ name: c.province.name, href: `/tinh/${c.province.slug}` }] : []),
+          { name: c.name },
+        ]}
+      >
+        <h1 className={PAGE_H1}>{c.name}</h1>
         {(c.name_en || c.name_short) && (
           <dl className="mt-1.5 flex flex-wrap gap-x-6 gap-y-0.5 text-sm text-muted md:text-[15px]">
             {c.name_en && (
@@ -152,60 +147,63 @@ export default async function CompanyPage({ params }) {
             <StatusBadge status={c.status} />
           </p>
         )}
-      </header>
+      </PageHero>
 
-      <section aria-labelledby="info-title" className="panel mt-4 md:mt-5">
-        <SectionHeader id="info-title" title={M.company.info} />
-        <div className="px-4 md:px-[22px]">
-          <CompanyInfoTable company={c} parent={parent} />
-        </div>
-      </section>
+      <div className="site-wrap">
+        <section aria-labelledby="info-title" className="panel mt-4 md:mt-5">
+          <SectionHeader id="info-title" title={M.company.info} />
+          <div className="px-4 md:px-[22px]">
+            <CompanyInfoTable company={c} parent={parent} />
+          </div>
+        </section>
 
-      <AdSlot slotId="detail-below-info" className="mt-4 md:mt-5" />
+        <AdSlot slotId="detail-below-info" className="mt-4 md:mt-5" />
 
-      <div className={`mt-4 md:mt-5 ${BANNERS_ON ? 'rail-grid-lg' : ''}`}>
-        <div className="flex min-w-0 flex-col gap-4 md:gap-5">
-          {c.industries?.length > 0 ? (
-            <section aria-labelledby="ind-title" className="panel">
-              <SectionHeader
-                tier="secondary"
-                id="ind-title"
-                title={M.company.industries}
-                meta={M.company.industryCount(c.industries.length)}
-              />
-              <IndustryTable industries={c.industries} />
-              <UpdatedLine c={c} />
-            </section>
-          ) : (
-            <div className="card">
-              <UpdatedLine c={c} first />
+        <div className={`mt-4 md:mt-5 ${BANNERS_ON ? 'rail-grid-lg' : ''}`}>
+          <div className="flex min-w-0 flex-col gap-4 md:gap-5">
+            {c.industries?.length > 0 ? (
+              <section aria-labelledby="ind-title" className="panel">
+                <SectionHeader
+                  tier="secondary"
+                  id="ind-title"
+                  title={M.company.industries}
+                  meta={M.company.industryCount(c.industries.length)}
+                />
+                <IndustryTable industries={c.industries} />
+                <UpdatedLine c={c} />
+              </section>
+            ) : (
+              <div className="card">
+                <UpdatedLine c={c} first />
+              </div>
+            )}
+
+            {related.length > 0 && (
+              <section aria-labelledby="rel-title" className="panel">
+                <SectionHeader
+                  tier="secondary"
+                  id="rel-title"
+                  title={M.company.related(c.province?.name || '')}
+                  meta={M.company.relatedCount(related.length)}
+                />
+                {/* Thẻ «Nhãn │ Giá trị» (đọc trên → dưới), 2 cột từ 768px để khung rộng không bỏ trống nửa phải. */}
+                <ul className="grid grid-cols-1 px-4 md:grid-cols-2 md:gap-x-8 md:px-[22px]">
+                  {related.map((r) => (
+                    <li key={r.mst} className="min-w-0 border-b border-line-soft">
+                      <CompanyCard company={r} variant="card" />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
+
+          {BANNERS_ON && (
+            <div className="hidden self-stretch lg:block">
+              <AdSlot slotId="detail-rail" variant="rail" className="h-full" />
             </div>
           )}
-
-          {related.length > 0 && (
-            <section aria-labelledby="rel-title" className="panel">
-              <SectionHeader
-                tier="secondary"
-                id="rel-title"
-                title={M.company.related(c.province?.name || '')}
-                meta={M.company.relatedCount(related.length)}
-              />
-              <ul className="px-4 md:px-[22px]">
-                {related.map((r) => (
-                  <li key={r.mst} className="border-b border-line-soft last:border-b-0">
-                    <CompanyCard company={r} variant="card" />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
         </div>
-
-        {BANNERS_ON && (
-          <div className="hidden self-stretch lg:block">
-            <AdSlot slotId="detail-rail" variant="rail" className="h-full" />
-          </div>
-        )}
       </div>
     </main>
   );

@@ -1,5 +1,5 @@
 // Yêu cầu ẩn/sửa thông tin /yeu-cau-cap-nhat?mst=... (spec mục 3.6, 8.3).
-import Breadcrumb from '@/components/Breadcrumb';
+import PageHero, { PAGE_H1 } from '@/components/PageHero';
 import UpdateRequestForm from '@/components/UpdateRequestForm';
 import { getCompany } from '@/lib/api';
 import { companyPath, isValidMst, normalizeMst } from '@/lib/mst';
@@ -22,26 +22,16 @@ export default async function UpdateRequestPage({ searchParams }) {
     ? { mst: company.mst, name: company.name, path: companyPath(company) }
     : null;
   return (
-    // Hệ A: cùng khung, H1 cùng chỗ với mọi trang (breadcrumb trên 20 / dưới 16), không hình minh hoạ.
-    // ≥ 1280px: lưới cột chính + cột phải (.rail-grid) — form rộng đúng cột chính 852, đoạn giới thiệu sang cột
-    // phải, vạch 2px của nó nối liền vạch mở đầu form → một mép phải duy nhất cho mỗi cột, không còn đoạn chữ
-    // 640 lửng giữa trang và khoảng trống bên phải suốt trang. Thứ tự DOM vẫn H1 → giới thiệu → form (đọc đúng
-    // thứ tự trên điện thoại / trình đọc màn hình); dưới 1280 xếp một cột, cùng bề rộng 852 với form.
-    <main className="site-wrap pb-12 md:pb-16">
-      <div className="pt-3 pb-3 md:pt-5 md:pb-4">
-        <Breadcrumb items={[{ name: M.updateRequest.title }]} />
-      </div>
-      <div className="rail-grid max-xl:max-w-[852px]">
-        {/* Cùng mẫu đầu trang với các trang khác: H1 trong một khung trắng. */}
-        <div className="card px-4 py-3.5 md:px-6 md:py-5">
-          <h1 className="text-h1-m font-semibold text-pretty text-title md:text-h1">
-            {M.updateRequest.title}
-          </h1>
-        </div>
-        <p className="mt-2 text-body leading-7 text-pretty text-ink-2 xl:sticky xl:top-24 xl:col-start-2 xl:row-start-2 xl:mt-8 xl:rounded-xl xl:bg-white xl:p-6 xl:shadow-[0_0_0_1px_var(--color-line)] xl:text-sm xl:leading-6">
+    // Dải đầu trang dùng chung (PageHero): breadcrumb, H1, câu giới thiệu. Form bên dưới rộng 852px.
+    <main className="pb-12 md:pb-16">
+      <PageHero breadcrumb={[{ name: M.updateRequest.title }]}>
+        <h1 className={PAGE_H1}>{M.updateRequest.title}</h1>
+        <p className="mt-2 max-w-[760px] text-sm text-pretty text-ink-2 md:text-[15px]">
           {M.updateRequest.intro}
         </p>
-        <div className="mt-5 md:mt-8 xl:col-start-1 xl:row-start-2">
+      </PageHero>
+      <div className="site-wrap">
+        <div className="mt-5 max-w-[852px] md:mt-8">
           <UpdateRequestForm initialMst={mst} initialCompany={initialCompany} />
         </div>
       </div>

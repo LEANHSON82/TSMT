@@ -409,8 +409,34 @@ export default function HeaderBar({ provinces, industries }) {
             tìm (kèm nút icon «Lọc nâng cao») và nút menu. Từ 768px: chỉ còn dải menu xanh, ô tìm nằm bên phải dải. */}
         {/* Hàng header điện thoại: nền trắng (trang chủ: chỉ có nút menu cho tới khi ô tìm lớn của hero cuộn khuất). */}
         <div ref={findRef} className="md:hidden">
-          <div className="site-wrap flex items-center gap-1.5 py-2 max-md:pr-2">
-            {/* Trang chủ: ô tìm ẩn (vẫn giữ chỗ, nút menu vẫn hiện) cho tới khi ô tìm lớn của hero cuộn khuất. */}
+          <div className="site-wrap relative flex items-center gap-1.5 py-2 max-md:pr-2">
+            {/* Trang chủ: ô tìm ẩn (vẫn giữ chỗ, nút menu vẫn hiện) cho tới khi ô tìm lớn của hero cuộn khuất. Chỗ
+                trống đó hiện lối tắt Tỉnh/thành · Ngành nghề · DN mới (không để một dải trắng chỉ có nút menu). */}
+            {!showHeaderSearch && (
+              <nav
+                aria-label={M.nav.mainMenu}
+                className="absolute inset-y-0 right-16 left-4 flex items-center gap-5 overflow-x-auto"
+              >
+                <a
+                  href="#prov-title"
+                  className="text-[15px] font-semibold whitespace-nowrap text-title hover:text-brand"
+                >
+                  {M.nav.provinces}
+                </a>
+                <a
+                  href="#ind-title"
+                  className="text-[15px] font-semibold whitespace-nowrap text-title hover:text-brand"
+                >
+                  {M.nav.industries}
+                </a>
+                <Link
+                  href="/doanh-nghiep-moi-thanh-lap"
+                  className="text-[15px] font-semibold whitespace-nowrap text-title hover:text-brand"
+                >
+                  {M.nav.newCompaniesShort}
+                </Link>
+              </nav>
+            )}
             <div
               data-header-search
               inert={!showHeaderSearch}

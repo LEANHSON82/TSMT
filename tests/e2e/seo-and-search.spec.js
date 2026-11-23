@@ -331,8 +331,8 @@ test('lọc nâng cao: chọn nhiều tỉnh, thành lập trong 30 ngày, khôn
   page,
 }) => {
   await page.goto('/tinh/ha-noi');
-  // Lối vào «Lọc nâng cao» ở hàng ô tìm trên header, mở sẵn tỉnh đang xem.
-  await page.getByRole('link', { name: /Lọc nâng cao/ }).click();
+  // Lối vào «Bộ lọc» ở hàng ô tìm trên header, mở sẵn tỉnh đang xem.
+  await page.getByRole('link', { name: /Bộ lọc/ }).click();
   await expect(page).toHaveURL(/\/tim-kiem\?tinh=ha-noi$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Tìm thấy \d+ doanh nghiệp/);
 

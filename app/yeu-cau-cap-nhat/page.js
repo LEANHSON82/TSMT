@@ -35,7 +35,7 @@ export default async function UpdateRequestPage({ searchParams }) {
         <h1 className="text-h1-m font-semibold text-pretty text-ink md:text-h1">
           {M.updateRequest.title}
         </h1>
-        <p className="mt-2 text-body leading-7 text-pretty text-ink-2 xl:sticky xl:top-24 xl:col-start-2 xl:row-start-2 xl:mt-8 xl:rounded-xl xl:bg-white xl:p-6 xl:shadow-[0_0_0_0.5px_#dde0e7] xl:text-sm xl:leading-6">
+        <p className="mt-2 text-body leading-7 text-pretty text-ink-2 xl:sticky xl:top-24 xl:col-start-2 xl:row-start-2 xl:mt-8 xl:rounded-xl xl:bg-white xl:p-6 xl:shadow-[0_0_0_0.5px_#e2e2e2] xl:text-sm xl:leading-6">
           {M.updateRequest.intro}
         </p>
         <div className="mt-5 md:mt-8 xl:col-start-1 xl:row-start-2">

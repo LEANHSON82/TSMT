@@ -307,7 +307,7 @@ export default function SearchBox({
                 }, 150)
               }
               data-size={size}
-              className={`search-input w-full appearance-none rounded-l-full rounded-r-none border border-r-0 border-field bg-white pr-1 pl-[44px] text-base text-ink text-ellipsis placeholder:text-[#6b7483] hover:border-ink-2 md:pr-4 md:pl-[46px] ${size === 'nav' ? 'h-11 md:h-10 md:text-[15px]' : 'h-[52px] md:h-14 md:text-[17px]'}`}
+              className={`search-input w-full appearance-none rounded-l-full rounded-r-none border border-r-0 border-field bg-white pr-1 pl-[44px] text-base text-ink text-ellipsis placeholder:text-[#636363] hover:border-ink-2 md:pr-4 md:pl-[46px] ${size === 'nav' ? 'h-11 md:h-10 md:text-[15px]' : 'h-[52px] md:h-14 md:text-[17px]'}`}
             />
           </div>
           <button

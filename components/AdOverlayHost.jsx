@@ -43,7 +43,7 @@ function MockVideo({ req, done }) {
       onClose={() => done({ status: 'closed' })}
       initialFocusRef={closeRef}
     >
-      <div className="on-dark relative flex h-full flex-col items-center justify-center gap-5 bg-[#0b0f17] px-6 text-white">
+      <div className="on-dark relative flex h-full flex-col items-center justify-center gap-5 bg-[#252525] px-6 text-white">
         {/* Nút đóng mô phỏng giao diện của mạng quảng cáo — FE thật không tự vẽ nút bỏ qua. */}
         <button
           ref={closeRef}

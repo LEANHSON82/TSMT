@@ -1,5 +1,5 @@
 // Logo «TMST» dạng hình vẽ (SVG): nét chữ Be Vietnam Pro SemiBold đã chuyển thành path nên hiển thị
-// sắc nét, giống nhau mọi máy, không phụ thuộc font. «T» màu bạc, «MST» màu than chì — lấy từ token nên đổi màu ở globals.css là đủ.
+// sắc nét, giống nhau mọi máy, không phụ thuộc font. «T» xám #7D7D7D, «MST» đen than #252525 — lấy từ token nên đổi màu ở globals.css là đủ.
 // tone="dark" dùng trên nền tối (footer). Sinh lại path: xem scripts/gen-logo.py.
 const T_PATH = 'M269 740V118H41V0H633V118H405V740Z';
 const MST_PATH =
@@ -7,7 +7,7 @@ const MST_PATH =
 
 const TONES = {
   light: { t: 'var(--color-logo-t)', mst: 'var(--color-brand)' },
-  dark: { t: '#c7ccd4', mst: '#ffffff' },
+  dark: { t: '#cfcfcf', mst: '#ffffff' },
 };
 
 export default function Logo({ tone = 'light', className = '', title = 'TMST' }) {

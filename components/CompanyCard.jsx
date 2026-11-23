@@ -53,7 +53,7 @@ export default function CompanyCard({
 
   return (
     <article
-      className={`group relative py-3.5 transition-colors duration-150 hover:bg-[#fafbfc] ${variant === 'row' ? 'px-4 md:px-5' : ''}`}
+      className={`group relative py-3.5 transition-colors duration-150 hover:bg-[#fafafa] ${variant === 'row' ? 'px-4 md:px-5' : ''}`}
     >
       <div className="flex items-start justify-between gap-4">
         <H className="min-w-0 text-[15px] leading-6 font-semibold md:text-base">

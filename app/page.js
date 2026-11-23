@@ -122,23 +122,28 @@ export default async function HomePage() {
             {sorted.length === 0 && <HomeEmpty text={M.home.emptyProvinces} />}
             <ul hidden={sorted.length === 0} className="browse-grid">
               {sorted.map((p) => {
+                // Một dòng: tên tỉnh + số DN nhỏ, xám nhạt (spec 3.1 mục 5 «kèm số DN»).
                 const inner = (
                   <>
                     <span className="browse-name">{p.name}</span>
-                    <span className="browse-meta">
+                    <span className="browse-count">
                       {formatNumber(p.company_count || 0)}
-                      {M.home.companiesSr}
+                      <span className="sr-only">{M.home.companiesSr}</span>
                     </span>
                   </>
                 );
                 return (
                   <li key={p.code} className="min-w-0">
                     {p.company_count > 0 ? (
-                      <Link href={`/tinh/${p.slug}`} prefetch={false} className="browse-tile">
+                      <Link
+                        href={`/tinh/${p.slug}`}
+                        prefetch={false}
+                        className="browse-tile is-row"
+                      >
                         {inner}
                       </Link>
                     ) : (
-                      <span className="browse-tile is-empty">{inner}</span>
+                      <span className="browse-tile is-row is-empty">{inner}</span>
                     )}
                   </li>
                 );
@@ -146,6 +151,7 @@ export default async function HomePage() {
             </ul>
           </section>
 
+          {/* Ngành nghề: tên gọn (tên VSIC đầy đủ ở tooltip và trên trang ngành) để mọi ô hiện đủ chữ. */}
           <section aria-labelledby="ind-title" className="pt-4 md:pt-6">
             <h2 id="ind-title" className="browse-title">
               {M.home.industriesTitle}
@@ -153,11 +159,8 @@ export default async function HomePage() {
             <ul className="browse-grid">
               {POPULAR_INDUSTRIES.map((n) => (
                 <li key={n.code} className="min-w-0">
-                  <Link href={n.href} prefetch={false} className="browse-tile">
-                    <span className="browse-name line-clamp-2" title={n.name}>
-                      {n.name}
-                    </span>
-                    <span className="browse-meta">{M.search.industryCode(n.code)}</span>
+                  <Link href={n.href} prefetch={false} className="browse-tile" title={n.name}>
+                    <span className="browse-name">{n.short || n.name}</span>
                   </Link>
                 </li>
               ))}
@@ -166,22 +169,19 @@ export default async function HomePage() {
 
           <AdSlot slotId="home-mid" />
 
-          {/* Khối DN mới (spec 3.1 mục 4: 20 DN mới nhất, thẻ DN mục 3.3 + link xem tất cả). Cho người xem thấy ngay ý
-              nghĩa: số DN mới trong 30 ngày, lối tắt theo tỉnh, và danh sách nhóm theo ngày hoạt động (ngày ở tiêu đề
-              nhóm nên mỗi thẻ không lặp lại). Máy tính: mỗi DN một hàng dạng bảng (MST · đại diện · tình trạng). */}
-          <section aria-labelledby="new-title" className="panel">
-            <SectionHeader
-              tier="secondary"
-              id="new-title"
-              title={M.home.newTitle}
-              action={{ href: '/doanh-nghiep-moi-thanh-lap' }}
-            />
+          {/* Khối DN mới (spec 3.1 mục 4: 20 DN mới nhất, thẻ DN mục 3.3 + link xem tất cả), cùng kiểu hai khối duyệt ở
+              trên: tiêu đề giữa, dòng tóm tắt + lối tắt theo tỉnh, rồi các thẻ trắng rời nhau (2 cột máy tính) nhóm theo
+              ngày hoạt động — ngày ở tiêu đề nhóm nên thẻ không lặp lại. */}
+          <section aria-labelledby="new-title" className="pt-4 md:pt-6">
+            <h2 id="new-title" className="browse-title">
+              {M.home.newTitle}
+            </h2>
             {newest.length === 0 && <HomeEmpty text={M.home.emptyNew} />}
             {newest.length > 0 && (
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line-soft px-4 py-3 md:px-5">
+              <div className="mb-5 flex flex-col items-center gap-3 md:mb-6">
                 {newTotal != null && (
-                  <p className="text-body text-ink-2">
-                    <span className="text-[20px] leading-7 font-semibold text-title tabular-nums">
+                  <p className="text-center text-body text-ink-2">
+                    <span className="font-semibold text-title tabular-nums">
                       {formatNumber(newTotal)}
                     </span>{' '}
                     {M.home.newCount}
@@ -191,7 +191,7 @@ export default async function HomePage() {
                   // Điện thoại: một hàng cuộn ngang (không chiếm 3 dòng).
                   <nav
                     aria-label={M.home.newByProvince}
-                    className="flex items-center gap-2 max-md:-mx-4 max-md:w-[calc(100%+2rem)] max-md:overflow-x-auto max-md:px-4 max-md:pb-1 md:flex-wrap"
+                    className="flex max-w-full items-center gap-2 max-md:-mx-4 max-md:w-[calc(100%+2rem)] max-md:overflow-x-auto max-md:px-4 max-md:pb-1 md:flex-wrap md:justify-center"
                   >
                     <span className="flex-none text-sm text-muted">{M.home.newByProvince}</span>
                     {topProvinces.map((p) => (
@@ -208,29 +208,41 @@ export default async function HomePage() {
                 )}
               </div>
             )}
-            {dayGroups.map((g) => (
-              <div key={g.date}>
-                <h3 className="flex items-baseline justify-between gap-3 border-b border-line-soft bg-page px-4 py-1.5 text-sm font-semibold text-ink-2 md:px-5">
-                  <span>{g.heading}</span>
-                  <span className="font-normal text-muted tabular-nums">
-                    {M.home.dayGroupCount(g.items.length)}
-                  </span>
-                </h3>
-                <ol>
-                  {g.items.map((c) => (
-                    <li key={c.mst} className="border-b border-line-soft last:border-b-0">
-                      <CompanyCard
-                        company={c}
-                        variant="row"
-                        headingLevel={4}
-                        showNew={false}
-                        showDate={false}
-                      />
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            ))}
+            <div className="flex flex-col gap-5 md:gap-6">
+              {dayGroups.map((g) => (
+                <div key={g.date}>
+                  <h3 className="mb-2.5 flex items-baseline gap-2 text-sm font-semibold text-ink-2">
+                    <span>{g.heading}</span>
+                    <span className="font-normal text-muted tabular-nums">
+                      · {M.home.dayGroupCount(g.items.length)}
+                    </span>
+                  </h3>
+                  <ol className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-3">
+                    {g.items.map((c) => (
+                      <li key={c.mst} className="min-w-0">
+                        <CompanyCard
+                          company={c}
+                          variant="tile"
+                          headingLevel={4}
+                          showNew={false}
+                          showDate={false}
+                        />
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ))}
+            </div>
+            {newest.length > 0 && (
+              <p className="mt-5 text-center md:mt-6">
+                <Link
+                  href="/doanh-nghiep-moi-thanh-lap"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-line-strong bg-white px-5 font-semibold no-underline hover:border-brand"
+                >
+                  {M.home.newSeeAll} →
+                </Link>
+              </p>
+            )}
           </section>
         </div>
       </main>

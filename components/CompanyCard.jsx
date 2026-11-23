@@ -22,7 +22,8 @@ import Highlight from './Highlight';
 //   Mỗi trường một cột thẳng hàng giữa các dòng (như bảng), nhãn nhỏ trên giá trị.
 //
 // Không tải trước trang DN (prefetch={false}). MST nằm trên lớp phủ để vẫn bôi đen/chép được.
-// variant: 'row' (CompanyList) | 'card' (khối/lưới hẹp — luôn dạng nhãn – giá trị).
+// variant: 'row' (CompanyList) | 'card' (khối/lưới hẹp — luôn dạng nhãn – giá trị) | 'tile' (như card, trong khung trắng
+//          viền mảnh riêng — thẻ rời nhau ở khối DN mới trang chủ).
 // highlight: từ khoá tìm kiếm để tô sáng trong tên DN, MST, người đại diện.
 // showNew: nhãn «MỚI» cho DN thành lập trong 7 ngày (tắt ở khối/trang «DN mới thành lập»).
 // showProvince=false: trang theo tỉnh — địa chỉ chỉ ghi phường/xã (tỉnh đã có ở tiêu đề trang).
@@ -52,6 +53,7 @@ export default function CompanyCard({
   // Chỉ tô sáng ở trường đã khớp (API trả matched). Không có matched (trang danh sách) → tô như trước.
   const hl = (field) => (!c.matched || c.matched === field ? highlight : undefined);
   const table = variant === 'row';
+  const tile = variant === 'tile'; // thẻ rời: khung trắng viền mảnh bo 10px (khối DN mới trang chủ)
 
   // Một trường: nhãn + giá trị. Dạng nhãn – giá trị: 2 cột (nhãn 84px). Dạng bảng: nhãn nhỏ nằm trên giá trị.
   // min-w-0: ô lưới được co nhỏ hơn nội dung → địa chỉ dài cắt «…» thay vì tràn sang cột bên cạnh.
@@ -63,7 +65,11 @@ export default function CompanyCard({
 
   return (
     <article
-      className={`group relative grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 py-4 transition-colors duration-150 hover:bg-page/60 ${
+      className={`group relative grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 py-4 transition-colors duration-150 ${
+        tile
+          ? 'h-full rounded-[10px] border border-line bg-white px-4 hover:border-brand hover:shadow-[0_4px_14px_-6px_rgba(37,99,235,0.35)]'
+          : 'hover:bg-page/60'
+      } ${
         table
           ? `px-4 md:px-5 lg:items-center lg:gap-x-6 lg:gap-y-0.5 ${
               showDate

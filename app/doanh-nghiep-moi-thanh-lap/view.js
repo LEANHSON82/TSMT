@@ -66,6 +66,7 @@ export async function NewCompaniesList({ searchParams }) {
       params={{ tinh: province?.slug }}
       slotPrefix="new"
       showNew={false}
+      groupByDate
       emptyTitle={M.list.newCompanies.empty}
     />
   );

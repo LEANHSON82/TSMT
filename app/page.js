@@ -7,8 +7,9 @@ import { AdvancedSearchLink } from '@/components/HeaderBar';
 import SectionHeader from '@/components/SectionHeader';
 import { getProvinces, listCompanies, searchCompanies } from '@/lib/api';
 import { POPULAR_INDUSTRIES } from '@/lib/popular-industries';
-import { daysAgoVN, todayVN } from '@/lib/filters';
-import { formatDate, formatNumber } from '@/lib/format';
+import { daysAgoVN } from '@/lib/filters';
+import { groupByDay } from '@/lib/day-groups';
+import { formatNumber } from '@/lib/format';
 import { SITE_NAME, absoluteUrl } from '@/lib/site';
 import { M, NEW_WINDOW_DAYS } from '@/lib/messages';
 
@@ -31,10 +32,7 @@ export default async function HomePage() {
     .then((d) => d.total ?? null)
     .catch(() => null);
   const dayGroups = groupByDay(newest);
-  // Lối tắt «Xem theo tỉnh»: 6 tỉnh nhiều DN nhất → trang DN mới của tỉnh đó.
-  const topProvinces = [...provinces]
-    .sort((a, b) => (b.company_count || 0) - (a.company_count || 0))
-    .slice(0, 6);
+
   // Xếp A–Z theo tiếng Việt; bỏ tiền tố «TP »/«Thành phố » khi so → «TP Hồ Chí Minh» nằm ở vần H, chỗ người
   // dùng tìm (như bản mẫu A), không lạc xuống cuối vần T.
   const sortKey = (name = '') => name.replace(/^(TP\.?|Thành phố)\s+/i, '');
@@ -170,7 +168,7 @@ export default async function HomePage() {
           <AdSlot slotId="home-mid" />
 
           {/* Khối DN mới (spec 3.1 mục 4: 20 DN mới nhất, thẻ DN mục 3.3 + link xem tất cả), cùng kiểu hai khối duyệt ở
-              trên: tiêu đề giữa, dòng tóm tắt + lối tắt theo tỉnh, rồi các thẻ trắng rời nhau (2 cột máy tính) nhóm theo
+              trên: tiêu đề giữa, dòng tóm tắt, rồi các thẻ trắng rời nhau (2 cột máy tính) nhóm theo
               ngày hoạt động — ngày ở tiêu đề nhóm nên thẻ không lặp lại. */}
           <section aria-labelledby="new-title" className="pt-4 md:pt-6">
             <h2 id="new-title" className="browse-title">
@@ -186,25 +184,6 @@ export default async function HomePage() {
                     </span>{' '}
                     {M.home.newCount}
                   </p>
-                )}
-                {topProvinces.length > 0 && (
-                  // Điện thoại: một hàng cuộn ngang (không chiếm 3 dòng).
-                  <nav
-                    aria-label={M.home.newByProvince}
-                    className="flex max-w-full items-center gap-2 max-md:-mx-4 max-md:w-[calc(100%+2rem)] max-md:overflow-x-auto max-md:px-4 max-md:pb-1 md:flex-wrap md:justify-center"
-                  >
-                    <span className="flex-none text-sm text-muted">{M.home.newByProvince}</span>
-                    {topProvinces.map((p) => (
-                      <Link
-                        key={p.code}
-                        href={`/doanh-nghiep-moi-thanh-lap?tinh=${p.slug}`}
-                        prefetch={false}
-                        className="inline-flex min-h-8 flex-none items-center rounded-full border border-line-strong bg-white px-3 text-sm font-semibold whitespace-nowrap text-ink-2 no-underline hover:border-brand hover:text-brand"
-                      >
-                        {p.name}
-                      </Link>
-                    ))}
-                  </nav>
                 )}
               </div>
             )}
@@ -248,24 +227,6 @@ export default async function HomePage() {
       </main>
     </>
   );
-}
-
-/** 20 DN mới nhất → nhóm theo ngày hoạt động: [{ date, heading: «Hôm nay · 23/11/2026», items }]. */
-function groupByDay(items) {
-  const today = todayVN();
-  const yesterday = daysAgoVN(1);
-  const groups = [];
-  for (const c of items) {
-    const date = (c.founded_date || '').slice(0, 10);
-    let g = groups[groups.length - 1];
-    if (!g || g.date !== date) {
-      const label = date === today ? M.home.today : date === yesterday ? M.home.yesterday : '';
-      g = { date, heading: M.home.dayGroup(label, formatDate(date)), items: [] };
-      groups.push(g);
-    }
-    g.items.push(c);
-  }
-  return groups;
 }
 
 // Khối trống khi API lỗi: câu thông báo + link tải lại (trang chủ là ISR — lần sau tải sẽ lấy bản mới).

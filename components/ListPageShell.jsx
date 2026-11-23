@@ -31,6 +31,7 @@ export default function ListPageShell({
   slotPrefix,
   highlight,
   showNew = true,
+  groupByDate = false, // trang DN mới: nhóm danh sách theo ngày hoạt động
   showProvince = true,
 }) {
   const size = data.page_size || 20;
@@ -104,6 +105,7 @@ export default function ListPageShell({
                 slotPrefix={slotPrefix}
                 highlight={highlight}
                 showNew={showNew}
+                groupByDate={groupByDate}
                 showProvince={showProvince}
                 title={M.list.listTitle}
                 meta={range}

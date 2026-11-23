@@ -23,7 +23,7 @@ function pageList(page, total) {
 const box =
   'press inline-flex h-11 min-w-11 items-center justify-center gap-1 rounded-lg border px-3 text-body font-semibold tabular-nums no-underline';
 const live = `${box} border-line-strong bg-white text-brand hover:border-brand hover:text-brand`;
-const off = `${box} border-line text-[#7d7d7d]`;
+const off = `${box} border-line text-[#8a929e]`;
 
 export default function Pagination({ page, totalPages, basePath, params = {} }) {
   if (totalPages <= 1) return null;

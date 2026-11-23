@@ -111,12 +111,12 @@ export default async function HomePage() {
 
         {/* Phần dưới hero: cùng khung .site-wrap với header/hero → mép trái mọi khối x=120 ở 1440. Nhịp dọc hệ A:
             đầu trang 40 (điện thoại 24), giữa các khối 48 (điện thoại 40). Footer tự có mt-12 nên không đệm đáy. */}
-        {/* Nhịp nền: hero xanh nhạt → dải TRẮNG rộng hết màn hình (tỉnh/thành, ngành nghề) → nền xám (quảng cáo, DN
-            mới trong khung trắng). Tiêu đề khối căn trái, 24px; link «Xem tất cả» ở đầu khối bên phải. */}
-        <div className="border-y border-line bg-white">
-          <div className="site-wrap flex flex-col gap-10 py-8 md:gap-12 md:py-12">
+        {/* Tỉnh/thành, ngành nghề: trên nền trang, tiêu đề và chữ trong ô căn giữa (theo yêu cầu). DN mới: tiêu đề căn
+            trái, link «Xem tất cả» cùng hàng dòng tóm tắt. */}
+        <div>
+          <div className="site-wrap flex flex-col gap-10 pt-8 md:gap-12 md:pt-12">
             <section aria-labelledby="prov-title">
-              <h2 id="prov-title" className="block-title">
+              <h2 id="prov-title" className="block-title text-center">
                 {M.home.provincesTitle}
               </h2>
               {sorted.length === 0 && <HomeEmpty text={M.home.emptyProvinces} />}
@@ -146,7 +146,7 @@ export default async function HomePage() {
 
             {/* Ngành nghề: tên gọn (tên VSIC đầy đủ ở tooltip và trên trang ngành) để mọi ô hiện đủ chữ. */}
             <section aria-labelledby="ind-title">
-              <h2 id="ind-title" className="block-title">
+              <h2 id="ind-title" className="block-title text-center">
                 {M.home.industriesTitle}
               </h2>
               <MobileMore moreLabel={M.home.moreIndustries}>

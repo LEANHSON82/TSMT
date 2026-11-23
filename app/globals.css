@@ -49,7 +49,6 @@
   --color-cta-hover: #1d4ed8;
   --color-cta-50: #eff6ff;
   --color-accent: #2563eb;
-  /* Vạch mục đang xem trên dải menu navy (5,6:1). */
   --color-accent-on-dark: #60a5fa;
   /* Logo footer: «T» navy, «MST» xanh. */
   --color-logo-t: #142d4e;
@@ -350,7 +349,7 @@
 /* Ô tìm: khung .search-box chứa ô nhập + nút «Tìm» xanh liền nhau,
    khung nhận focus (ô nhập bên trong không tự vẽ viền).
    --lg  (ô lớn trong trang: trang chủ, 404): nền trắng, viền mảnh bo 8px, đổ bóng nhẹ; nút than chì liền bên phải.
-   --nav (dải menu navy): ô trắng gọn bo 6px, nút «Tìm» xanh liền bên phải; focus quầng trắng mờ. */
+   --nav (header trắng): cùng kiểu ô lớn nhưng gọn: viền xám bo 6px, nút «Tìm» xanh liền bên phải. */
 .search-input:focus {
   outline: none;
   box-shadow: none;
@@ -413,12 +412,9 @@
 .search-box--nav:hover {
   border-color: var(--color-field);
 }
-.search-box--nav {
-  border-color: #ffffff;
-}
 .search-box--nav:focus-within {
-  border-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.45);
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px #bfdbfe;
 }
 .search-box--nav .search-input {
   color: var(--color-ink);
@@ -634,12 +630,16 @@ html[data-navigating] [data-list-content] {
   animation: motion-page 0.22s ease-out;
 }
 
-/* Header dính: cuộn khỏi đầu trang thì viền dưới nhạt đi, hiện bóng đổ mềm (scroll-driven, không JS). */
+/* Header dính: cuộn khỏi đầu trang thì bóng đổ đậm hơn một chút (scroll-driven, không JS); viền dưới giữ nguyên. */
 @keyframes header-lift {
   to {
-    border-bottom-color: transparent;
-    box-shadow: 0 4px 16px rgba(10, 42, 94, 0.08);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
   }
+}
+
+/* Hero trang chủ: nền xanh xám nhạt chuyển dần xuống màu nền trang. */
+.hero-tint {
+  background: linear-gradient(180deg, #e8f0fb 0%, #f3f6fa 100%);
 }
 @supports (animation-timeline: scroll()) {
   .header-lift {

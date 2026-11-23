@@ -62,7 +62,8 @@ export default async function HomePage() {
       <main className="flex w-full flex-col">
         {/* Hero: nền trắng, tiêu đề + dòng số liệu + ô tìm lớn (viên tròn, nút «Tìm» navy). Từ 1024px ô tìm của header
             ẩn cho tới khi ô tìm này cuộn khuất (data-hero-search). */}
-        <section aria-labelledby="home-title" className="border-b border-line bg-white">
+        {/* Nền xanh xám nhạt chuyển dần (như hero BizLookup) — header trắng phía trên nổi rõ, không hoà vào nền. */}
+        <section aria-labelledby="home-title" className="hero-tint border-b border-line">
           <div className="site-wrap">
             <div className="mx-auto max-w-[820px] pt-6 pb-7 md:pt-12 md:pb-12">
               <h1

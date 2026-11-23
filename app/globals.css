@@ -30,55 +30,61 @@
   --default-transition-duration: 150ms;
   --default-transition-timing-function: ease-out;
 
-  /* Bộ màu đơn sắc «than chì – bạc – trắng» (chủ dự án chọn 23/11/2026): không dùng màu sáng / màu nhấn.
-     Than chì #1F2937: dải menu, tiêu đề khung, link, tên DN, nút. Bạc #C7CCD4 / #E3E6EA: nút trên nền than chì,
-     nhãn, tô sáng từ khoá, vạch mục đang xem. Ngoại lệ bắt buộc: xanh lá cho nhãn «Đang hoạt động» (spec 3.3) và
-     đỏ cho chữ báo lỗi của form. */
-  --color-chrome: #1f2937;
-  --color-chrome-2: #111827;
-  --color-silver: #c7ccd4;
-  --color-silver-2: #e3e6ea;
-  --color-brand: #1f2937;
-  --color-brand-hover: #4b5563;
-  --color-brand-50: #f1f2f4;
-  --color-title: #111827;
-  --color-title-50: #e3e6ea;
-  --color-navy: #1f2937;
-  --color-cta: #1f2937;
-  /* Rê chuột lên nút than chì: SÁNG lên (#374151) cho thấy rõ; nhấn giữ: tối hơn (chrome-2). */
-  --color-cta-hover: #374151;
-  --color-cta-50: #f1f2f4;
-  --color-accent: #1f2937;
-  /* Chữ «T» của logo (spec: T cam, MST xanh). */
-  --color-logo-t: #9ca3af;
+  /* Bộ màu theo BizLookup (bizlookup.co.uk, đo màu thật trên trang 23/11/2026 — bảng màu Tailwind «slate» + «blue»):
+     xám than xanh #0F172A cho dải menu, tiêu đề khung chính và tiêu đề; xanh dương #155DFC là màu nhấn cho nút chính
+     («Tìm», «Xem số điện thoại»), link, hành động, trang đang chọn; nền #F8FAFC, viền #E2E8F0, chữ #1E293B / #475569.
+     Tình trạng «Đang hoạt động»: nhãn tròn chữ xanh ngọc đậm trên nền xanh ngọc nhạt (5,1:1, spec 3.3 xanh lá).
+     brand = link / hành động (xanh); title = tên DN, tiêu đề (xám than); cta = nút chính (xanh, chữ trắng 5,3:1). */
+  --color-chrome: #0f172a;
+  --color-chrome-2: #020617;
+  --color-silver: #cbd5e1;
+  --color-silver-2: #f1f5f9;
+  --color-brand: #155dfc;
+  --color-brand-hover: #1447e6;
+  --color-brand-50: #eff6ff;
+  --color-title: #0f172a;
+  --color-title-50: #f1f5f9;
+  --color-navy: #0f172a;
+  --color-cta: #155dfc;
+  --color-cta-hover: #1447e6;
+  --color-cta-50: #eff6ff;
+  --color-accent: #155dfc;
+  /* Vạch mục đang xem trên dải menu tối (xanh sáng hơn để đủ tương phản: 4,8:1). */
+  --color-accent-on-dark: #2b7fff;
+  /* Logo footer: «T» xám than, «MST» xanh (như BizLookup: «Biz» đậm, «Lookup» xanh). */
+  --color-logo-t: #0f172a;
+  /* Nền tô sáng từ khoá trong kết quả. */
+  --color-mark: #dbeafe;
 
-  --color-page: #f5f6f8;
-  --color-surface: #f5f6f8;
+  --color-page: #f8fafc;
+  --color-surface: #f8fafc;
   --color-card: #ffffff;
-  --color-ink: #222222;
-  --color-ink-2: #444444;
-  --color-muted: #666666;
-  --color-line: #e1e4ea;
-  --color-line-strong: #c9d0da;
-  --color-line-soft: #eef0f3;
-  --color-field: #858c99;
-  /* Chữ gợi ý trong ô nhập (placeholder): 4,7:1 trên trắng. */
-  --color-placeholder: #6b7483;
-  --color-focus: #1f2937;
+  --color-ink: #1e293b;
+  --color-ink-2: #475569;
+  --color-muted: #64748b;
+  --color-line: #e2e8f0;
+  --color-line-strong: #cbd5e1;
+  --color-line-soft: #f1f5f9;
+  --color-field: #7c8ba1;
+  /* Chữ gợi ý trong ô nhập (placeholder): 4,8:1 trên trắng. */
+  --color-placeholder: #64748b;
+  --color-focus: #155dfc;
 
-  --color-ok: #0a7c33;
-  --color-ok-bg: #e6f4ea;
-  --color-off: #666666;
-  --color-off-bg: #eceef1;
+  --color-ok: #007a55;
+  --color-ok-bg: #ecfdf5;
+  --color-ok-line: #a4f4cf;
+  --color-off: #475569;
+  --color-off-bg: #f1f5f9;
+  --color-off-line: #cad5e2;
   --color-danger: #b42318;
   --color-danger-bg: #fef3f2;
-  --color-warn: #374151;
-  --color-warn-bg: #f1f2f4;
-  /* Nhãn «MỚI»: nền bạc chữ than chì. */
-  --color-new: #1f2937;
-  --color-new-bg: #e3e6ea;
+  --color-warn: #475569;
+  --color-warn-bg: #f1f5f9;
+  /* Nhãn «MỚI»: nền xanh nhạt chữ xanh đậm (6,3:1). */
+  --color-new: #1447e6;
+  --color-new-bg: #eff6ff;
 
-  --color-ad: #e7eaee;
+  --color-ad: #eef2f6;
 
   --container-site: 1160px;
   --width-rail: 300px;
@@ -368,14 +374,14 @@
   border: 1px solid var(--color-line-strong);
   border-radius: 8px;
   background: #ffffff;
-  box-shadow: 0 2px 10px rgba(17, 24, 39, 0.07);
+  box-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.18);
 }
 .search-box--lg:hover {
   border-color: var(--color-ink-2);
 }
 .search-box--lg:focus-within {
   border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px #d5d9df;
+  box-shadow: 0 0 0 3px #bfdbfe;
 }
 .search-box--lg .search-input {
   color: var(--color-ink);
@@ -715,7 +721,7 @@ html[data-navigating] [data-list-content] {
   gap: 12px;
   min-height: 44px;
   border-bottom: 1px solid var(--color-line-soft);
-  color: var(--color-brand);
+  color: var(--color-ink);
   text-decoration: none;
 }
 a.prov-link:hover {

@@ -14,7 +14,7 @@ import Highlight from './Highlight';
 //     Đại diện     NGÔ MINH CƯỜNG
 //     Hoạt động    11/11/2026
 //     Địa chỉ      Số 123 Đường Lê Duẩn, …
-//   Nhãn xám cột cố định 84px, giá trị chữ đậm màu chính → mắt lướt dọc theo cột giá trị.
+//   Nhãn xám cột cố định 72px, giá trị chữ đậm màu chính → mắt lướt dọc theo cột giá trị.
 //
 //   Dạng bảng (variant="row" từ 1024px — trang kết quả / tỉnh / ngành / DN mới):
 //     TÊN DOANH NGHIỆP              │ MST        │ Người đại diện │ Hoạt động từ │ ✓ Đang hoạt động
@@ -53,9 +53,10 @@ export default function CompanyCard({
   const table = variant === 'row';
 
   // Một trường: nhãn + giá trị. Dạng nhãn – giá trị: 2 cột (nhãn 84px). Dạng bảng: nhãn nhỏ nằm trên giá trị.
+  // min-w-0: ô lưới được co nhỏ hơn nội dung → địa chỉ dài cắt «…» thay vì tràn sang cột bên cạnh.
   const field = table
-    ? 'grid grid-cols-[84px_minmax(0,1fr)] items-baseline gap-x-2 lg:flex lg:flex-col lg:gap-0.5'
-    : 'grid grid-cols-[84px_minmax(0,1fr)] items-baseline gap-x-2';
+    ? 'grid min-w-0 grid-cols-[72px_minmax(0,1fr)] items-baseline gap-x-2 lg:flex lg:flex-col lg:items-stretch lg:gap-0.5'
+    : 'grid min-w-0 grid-cols-[72px_minmax(0,1fr)] items-baseline gap-x-2';
   const label = `text-[13px] leading-5 text-muted ${table ? 'lg:text-xs lg:leading-4' : ''}`;
   const value = 'min-w-0 text-sm leading-5 text-ink';
 
@@ -76,7 +77,7 @@ export default function CompanyCard({
           href={href}
           prefetch={false}
           title={c.name}
-          className="text-brand no-underline decoration-1 underline-offset-[3px] group-hover:underline after:absolute after:inset-0"
+          className="text-title no-underline decoration-1 underline-offset-[3px] group-hover:text-brand group-hover:underline after:absolute after:inset-0"
         >
           <Highlight text={c.name} query={hl('name')} />
         </Link>
@@ -96,7 +97,7 @@ export default function CompanyCard({
 
         {/* Tình trạng: dạng nhãn – giá trị nằm góc phải hàng MST; dạng bảng là cột cuối. */}
         <div
-          className={`col-start-2 row-start-2 self-baseline justify-self-end ${
+          className={`col-start-2 row-start-2 self-center justify-self-end ${
             table ? 'lg:col-start-5 lg:row-span-2 lg:row-start-1 lg:self-center' : ''
           }`}
         >

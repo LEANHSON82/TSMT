@@ -102,9 +102,9 @@ function AdvancedSearchIcon({ href, className = '' }) {
 // Dải menu than chì kiểu CafeF (cao 48px): chữ trắng in hoa 14px đậm (85%); trang đang xem: trắng hẳn + vạch trắng 3px.
 const NAV_ITEM =
   'nav-item inline-flex h-12 items-center gap-1 px-4 text-sm font-semibold tracking-[0.02em] whitespace-nowrap text-white/85 uppercase no-underline hover:bg-white/15 hover:text-white';
-// Trang đang xem: chữ trắng hẳn + nền sáng nhẹ + vạch trắng 3px sát đáy (rõ hơn hẳn mục thường chữ trắng 85%).
+// Trang đang xem: chữ trắng hẳn + nền sáng nhẹ + vạch xanh 3px sát đáy (rõ hơn hẳn mục thường chữ trắng 85%).
 // Rê chuột: nền sáng hơn (trắng 15%). Bảng thả xuống đang mở: giữ nền trắng 15%.
-const CURRENT_BAR = 'bg-white/10 text-white shadow-[inset_0_-3px_0_#ffffff]';
+const CURRENT_BAR = 'bg-white/10 text-white shadow-[inset_0_-3px_0_var(--color-accent-on-dark)]';
 
 function DesktopDropdown({ id, label, open, current, onToggle, onClose, children }) {
   const btnRef = useRef(null);
@@ -453,7 +453,9 @@ export default function HeaderBar({ provinces, industries }) {
               aria-label={M.nav.home}
               aria-current={pathname === '/' ? 'page' : undefined}
               className={`nav-item flex w-12 flex-none items-center justify-center text-white hover:bg-white/15 hover:text-white ${
-                pathname === '/' ? 'bg-white/10 shadow-[inset_0_-3px_0_#ffffff]' : 'bg-chrome-2'
+                pathname === '/'
+                  ? 'bg-white/10 shadow-[inset_0_-3px_0_var(--color-accent-on-dark)]'
+                  : 'bg-chrome-2'
               }`}
             >
               <svg

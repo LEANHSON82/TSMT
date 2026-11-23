@@ -1,18 +1,18 @@
 import { STATUS_LABELS } from '@/lib/messages';
 
-// Tình trạng DN (spec mục 3.3), kiểu Pappers: icon + chữ, không nền — xanh lá khi đang hoạt động (✓), xám khi
-// ngừng / đóng MST (⊘). Màu và icon cùng báo trạng thái nên không phụ thuộc riêng vào màu (WCAG 1.4.1).
+// Tình trạng DN (spec mục 3.3), kiểu BizLookup: nhãn tròn viền mảnh — xanh lá (xanh ngọc) khi đang hoạt động (✓),
+// xám khi ngừng / đóng MST (⊘). Chữ + icon cùng báo trạng thái nên không phụ thuộc riêng vào màu (WCAG 1.4.1).
 export default function StatusBadge({ status, className = '' }) {
   const code = status?.code || 'active';
   const label = status?.label || STATUS_LABELS[code] || code;
   const active = code === 'active';
   return (
     <span
-      className={`inline-flex items-center gap-1 text-sm leading-5 font-semibold whitespace-nowrap ${active ? 'text-ok' : 'text-off'} ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-px text-xs leading-5 md:px-2.5 md:text-[13px] font-semibold whitespace-nowrap ${active ? 'border-ok-line bg-ok-bg text-ok' : 'border-off-line bg-off-bg text-off'} ${className}`}
     >
       <svg
-        width="15"
-        height="15"
+        width="13"
+        height="13"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"

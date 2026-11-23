@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { M } from '@/lib/messages';
 
-// Tiêu đề khối kiểu CafeF. tab (mặc định): đặt ở đầu một khung .panel — tiêu đề nằm trong ô nền navy chữ trắng
+// Tiêu đề khối kiểu CafeF. tab (mặc định): đặt ở đầu một khung .panel — tiêu đề nằm trong ô nền than chì chữ trắng
 // sát góc trái khung, vạch mảnh dưới; phần phụ bên phải CÙNG hàng: số đếm (meta) và/hoặc link (action).
 // tab={false}: tiêu đề chữ đậm thường (đặt ngoài khung).
 //   id      — gắn vào thẻ tiêu đề, để <section aria-labelledby={id}>.
@@ -42,7 +42,7 @@ export default function SectionHeader({
     <div className={`flex items-stretch justify-between gap-2 border-b border-line ${className}`}>
       <Tag
         id={id}
-        className="min-w-0 bg-brand px-4 py-2.5 text-base leading-6 font-semibold text-pretty text-white md:px-5 md:py-3 md:text-[18px] md:leading-[26px]"
+        className="min-w-0 bg-chrome px-4 py-2.5 text-base leading-6 font-semibold text-pretty text-white md:px-5 md:py-3 md:text-[18px] md:leading-[26px]"
       >
         {title}
       </Tag>

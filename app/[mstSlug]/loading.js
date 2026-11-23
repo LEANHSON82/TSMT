@@ -15,7 +15,7 @@ export default function Loading() {
         <div className="skeleton h-4 w-1/2 rounded-sm" />
       </div>
       <div className="panel mt-3 md:mt-4">
-        <div className="h-11 w-56 bg-brand md:h-[50px]" />
+        <div className="h-11 w-56 bg-chrome md:h-[50px]" />
         <div className="flex flex-col px-4 md:px-[22px]">
           {Array.from({ length: 9 }).map((_, i) => (
             <div

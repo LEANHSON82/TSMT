@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
-/* Hệ thiết kế «CafeF» (bản mẫu: .design/cafef-design), bộ màu B (.design/colors): dải menu xanh dương,
-   tên DN xanh than đậm, nội dung trong các khung trắng viền mảnh bo 10px, tiêu đề khung dạng tab nền navy.
+/* Hệ thiết kế «CafeF» (bản mẫu: .design/cafef-design), bộ màu than chì (.design/colors2): dải menu than chì,
+   tên DN gần đen, nội dung trong các khung trắng viền mảnh bo 10px, tiêu đề khung dạng tab nền navy.
    Chữ: Inter, đúng 2 độ đậm 400/600. Nền trang xám nhạt #F5F6F8.
    Khung 1160 = cột chính + khe 20 + cột phải 300. */
 @theme {
@@ -30,17 +30,20 @@
   --default-transition-duration: 150ms;
   --default-transition-timing-function: ease-out;
 
-  /* Bộ màu B (chủ dự án chọn 23/11/2026): một màu nhấn xanh dương — menu, link, nút chính, tiêu đề khung. */
-  --color-brand: #0e4da4;
-  --color-brand-hover: #0a3a7e;
-  --color-brand-50: #e8f0fc;
-  /* Tên doanh nghiệp (H1, tiêu đề trang): xanh than đậm. «Ngành chính»: nhãn xanh nhạt. */
-  --color-title: #10233d;
-  --color-title-50: #e8f0fc;
-  --color-navy: #0e4da4;
-  --color-cta: #0e4da4;
-  --color-cta-hover: #0a3a7e;
-  --color-cta-50: #e8f0fc;
+  /* Bộ màu «than chì» (chủ dự án chọn 23/11/2026): than chì #1F2937 là màu chính của khung giao diện (dải menu,
+     tiêu đề khung, viền footer); xanh dương dịu #1F5FBF là màu nhấn duy nhất cho link và nút. */
+  --color-chrome: #1f2937;
+  --color-chrome-2: #111827;
+  --color-brand: #1f5fbf;
+  --color-brand-hover: #174a96;
+  --color-brand-50: #eef3fb;
+  /* Tên doanh nghiệp (H1, tiêu đề trang): gần đen. «Ngành chính»: nhãn xanh nhạt. */
+  --color-title: #111827;
+  --color-title-50: #eef3fb;
+  --color-navy: #1f2937;
+  --color-cta: #1f5fbf;
+  --color-cta-hover: #174a96;
+  --color-cta-50: #eef3fb;
   /* Chữ «T» của logo (spec: T cam, MST xanh). */
   --color-logo-t: #e8610e;
 

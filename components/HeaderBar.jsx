@@ -99,10 +99,10 @@ function AdvancedSearchIcon({ href, className = '' }) {
 }
 
 // Mục menu hàng 1: chữ 16px đậm; mục của trang đang xem màu xanh + vạch 2px sát đáy vùng bấm.
-// Dải menu navy kiểu CafeF: chữ trắng in hoa 13px; mục của trang đang xem có vạch cam 3px sát đáy.
+// Dải menu than chì kiểu CafeF: chữ trắng in hoa 13px; mục của trang đang xem có vạch xanh 3px sát đáy.
 const NAV_ITEM =
   'inline-flex h-11 items-center gap-1 px-4 text-[13px] tracking-[0.02em] whitespace-nowrap text-white uppercase no-underline hover:bg-white/10 hover:text-white';
-const CURRENT_BAR = 'font-semibold shadow-[inset_0_-3px_0_#f5a623]';
+const CURRENT_BAR = 'font-semibold shadow-[inset_0_-3px_0_#60a5fa]';
 
 function DesktopDropdown({ id, label, open, current, onToggle, onClose, children }) {
   const btnRef = useRef(null);
@@ -413,7 +413,7 @@ export default function HeaderBar({ provinces, industries }) {
       >
         {/* Không có logo (quyết định của chủ dự án 23/11/2026, khác spec mục 3). Điện thoại (< 768px): một hàng gồm ô
             tìm (kèm nút icon «Lọc nâng cao») và nút menu. Từ 768px: chỉ còn dải menu xanh, ô tìm nằm bên phải dải. */}
-        <div ref={findRef} className="md:hidden">
+        <div ref={findRef} className="bg-chrome md:hidden">
           <div className="site-wrap flex items-center gap-1.5 py-2 max-md:pr-2">
             {/* Trang chủ: ô tìm ẩn (vẫn giữ chỗ, nút menu vẫn hiện) cho tới khi ô tìm lớn của hero cuộn khuất. */}
             <div
@@ -430,7 +430,7 @@ export default function HeaderBar({ provinces, industries }) {
               aria-expanded={mobileOpen}
               aria-controls="mobile-menu"
               onClick={() => setMobileOpen(true)}
-              className="inline-flex h-11 w-11 flex-none items-center justify-center rounded text-ink"
+              className="inline-flex h-11 w-11 flex-none items-center justify-center rounded text-white"
             >
               <IconMenu size={24} />
             </button>
@@ -439,13 +439,13 @@ export default function HeaderBar({ provinces, industries }) {
 
         {/* Dải menu navy (≥ 768px), kiểu CafeF: ô «nhà» · Tỉnh/thành · Ngành nghề · DN mới · Yêu cầu ẩn/sửa. Bảng
             thả xuống của Tỉnh/thành và Ngành nghề mở ngay dưới dải (relative). */}
-        <div className="relative hidden bg-brand md:block">
+        <div className="relative hidden bg-chrome md:block">
           <div className="site-wrap flex h-11 items-stretch">
             <Link
               href="/"
               aria-label={M.nav.home}
               aria-current={pathname === '/' ? 'page' : undefined}
-              className="flex w-11 flex-none items-center justify-center bg-[#0a3f86] text-white hover:bg-[#0a3a7e] hover:text-white"
+              className="flex w-11 flex-none items-center justify-center bg-chrome-2 text-white hover:bg-black hover:text-white"
             >
               <svg
                 width="18"

@@ -3,13 +3,11 @@ import { formatDate, formatMoney, formatMoneyWords } from '@/lib/format';
 import { M } from '@/lib/messages';
 import CopyButton from './CopyButton';
 import PhoneReveal from './PhoneReveal';
-import StatusBadge from './StatusBadge';
 import { companyPath } from '@/lib/mst';
 import {
   IconBanknote,
   IconBuilding,
   IconCalendar,
-  IconCheckCircle,
   IconLandmark,
   IconLayers,
   IconMail,
@@ -67,7 +65,8 @@ const COPY_FIX = '-my-3! py-3 leading-5 max-md:gap-1';
 // Bảng thông tin DN (spec mục 3.4 — đúng thứ tự trường, mỗi mục icon + nhãn + giá trị, trường trống thì ẩn). Hai phần:
 //   1. Định danh & liên hệ (MST, đơn vị chủ quản, địa chỉ, người đại diện, điện thoại, email): dạng hàng, nút hành
 //      động thẳng một cột bên phải.
-//   2. Thông tin đăng ký (ngày hoạt động, quản lý bởi, loại hình, tình trạng, vốn): lưới ô «nhãn nhỏ / giá trị» —
+//   2. Thông tin đăng ký (ngày hoạt động, quản lý bởi, loại hình, vốn): lưới ô «nhãn nhỏ / giá trị» (tình trạng hiện
+//      MỘT lần, ngay dưới tên DN ở đầu trang) —
 //      giá trị ngắn, lướt ngang một lần là đọc hết.
 // Hàng (phần 1):
 //   ≥ 768px: [icon + nhãn 180px] [giá trị] [hành động, dạt phải].
@@ -113,7 +112,7 @@ function Fact({ icon: Icon, label, children }) {
 export default function CompanyInfoTable({ company: c, parent }) {
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address || '')}`;
   const repHref = `/tim-kiem?q=${encodeURIComponent(c.representative || '')}`;
-  const hasFacts = c.founded_date || c.tax_office || c.business_type || c.status || c.capital;
+  const hasFacts = c.founded_date || c.tax_office || c.business_type || c.capital;
   return (
     <>
       <dl>
@@ -228,7 +227,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
         )}
       </dl>
       {hasFacts && (
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-5 border-t border-line py-5 md:grid-cols-3 lg:grid-cols-5">
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-5 border-t border-line py-5 md:grid-cols-4">
           {c.founded_date && (
             <Fact icon={IconCalendar} label={M.company.foundedDate}>
               <span className="tabular-nums">{formatDate(c.founded_date)}</span>
@@ -242,11 +241,6 @@ export default function CompanyInfoTable({ company: c, parent }) {
           {c.business_type && (
             <Fact icon={IconLayers} label={M.company.businessType}>
               {c.business_type}
-            </Fact>
-          )}
-          {c.status && (
-            <Fact icon={IconCheckCircle} label={M.company.status}>
-              <StatusBadge status={c.status} />
             </Fact>
           )}
           {c.capital ? (

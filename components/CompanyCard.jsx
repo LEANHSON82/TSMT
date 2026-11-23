@@ -39,13 +39,14 @@ export default function CompanyCard({
   highlight,
   showNew = true,
   showProvince = true,
+  showDate = true, // false: ngày hoạt động đã hiện ở tiêu đề nhóm (khối DN mới trang chủ, nhóm theo ngày)
 }) {
   const H = `h${headingLevel}`;
   const href = companyPath(c);
   const addr = showProvince
     ? shortAddress(c.address) || areaAddress(c.address, c.province?.name)
     : areaAddress(c.address, c.province?.name, { withProvince: false });
-  const date = formatDate(c.founded_date);
+  const date = showDate ? formatDate(c.founded_date) : '';
   const fresh = showNew && isNew(c.founded_date);
   const phone = c.matched === 'phone';
   // Chỉ tô sáng ở trường đã khớp (API trả matched). Không có matched (trang danh sách) → tô như trước.
@@ -64,7 +65,11 @@ export default function CompanyCard({
     <article
       className={`group relative grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 py-4 transition-colors duration-150 hover:bg-page/60 ${
         table
-          ? 'px-4 md:px-5 lg:grid-cols-[minmax(0,1fr)_112px_minmax(0,190px)_104px_148px] lg:items-center lg:gap-x-6 lg:gap-y-0.5'
+          ? `px-4 md:px-5 lg:items-center lg:gap-x-6 lg:gap-y-0.5 ${
+              showDate
+                ? 'lg:grid-cols-[minmax(0,1fr)_112px_minmax(0,190px)_104px_148px]'
+                : 'lg:grid-cols-[minmax(0,1fr)_112px_minmax(0,220px)_148px]'
+            }`
           : ''
       }`}
     >
@@ -98,7 +103,9 @@ export default function CompanyCard({
         {/* Tình trạng: dạng nhãn – giá trị nằm góc phải hàng MST; dạng bảng là cột cuối. */}
         <div
           className={`col-start-2 row-start-2 self-center justify-self-end ${
-            table ? 'lg:col-start-5 lg:row-span-2 lg:row-start-1 lg:self-center' : ''
+            table
+              ? `lg:row-span-2 lg:row-start-1 lg:self-center ${showDate ? 'lg:col-start-5' : 'lg:col-start-4'}`
+              : ''
           }`}
         >
           <dt className="sr-only">{M.company.status}</dt>

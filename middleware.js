@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server';
 import { parseMstSlug } from './lib/mst.js';
 import { toSlug } from './lib/slug.js';
+import { NEW_WINDOW_DAYS, daysAgoVN } from './lib/filters.js';
 
 export const config = {
   runtime: 'nodejs',
@@ -132,7 +133,7 @@ function dropProvinceParam(request) {
 }
 
 /** ?page=N (N > 1) mà API trả danh sách rỗng → vượt số trang. Cùng tham số trang danh sách gọi. */
-async function pageOutOfRange(request, filters) {
+async function pageOutOfRange(request, filters, path = '/v1/companies') {
   const page = pageParam(request);
   if (!(page > 1)) return false;
   const qs = new URLSearchParams();
@@ -140,7 +141,7 @@ async function pageOutOfRange(request, filters) {
   qs.set('sort', 'founded_desc');
   qs.set('page', String(page));
   const isEmpty = (v) => Boolean(v && Array.isArray(v.items) && v.items.length === 0);
-  return isEmpty(await lookup(`/v1/companies?${qs}`, request.nextUrl.origin, isEmpty));
+  return isEmpty(await lookup(`${path}?${qs}`, request.nextUrl.origin, isEmpty));
 }
 
 /** Tỉnh của tham số ?tinh=: { code, slug }; undefined nếu không có tham số hoặc API lỗi; null nếu sai. */
@@ -164,7 +165,16 @@ async function province(request, slug) {
 async function newCompanies(request) {
   const prov = await provinceFilter(request);
   if (prov === null) return dropProvinceParam(request);
-  if (await pageOutOfRange(request, { province: prov?.code })) return notFound(request);
+  // Trang DN mới chỉ gồm DN hoạt động trong 30 ngày gần nhất (app/doanh-nghiep-moi-thanh-lap/view.js) → đếm trang
+  // bằng đúng truy vấn đó.
+  if (
+    await pageOutOfRange(
+      request,
+      { province: prov?.code, founded_from: daysAgoVN(NEW_WINDOW_DAYS) },
+      '/v1/search',
+    )
+  )
+    return notFound(request);
   return NextResponse.next();
 }
 

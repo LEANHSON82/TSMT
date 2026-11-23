@@ -1,8 +1,10 @@
-// DN mới thành lập /doanh-nghiep-moi-thanh-lap?tinh=&page= (spec mục 2, 3.5): sắp ngày thành lập mới nhất.
+// DN mới thành lập /doanh-nghiep-moi-thanh-lap?tinh=&page= (spec mục 2, 3.5): DN có ngày bắt đầu hoạt động trong 30
+// ngày gần nhất, sắp ngày thành lập mới nhất.
 import ListFilters from '@/components/ListFilters';
 import ListPageShell from '@/components/ListPageShell';
-import { listCompanies } from '@/lib/api';
-import { M } from '@/lib/messages';
+import { searchCompanies } from '@/lib/api';
+import { daysAgoVN } from '@/lib/filters';
+import { M, NEW_WINDOW_DAYS } from '@/lib/messages';
 import { provinceOptions } from '@/lib/provinces';
 import { buildHref, firstParam, pageNumber } from '@/lib/url';
 
@@ -29,7 +31,13 @@ export async function newListMetadata({ searchParams }) {
 
 export async function NewCompaniesList({ searchParams }) {
   const { province, options, page } = await load(searchParams);
-  const data = await listCompanies({ province: province?.code, sort: 'founded_desc', page });
+  // «Mới» = ngày bắt đầu hoạt động trong 30 ngày gần nhất (giờ Việt Nam), mới nhất trước.
+  const data = await searchCompanies({
+    province: province?.code,
+    foundedFrom: daysAgoVN(NEW_WINDOW_DAYS),
+    sort: 'founded_desc',
+    page,
+  });
   const where = M.common.inProvince(province?.name);
   return (
     <ListPageShell
@@ -58,6 +66,7 @@ export async function NewCompaniesList({ searchParams }) {
       params={{ tinh: province?.slug }}
       slotPrefix="new"
       showNew={false}
+      emptyTitle={M.list.newCompanies.empty}
     />
   );
 }

@@ -761,3 +761,87 @@ details[open] > :not(summary) {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Khối duyệt trang chủ (Tra cứu theo tỉnh/thành, ngành nghề) kiểu BizLookup: tiêu đề giữa, lưới ô trắng viền mảnh bo
+   10px, chữ giữa ô (tên đậm + dòng phụ xám). 2 cột điện thoại · 3 cột ≥ 640 · 4 cột ≥ 900 · 5 cột ≥ 1100. */
+.browse-title {
+  margin-bottom: 16px;
+  text-align: center;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  color: var(--color-title);
+  text-wrap: balance;
+}
+@media (min-width: 768px) {
+  .browse-title {
+    margin-bottom: 20px;
+    font-size: 24px;
+    line-height: 32px;
+  }
+}
+.browse-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (min-width: 640px) {
+  .browse-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .browse-tile {
+    min-height: 62px;
+    padding: 10px 12px;
+  }
+}
+@media (min-width: 900px) {
+  .browse-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1100px) {
+  .browse-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+.browse-tile {
+  display: flex;
+  height: 100%;
+  min-height: 54px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: #ffffff;
+  text-align: center;
+  text-decoration: none;
+  color: var(--color-ink);
+  transition:
+    border-color 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    color 0.15s ease-out;
+}
+a.browse-tile:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+  box-shadow: 0 4px 14px -6px rgba(37, 99, 235, 0.35);
+}
+.browse-name {
+  font-size: 15px;
+  line-height: 21px;
+  font-weight: 600;
+}
+.browse-meta {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+.browse-tile.is-empty {
+  color: var(--color-muted);
+  background: transparent;
+}

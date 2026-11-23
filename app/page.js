@@ -6,6 +6,7 @@ import SearchBox from '@/components/SearchBox';
 import { AdvancedSearchLink } from '@/components/HeaderBar';
 import SectionHeader from '@/components/SectionHeader';
 import { getProvinces, listCompanies, searchCompanies } from '@/lib/api';
+import { POPULAR_INDUSTRIES } from '@/lib/popular-industries';
 import { daysAgoVN, todayVN } from '@/lib/filters';
 import { formatDate, formatNumber } from '@/lib/format';
 import { SITE_NAME, absoluteUrl } from '@/lib/site';
@@ -111,50 +112,55 @@ export default async function HomePage() {
         {/* Phần dưới hero: cùng khung .site-wrap với header/hero → mép trái mọi khối x=120 ở 1440. Nhịp dọc hệ A:
             đầu trang 40 (điện thoại 24), giữa các khối 48 (điện thoại 40). Footer tự có mt-12 nên không đệm đáy. */}
         <div className="site-wrap flex flex-col gap-5 pt-5 pb-12 md:gap-6 md:pt-6 md:pb-16">
-          <section aria-labelledby="prov-title" className="panel">
-            {/* API lỗi / chưa có dữ liệu: nói rõ thay vì để khung trống (spec mục 3: trạng thái lỗi/rỗng). */}
-            <SectionHeader
-              id="prov-title"
-              title={M.home.provincesTitle}
-              meta={`${provinces.length} ${M.nav.provinces.toLowerCase()}`}
-            />
-            {/* Bảng kê A–Z rộng hết khung như bản mẫu A (không bản đồ): ≥ 1024px 4 cột, 768–1023 3 cột đọc dọc từng
-                cột như mục lục sổ đăng ký (số hàng mỗi cột đặt qua biến CSS); điện thoại 2 cột đọc theo HÀNG
-                (An Giang | Bắc Ninh / Cà Mau | …) — đọc dọc 17 hàng thì mắt phải nhảy từ đáy cột trái lên đầu cột phải,
-                vần A–Z bị đứt. Xem .prov-index trong globals.css. Tỉnh chưa có DN: chữ xám, không làm link (bấm vào
-                chỉ ra trang rỗng). */}
+          {/* Hai khối duyệt kiểu BizLookup («Browse by City / Industry»): tiêu đề giữa, lưới ô trắng viền mảnh bo góc,
+              chữ giữa ô. Tỉnh/thành (spec 3.1 mục 5: 34 tỉnh kèm số DN) xếp A–Z theo hàng; tỉnh chưa có DN: chữ xám,
+              không làm link. Ngành nghề phổ biến ngay dưới (mã VSIC + tên). */}
+          <section aria-labelledby="prov-title" className="pt-4 md:pt-6">
+            <h2 id="prov-title" className="browse-title">
+              {M.home.provincesTitle}
+            </h2>
             {sorted.length === 0 && <HomeEmpty text={M.home.emptyProvinces} />}
-            <ul
-              hidden={sorted.length === 0}
-              className="prov-index px-4 pt-1 pb-3 md:px-[22px] md:pb-4"
-              style={{
-                '--rows-3': Math.ceil(sorted.length / 3),
-                '--rows-4': Math.ceil(sorted.length / 4),
-              }}
-            >
+            <ul hidden={sorted.length === 0} className="browse-grid">
               {sorted.map((p) => {
-                const count = (
-                  <span className="flex-none text-sm text-muted tabular-nums">
-                    {formatNumber(p.company_count || 0)}
-                    <span className="sr-only">{M.home.companiesSr}</span>
-                  </span>
+                const inner = (
+                  <>
+                    <span className="browse-name">{p.name}</span>
+                    <span className="browse-meta">
+                      {formatNumber(p.company_count || 0)}
+                      {M.home.companiesSr}
+                    </span>
+                  </>
                 );
                 return (
                   <li key={p.code} className="min-w-0">
                     {p.company_count > 0 ? (
-                      <Link href={`/tinh/${p.slug}`} prefetch={false} className="prov-link">
-                        <span className="prov-name">{p.name}</span>
-                        {count}
+                      <Link href={`/tinh/${p.slug}`} prefetch={false} className="browse-tile">
+                        {inner}
                       </Link>
                     ) : (
-                      <span className="prov-link is-empty">
-                        <span className="prov-name">{p.name}</span>
-                        {count}
-                      </span>
+                      <span className="browse-tile is-empty">{inner}</span>
                     )}
                   </li>
                 );
               })}
+            </ul>
+          </section>
+
+          <section aria-labelledby="ind-title" className="pt-4 md:pt-6">
+            <h2 id="ind-title" className="browse-title">
+              {M.home.industriesTitle}
+            </h2>
+            <ul className="browse-grid">
+              {POPULAR_INDUSTRIES.map((n) => (
+                <li key={n.code} className="min-w-0">
+                  <Link href={n.href} prefetch={false} className="browse-tile">
+                    <span className="browse-name line-clamp-2" title={n.name}>
+                      {n.name}
+                    </span>
+                    <span className="browse-meta">{M.search.industryCode(n.code)}</span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </section>
 

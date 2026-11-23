@@ -24,12 +24,12 @@ export default function CompanyList({
 }) {
   const last = items.length - 1;
   const adAfter = (i) => ads && BANNERS_ON && AD_AFTER.includes(i) && i < last;
-  const th = 'text-xs font-semibold tracking-[0.02em] whitespace-nowrap text-muted uppercase';
+  const th = 'text-xs font-semibold tracking-[0.02em] whitespace-nowrap text-ink-2 uppercase';
   return (
     <div className="panel">
       <div
         aria-hidden="true"
-        className={`hidden border-b border-line bg-page px-5 py-2.5 lg:grid lg:gap-x-5 ${TABLE_COLS}`}
+        className={`hidden border-b border-line bg-thead px-5 py-3 lg:grid lg:gap-x-5 ${TABLE_COLS}`}
       >
         <span className={th}>{M.list.colCompany}</span>
         <span className={th}>{M.company.mst}</span>

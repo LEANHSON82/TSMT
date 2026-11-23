@@ -145,7 +145,7 @@ function PhoneUnlocker({ mst, masked, indent }) {
               }}
             >
               {copied ? (
-                <IconCheck size={16} className="motion-pop text-chrome" />
+                <IconCheck size={16} className="motion-pop text-ok" />
               ) : (
                 <IconCopy size={16} />
               )}

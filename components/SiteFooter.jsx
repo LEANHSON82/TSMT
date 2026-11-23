@@ -21,7 +21,7 @@ export default function SiteFooter() {
   const linkCls =
     'inline-flex min-h-11 items-center text-sm text-ink-2 no-underline hover:text-brand';
   return (
-    <footer className="border-t-[3px] border-chrome bg-white">
+    <footer className="border-t border-line bg-white">
       <div className="site-wrap flex flex-col items-start gap-2 pt-6 pb-2 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-x-8 md:gap-y-1 md:pt-7 md:pb-5 xl:flex xl:flex-row xl:justify-between">
         <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:gap-4">
           <Logo title={SITE_NAME} className="h-[15px] w-auto" />

@@ -30,61 +30,60 @@
   --default-transition-duration: 150ms;
   --default-transition-timing-function: ease-out;
 
-  /* Bộ màu theo BizLookup (bizlookup.co.uk, đo màu thật trên trang 23/11/2026 — bảng màu Tailwind «slate» + «blue»):
-     xám than xanh #0F172A cho dải menu, tiêu đề khung chính và tiêu đề; xanh dương #155DFC là màu nhấn cho nút chính
-     («Tìm», «Xem số điện thoại»), link, hành động, trang đang chọn; nền #F8FAFC, viền #E2E8F0, chữ #1E293B / #475569.
-     Tình trạng «Đang hoạt động»: nhãn tròn chữ xanh ngọc đậm trên nền xanh ngọc nhạt (5,1:1, spec 3.3 xanh lá).
-     brand = link / hành động (xanh); title = tên DN, tiêu đề (xám than); cta = nút chính (xanh, chữ trắng 5,3:1). */
-  --color-chrome: #0f172a;
-  --color-chrome-2: #020617;
+  /* Hệ thống màu «Business Lookup» (chủ dự án chọn 23/11/2026, theo bảng màu gửi kèm, tinh thần BizLookup):
+     Primary navy #142D4E — tiêu đề, tên DN, chữ đậm · Accent xanh #2563EB — nút chính («Tìm», «Xem số điện thoại»),
+     link, hành động, trang đang chọn · Background #F3F6FA · Surface #FFFFFF · Text #1E293B · Success #16A34A (nhãn
+     «Đang hoạt động»: chữ xanh lá đậm #15803D trên nền xanh lá nhạt để đạt AA). Không còn mảng nền tối: header trắng.
+     brand = link / hành động (xanh); title = tiêu đề, tên DN (navy); cta = nút chính (xanh, chữ trắng 5,2:1). */
+  --color-chrome: #142d4e;
+  --color-chrome-2: #0d1f38;
   --color-silver: #cbd5e1;
-  --color-silver-2: #f1f5f9;
-  --color-brand: #155dfc;
-  --color-brand-hover: #1447e6;
+  --color-silver-2: #eef2f7;
+  --color-brand: #2563eb;
+  --color-brand-hover: #1d4ed8;
   --color-brand-50: #eff6ff;
-  --color-title: #0f172a;
-  --color-title-50: #f1f5f9;
-  --color-navy: #0f172a;
-  --color-cta: #155dfc;
-  --color-cta-hover: #1447e6;
+  --color-title: #142d4e;
+  --color-title-50: #eef2f7;
+  --color-navy: #142d4e;
+  --color-cta: #2563eb;
+  --color-cta-hover: #1d4ed8;
   --color-cta-50: #eff6ff;
-  --color-accent: #155dfc;
-  /* Vạch mục đang xem trên dải menu tối (xanh sáng hơn để đủ tương phản: 4,8:1). */
-  --color-accent-on-dark: #2b7fff;
-  /* Logo footer: «T» xám than, «MST» xanh (như BizLookup: «Biz» đậm, «Lookup» xanh). */
-  --color-logo-t: #0f172a;
+  --color-accent: #2563eb;
+  --color-accent-on-dark: #60a5fa;
+  /* Logo footer: «T» navy, «MST» xanh. */
+  --color-logo-t: #142d4e;
   /* Nền tô sáng từ khoá trong kết quả. */
   --color-mark: #dbeafe;
 
-  --color-page: #f8fafc;
-  --color-surface: #f8fafc;
+  --color-page: #f3f6fa;
+  --color-surface: #f3f6fa;
   --color-card: #ffffff;
   --color-ink: #1e293b;
   --color-ink-2: #475569;
-  --color-muted: #64748b;
+  --color-muted: #5b6a80;
   --color-line: #e2e8f0;
   --color-line-strong: #cbd5e1;
-  --color-line-soft: #f1f5f9;
+  --color-line-soft: #eef2f7;
   --color-field: #7c8ba1;
   /* Chữ gợi ý trong ô nhập (placeholder): 4,8:1 trên trắng. */
   --color-placeholder: #64748b;
-  --color-focus: #155dfc;
+  --color-focus: #2563eb;
 
-  --color-ok: #007a55;
-  --color-ok-bg: #ecfdf5;
-  --color-ok-line: #a4f4cf;
+  --color-ok: #15803d;
+  --color-ok-bg: #f0fdf4;
+  --color-ok-line: #86efac;
   --color-off: #475569;
   --color-off-bg: #f1f5f9;
-  --color-off-line: #cad5e2;
+  --color-off-line: #cbd5e1;
   --color-danger: #b42318;
   --color-danger-bg: #fef3f2;
   --color-warn: #475569;
-  --color-warn-bg: #f1f5f9;
-  /* Nhãn «MỚI»: nền xanh nhạt chữ xanh đậm (6,3:1). */
-  --color-new: #1447e6;
+  --color-warn-bg: #eef2f7;
+  /* Nhãn «MỚI»: nền xanh nhạt chữ xanh đậm (6,2:1). */
+  --color-new: #1d4ed8;
   --color-new-bg: #eff6ff;
 
-  --color-ad: #eef2f6;
+  --color-ad: #e9eef5;
 
   --container-site: 1160px;
   --width-rail: 300px;
@@ -347,11 +346,10 @@
 .search-input:placeholder-shown::-webkit-search-cancel-button {
   display: none;
 }
-/* Ô tìm kiểu «hoà dải menu» (chủ dự án chọn 23/11/2026). Khung .search-box chứa ô nhập + nút «Tìm» liền nhau,
+/* Ô tìm: khung .search-box chứa ô nhập + nút «Tìm» xanh liền nhau,
    khung nhận focus (ô nhập bên trong không tự vẽ viền).
    --lg  (ô lớn trong trang: trang chủ, 404): nền trắng, viền mảnh bo 8px, đổ bóng nhẹ; nút than chì liền bên phải.
-   --nav (trên dải than chì): ô trong suốt, viền trắng 35% (3,3:1 so với dải), chữ trắng, «Tìm» tách bằng vạch mảnh;
-         bấm vào → nền trắng, chữ than chì, nút «Tìm» than chì (như ô lớn). */
+   --nav (header trắng): cùng kiểu ô lớn nhưng gọn: viền xám bo 6px, nút «Tìm» xanh liền bên phải. */
 .search-input:focus {
   outline: none;
   box-shadow: none;
@@ -407,49 +405,32 @@
   background: var(--color-chrome-2);
 }
 .search-box--nav {
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid var(--color-line-strong);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  background: #ffffff;
 }
 .search-box--nav:hover {
-  background: rgba(255, 255, 255, 0.13);
-}
-.search-box--nav .search-input {
-  color: #ffffff;
-}
-.search-box--nav .search-input::placeholder {
-  color: rgba(255, 255, 255, 0.66);
-}
-.search-box--nav .search-icon {
-  color: rgba(255, 255, 255, 0.8);
-}
-.search-box--nav .search-input::-webkit-search-cancel-button {
-  background-color: rgba(255, 255, 255, 0.75);
-}
-.search-box--nav .search-submit {
-  background: transparent;
-  color: #ffffff;
-  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.3);
-}
-.search-box--nav .search-submit:hover {
-  background: rgba(255, 255, 255, 0.13);
+  border-color: var(--color-field);
 }
 .search-box--nav:focus-within {
-  border-color: #ffffff;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px #bfdbfe;
 }
-.search-box--nav:focus-within .search-input {
+.search-box--nav .search-input {
   color: var(--color-ink);
 }
-.search-box--nav:focus-within .search-input::placeholder {
+.search-box--nav .search-input::placeholder {
   color: var(--color-placeholder);
 }
-.search-box--nav:focus-within .search-icon {
+.search-box--nav .search-icon {
   color: var(--color-brand);
 }
-.search-box--nav:focus-within .search-input::-webkit-search-cancel-button {
-  background-color: var(--color-muted);
+.search-box--nav .search-submit {
+  background: var(--color-cta);
+  color: #ffffff;
+}
+.search-box--nav .search-submit:hover {
+  background: var(--color-cta-hover);
 }
 
 /* Thanh tiến độ khi chuyển trang (components/NavigationProgress.jsx). Hiện sau 150 ms để không nháy

@@ -182,7 +182,7 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
         className="card motion-rise flex flex-col items-start gap-3 px-5 py-6 outline-none md:px-8 md:py-8"
       >
         <h2 className="flex items-center gap-2 text-h2-m font-semibold text-ink md:text-h2">
-          <IconCheckCircle size={24} strokeWidth={1.8} className="flex-none text-chrome" />
+          <IconCheckCircle size={24} strokeWidth={1.8} className="flex-none text-ok" />
           {M.updateRequest.doneTitle}
         </h2>
         <p className="max-w-[640px] text-body leading-7 text-ink-2">

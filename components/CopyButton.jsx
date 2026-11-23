@@ -59,7 +59,7 @@ export default function CopyButton({ text, label, onCopied, variant = 'icon', cl
         className={`${TEXT_CLS} ${className}`}
       >
         {copied ? (
-          <IconCheck size={18} className="motion-pop flex-none text-chrome" />
+          <IconCheck size={18} className="motion-pop flex-none text-ok" />
         ) : (
           <IconCopy size={18} className="flex-none" />
         )}
@@ -79,7 +79,7 @@ export default function CopyButton({ text, label, onCopied, variant = 'icon', cl
       onClick={onClick}
       className={`relative inline-flex h-11 w-11 flex-none items-center justify-center rounded-md text-brand hover:bg-brand-50 ${className}`}
     >
-      {copied ? <IconCheck size={18} className="motion-pop text-chrome" /> : <IconCopy size={18} />}
+      {copied ? <IconCheck size={18} className="motion-pop text-ok" /> : <IconCopy size={18} />}
       <span aria-live="polite" className="sr-only">
         {copied ? M.company.copied : ''}
       </span>

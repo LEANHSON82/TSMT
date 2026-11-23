@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { M } from '@/lib/messages';
 
-// Tiêu đề khối kiểu CafeF. tab (mặc định): đặt ở đầu một khung .panel — tiêu đề nằm trong ô nền than chì chữ trắng
-// sát góc trái khung, vạch mảnh dưới; phần phụ bên phải CÙNG hàng: số đếm (meta) và/hoặc link (action).
+// Tiêu đề khối. tab (mặc định): đặt ở đầu một khung .panel — tiêu đề chữ navy đậm sát góc trái khung, vạch mảnh dưới
+// (khối chính thêm vạch xanh dưới chữ); phần phụ bên phải CÙNG hàng: số đếm (meta) và/hoặc link (action).
 // tab={false}: tiêu đề chữ đậm thường (đặt ngoài khung).
-//   tier    — 'primary' (mặc định: ô than chì chữ trắng — khối chính của trang) | 'secondary' (ô bạc chữ than chì —
-//             khối phụ: ngành nghề, DN cùng ngành, DN mới…). Hai bậc để mắt nhìn vào dữ liệu chính trước.
+//   tier    — 'primary' (mặc định: có vạch xanh dưới chữ — khối chính của trang) | 'secondary' (không vạch — khối
+//             phụ: ngành nghề, DN cùng ngành, DN mới…).
 //   id      — gắn vào thẻ tiêu đề, để <section aria-labelledby={id}>.
 //   as      — 'h2' (mặc định) | 'h3'.
 //   meta    — chữ phụ xám, vd «34 tỉnh/thành» (không xuống dòng).
@@ -41,12 +41,14 @@ export default function SectionHeader({
       </div>
     );
   }
+  // Kiểu BizLookup: hàng tiêu đề nền trắng, chữ navy đậm; khối chính có vạch xanh 3px dưới chữ (như tab đang chọn),
+  // khối phụ không có vạch. Không còn mảng nền tối.
   return (
     <div className={`flex items-stretch justify-between gap-2 border-b border-line ${className}`}>
       <Tag
         id={id}
-        className={`min-w-0 px-4 py-2 text-base leading-6 font-semibold text-pretty md:px-5 ${
-          tier === 'secondary' ? 'bg-silver-2 text-ink' : 'bg-chrome text-white'
+        className={`-mb-px min-w-0 px-4 py-3 text-[17px] leading-6 font-semibold text-pretty text-title md:px-5 ${
+          tier === 'secondary' ? '' : 'shadow-[inset_0_-3px_0_var(--color-brand)]'
         }`}
       >
         {title}

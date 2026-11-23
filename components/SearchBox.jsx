@@ -59,7 +59,7 @@ function recalledQuery() {
 }
 
 // size: 'lg' (ô tìm lớn trong trang: trang chủ, 404… — cao 56px, điện thoại 52px) | 'nav' (header — cao 44px).
-// Kiểu «hoà dải menu»: xem chú thích ở khung .search-box bên dưới và globals.css.
+// Ô nhập + nút «Tìm» xanh liền nhau trong một khung trắng viền xám (xem .search-box trong globals.css).
 export default function SearchBox({
   size = 'lg',
   defaultValue = '',
@@ -337,10 +337,8 @@ export default function SearchBox({
     >
       {/* Ô nhập (kính lúp bên trong) + nút «Tìm» luôn cùng một hàng, kể cả điện thoại 360px. */}
       <div className="flex w-full gap-2">
-        {/* Kiểu «hoà dải menu» (chủ dự án chọn 23/11/2026), xem .search-box trong globals.css:
-            - nav (trên dải than chì): ô trong suốt viền trắng mờ, chữ trắng, «Tìm» tách bằng vạch mảnh; bấm vào thì
-              ô thành nền trắng, nút «Tìm» thành than chì.
-            - lg (ô lớn trong trang): nền trắng viền mảnh bo 8px, đổ bóng nhẹ, nút «Tìm» than chì liền bên phải. */}
+        {/* Khung ô tìm (xem .search-box trong globals.css): nền trắng, viền xám, nút «Tìm» xanh liền bên phải.
+            nav = header (gọn, bo 6px) · lg = ô lớn trong trang (bo 8px, đổ bóng nhẹ). */}
         <div
           className={`search-box flex min-w-0 flex-1 items-stretch ${
             size === 'nav' ? 'search-box--nav h-11' : 'search-box--lg h-[52px] md:h-14'

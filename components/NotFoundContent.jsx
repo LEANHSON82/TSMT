@@ -7,12 +7,12 @@
 // sẵn không tự lấy gợi ý (suggestPrefilled={false}) nên không bung hộp «Không có gợi ý…» đè lên lối đi tiếp.
 // Hệ A: «Lỗi 404» nằm đúng chỗ breadcrumb ở các trang khác → H1 cùng vị trí dọc; ô tìm và danh sách lối đi tiếp
 // rộng đúng cột chính (852, thẳng mép với ô tìm header); câu chữ giữ ~75 ký tự/dòng. Không hình minh hoạ.
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { IconChevronRight } from './Icons';
 import SearchBox from './SearchBox';
+import { LinkList } from './States';
+import { suggestCompanies } from '@/lib/api';
 import { M } from '@/lib/messages';
-import { parseMstSlug } from '@/lib/mst';
+import { companyPath, parseMstSlug } from '@/lib/mst';
 
 const LINKS = [
   { href: '/', label: M.notFound.home },
@@ -24,9 +24,20 @@ export default function NotFoundContent() {
   // HTML trang 404 được dựng sẵn một lần (không biết đường dẫn) → đọc đường dẫn sau khi chạy ở trình duyệt.
   // undefined: chưa đọc đường dẫn (HTML dựng sẵn) · null: không phải MST · chuỗi: MST đúng định dạng.
   const [mst, setMst] = useState(undefined);
+  // MST gõ sai một chữ số: gợi ý các MST cùng 8 số đầu (lấy từ API gợi ý có sẵn).
+  const [near, setNear] = useState([]);
   useEffect(() => {
     setMst(parseMstSlug(window.location.pathname.replace(/^\//, ''))?.mst || null);
   }, []);
+  useEffect(() => {
+    if (!mst) return undefined;
+    document.title = `${M.notFound.mstTitle(mst)} | ${document.title.split(' | ').pop()}`;
+    const ctrl = new AbortController();
+    suggestCompanies(mst.slice(0, 8), { signal: ctrl.signal })
+      .then(({ items }) => setNear(items.filter((i) => i.mst !== mst).slice(0, 5)))
+      .catch(() => {});
+    return () => ctrl.abort();
+  }, [mst]);
   return (
     <main className="site-wrap pt-6 pb-12 md:pt-12 md:pb-16">
       <div className="card-hero mx-auto max-w-[760px] px-5 py-6 md:px-12 md:py-10">
@@ -45,21 +56,22 @@ export default function NotFoundContent() {
           suggestPrefilled={false}
           className="mt-5"
         />
-        <nav aria-label={M.notFound.linksLabel} className="mt-6 border-t border-line md:mt-8">
-          <ul>
-            {LINKS.map((l) => (
-              <li key={l.href} className="border-b border-line">
-                <Link
-                  href={l.href}
-                  className="flex min-h-12 items-center justify-between gap-3 py-2 font-semibold no-underline hover:underline hover:underline-offset-[3px]"
-                >
-                  {l.label}
-                  <IconChevronRight size={18} className="flex-none text-muted" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        {near.length > 0 && (
+          <section aria-labelledby="near-mst" className="mt-6 md:mt-8">
+            <h2 id="near-mst" className="pb-2 text-base font-semibold text-ink">
+              {M.notFound.nearTitle(mst.slice(0, 8))}
+            </h2>
+            <LinkList
+              label={M.notFound.nearTitle(mst.slice(0, 8))}
+              links={near.map((c) => ({
+                href: companyPath(c),
+                label: c.name,
+                note: `MST ${c.mst}`,
+              }))}
+            />
+          </section>
+        )}
+        <LinkList label={M.notFound.linksLabel} links={LINKS} className="mt-6 md:mt-8" />
       </div>
     </main>
   );

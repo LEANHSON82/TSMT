@@ -61,6 +61,8 @@
   --color-line-strong: #c9d0da;
   --color-line-soft: #eef0f3;
   --color-field: #858c99;
+  /* Chữ gợi ý trong ô nhập (placeholder): 4,7:1 trên trắng. */
+  --color-placeholder: #6b7483;
   --color-focus: #1f2937;
 
   --color-ok: #0a7c33;
@@ -121,6 +123,19 @@
 
   .on-dark :where(a, button):focus-visible {
     outline-color: #ffffff;
+  }
+
+  /* Trên nền than chì (dải menu, hàng header điện thoại) viền focus than chì bị chìm (1:1) → viền trắng.
+     Bảng thả xuống nền trắng nằm trong dải thì trả lại viền than chì. Mục menu cao bằng cả dải: viền vẽ vào
+     trong (offset âm) để không bị cắt mép. */
+  .bg-chrome :where(a, button):focus-visible {
+    outline-color: #ffffff;
+  }
+  .bg-chrome .bg-white :where(a, button):focus-visible {
+    outline-color: var(--color-focus);
+  }
+  .nav-item:focus-visible {
+    outline-offset: -3px;
   }
 
   /* Header dính: phần tử trong nội dung trang được nhảy tới (#mục) hoặc focus bằng bàn phím không bị
@@ -304,14 +319,41 @@
     top: 0;
   }
 }
-/* Ô tìm hệ A: nút xoá (×) của Chrome giữ chỗ cả khi ô trống → chữ gợi ý 360px bị cắt. Chỉ hiện khi đã gõ. */
+/* Nút xoá (×) của ô tìm: vẽ lại bằng màu chữ phụ (mặc định của Chrome là chấm xanh lạc bộ màu). Chỉ hiện khi đã
+   gõ (giữ chỗ khi ô trống làm chữ gợi ý 360px bị cắt). */
+.search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  cursor: pointer;
+  background-color: var(--color-muted);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6 6 18'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6 6 18'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+.search-input::-webkit-search-cancel-button:hover {
+  background-color: var(--color-ink);
+}
 .search-input:placeholder-shown::-webkit-search-cancel-button {
   display: none;
 }
-/* Ô tìm hệ A: focus = viền xanh + quầng nhạt 3px bên ngoài (rõ hơn ô form thường). */
+/* Ô tìm: focus = viền trong than chì 2px + quầng 3px bao CẢ ô nhập lẫn nút «Tìm» (đặt trên khung .search-pill
+   nên không còn khía ở chỗ nối). Trên nền than chì, quầng màu trắng. */
 .search-input:focus {
   border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px #d5d9df;
+  box-shadow: inset 0 0 0 1px var(--color-brand);
+}
+.search-pill:focus-within {
+  box-shadow: 0 0 0 3px #b9bfc8;
+}
+.bg-chrome .search-pill:focus-within {
+  box-shadow: 0 0 0 3px #ffffff;
+}
+.search-pill :where(button):focus-visible {
+  outline: none;
 }
 
 /* Thanh tiến độ khi chuyển trang (components/NavigationProgress.jsx). Hiện sau 150 ms để không nháy

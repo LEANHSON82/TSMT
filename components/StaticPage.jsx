@@ -2,6 +2,8 @@ import Breadcrumb from './Breadcrumb';
 import { IconChevronDown } from './Icons';
 import { M } from '@/lib/messages';
 
+const SHOW_DRAFT_NOTE = process.env.NEXT_PUBLIC_SHOW_DRAFT_NOTE === '1';
+
 /**
  * Mẫu trang tĩnh (văn bản dài, có mục lục). sections: [{ id, title, body: ReactNode }]
  * Nội dung chính thức do owner gửi sau (spec mục 2) — hiện là BẢN NHÁP.
@@ -38,10 +40,13 @@ export default function StaticPage({ title, intro, sections, updated = '15/11/20
           <header className={`flex flex-col gap-2 ${MEASURE}`}>
             <h1 className="text-h1-m font-semibold text-pretty text-ink md:text-h1">{title}</h1>
             <p className="text-sm text-muted tabular-nums">{M.staticPage.updated(updated)}</p>
-            {/* Ghi chú bản nháp: một dòng có vạch trái màu cảnh báo — đủ thấy, không thành hộp to giữa trang. */}
-            <p className="mt-2 rounded-lg bg-warn-bg px-3 py-2 text-sm text-warn">
-              {M.staticPage.draftNote}
-            </p>
+            {/* Ghi chú bản nháp: chỉ hiện ở môi trường duyệt nội dung (NEXT_PUBLIC_SHOW_DRAFT_NOTE=1), không hiện cho
+                người dùng thật. */}
+            {SHOW_DRAFT_NOTE && (
+              <p className="mt-2 rounded-lg bg-warn-bg px-3 py-2 text-sm text-warn">
+                {M.staticPage.draftNote}
+              </p>
+            )}
             {intro && <p className="mt-2 text-body leading-7 text-ink-2">{intro}</p>}
           </header>
 

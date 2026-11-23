@@ -17,7 +17,7 @@ export async function newListMetadata({ searchParams }) {
   const where = M.common.inProvince(province?.name);
   return {
     title: `${M.list.newCompanies.title}${where}${M.common.pageSuffix(page)}`,
-    description: M.list.newCompanies.metaDescription(where),
+    description: M.list.newCompanies.metaDescription(where, M.common.pageSuffix(page)),
     // Lọc theo tỉnh: nội dung trùng y hệt /tinh/{slug} (cùng sắp xếp mới nhất) → canonical về trang tỉnh.
     alternates: {
       canonical: province

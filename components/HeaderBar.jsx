@@ -31,6 +31,7 @@ import {
 // Điện thoại: «Lọc nâng cao» là nút icon ngay sau nút Tìm (addon), không chiếm thêm một hàng.
 const navSearch = (filterHref) => ({
   size: 'nav',
+  searchLabel: M.search.navSearchLabel,
   addon: <AdvancedSearchIcon href={filterHref} className="md:hidden" />,
 });
 
@@ -98,11 +99,10 @@ function AdvancedSearchIcon({ href, className = '' }) {
   );
 }
 
-// Mục menu hàng 1: chữ 16px đậm; mục của trang đang xem màu xanh + vạch 2px sát đáy vùng bấm.
-// Dải menu than chì kiểu CafeF: chữ trắng in hoa 13px; mục của trang đang xem có vạch bạc 3px sát đáy.
+// Dải menu than chì kiểu CafeF (cao 48px): chữ trắng in hoa 14px đậm; mục của trang đang xem có vạch bạc 3px sát đáy.
 const NAV_ITEM =
-  'inline-flex h-11 items-center gap-1 px-4 text-[13px] tracking-[0.02em] whitespace-nowrap text-white uppercase no-underline hover:bg-white/10 hover:text-white';
-const CURRENT_BAR = 'font-semibold shadow-[inset_0_-3px_0_#c7ccd4]';
+  'nav-item inline-flex h-12 items-center gap-1 px-4 text-sm font-semibold tracking-[0.02em] whitespace-nowrap text-white uppercase no-underline hover:bg-white/10 hover:text-white';
+const CURRENT_BAR = 'shadow-[inset_0_-3px_0_var(--color-silver)]';
 
 function DesktopDropdown({ id, label, open, current, onToggle, onClose, children }) {
   const btnRef = useRef(null);
@@ -413,7 +413,12 @@ export default function HeaderBar({ provinces, industries }) {
       >
         {/* Không có logo (quyết định của chủ dự án 23/11/2026, khác spec mục 3). Điện thoại (< 768px): một hàng gồm ô
             tìm (kèm nút icon «Lọc nâng cao») và nút menu. Từ 768px: chỉ còn dải menu xanh, ô tìm nằm bên phải dải. */}
-        <div ref={findRef} className="bg-chrome md:hidden">
+        {/* Trang chủ, khi ô tìm lớn của hero còn trong tầm nhìn: hàng này nền trắng liền với hero (chỉ có nút menu),
+            không để một dải tối trống; ô tìm hiện thì hàng chuyển sang than chì. */}
+        <div
+          ref={findRef}
+          className={`transition-colors duration-200 md:hidden ${showHeaderSearch ? 'bg-chrome' : 'bg-white'}`}
+        >
           <div className="site-wrap flex items-center gap-1.5 py-2 max-md:pr-2">
             {/* Trang chủ: ô tìm ẩn (vẫn giữ chỗ, nút menu vẫn hiện) cho tới khi ô tìm lớn của hero cuộn khuất. */}
             <div
@@ -430,7 +435,7 @@ export default function HeaderBar({ provinces, industries }) {
               aria-expanded={mobileOpen}
               aria-controls="mobile-menu"
               onClick={() => setMobileOpen(true)}
-              className="inline-flex h-11 w-11 flex-none items-center justify-center rounded text-white"
+              className={`inline-flex h-11 w-11 flex-none items-center justify-center rounded ${showHeaderSearch ? 'text-white' : 'text-ink'}`}
             >
               <IconMenu size={24} />
             </button>
@@ -440,12 +445,12 @@ export default function HeaderBar({ provinces, industries }) {
         {/* Dải menu navy (≥ 768px), kiểu CafeF: ô «nhà» · Tỉnh/thành · Ngành nghề · DN mới · Yêu cầu ẩn/sửa. Bảng
             thả xuống của Tỉnh/thành và Ngành nghề mở ngay dưới dải (relative). */}
         <div className="relative hidden bg-chrome md:block">
-          <div className="site-wrap flex h-11 items-stretch">
+          <div className="site-wrap flex h-12 items-stretch">
             <Link
               href="/"
               aria-label={M.nav.home}
               aria-current={pathname === '/' ? 'page' : undefined}
-              className="flex w-11 flex-none items-center justify-center bg-chrome-2 text-white hover:bg-black hover:text-white"
+              className="nav-item flex w-12 flex-none items-center justify-center bg-chrome-2 text-white hover:bg-black hover:text-white"
             >
               <svg
                 width="18"
@@ -547,7 +552,7 @@ export default function HeaderBar({ provinces, industries }) {
               <span className="ml-4 hidden lg:inline-flex">
                 <AdvancedSearchLink
                   href={filterHref}
-                  className="text-[13px] text-white hover:text-white [&>svg]:text-white/80"
+                  className="nav-item px-1 text-sm text-white hover:text-white [&>svg]:text-white/80"
                 />
               </span>
             </div>

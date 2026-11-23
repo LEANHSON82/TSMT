@@ -82,6 +82,7 @@ function MockVideo({ req, done }) {
 
 function FallbackAd({ req, done }) {
   const total = req.seconds || 5;
+  const closeRef = useRef(null);
   const [left, setLeft] = useState(total);
   const doneRef = useRef(done);
   doneRef.current = done;
@@ -101,14 +102,27 @@ function FallbackAd({ req, done }) {
   }, [req, total]);
 
   return (
+    // Spec 4.2, 5.2: quảng cáo dự phòng là modal TOÀN MÀN HÌNH chứa 1 banner lớn + đếm ngược (như video thưởng).
     <Modal
       open
+      variant="fullscreen"
       title={M.phone.fallbackTitle}
       onClose={() => done({ status: 'closed' })}
-      className="sm:max-w-[400px]"
+      initialFocusRef={closeRef}
     >
-      {/* Kiểu A: nhãn «Quảng cáo» 13px xám trên khung banner trơn (không bo), như ô quảng cáo trong trang. */}
-      <div className="flex flex-col items-center gap-4">
+      <div className="relative flex h-full flex-col items-center justify-center gap-4 overflow-y-auto bg-white px-4 py-16">
+        <button
+          ref={closeRef}
+          type="button"
+          aria-label={M.phone.closeAd}
+          onClick={() => done({ status: 'closed' })}
+          className="absolute top-3 right-3 inline-flex h-11 w-11 items-center justify-center rounded-full bg-page text-ink hover:bg-line"
+        >
+          <IconClose size={22} />
+        </button>
+        <p className="text-center text-h2-m font-semibold text-ink" aria-hidden="true">
+          {M.phone.fallbackTitle}
+        </p>
         <div className="flex w-full flex-col items-center gap-1">
           <span className="self-start text-meta text-muted">{M.ad.label}</span>
           <AdUnit

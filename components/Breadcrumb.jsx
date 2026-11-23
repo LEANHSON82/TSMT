@@ -37,6 +37,7 @@ export default function Breadcrumb({ items }) {
                 ) : (
                   <Link
                     href={it.href}
+                    prefetch={false}
                     className="-my-3 inline-flex min-h-11 items-center no-underline hover:underline hover:underline-offset-[3px]"
                   >
                     {it.name}

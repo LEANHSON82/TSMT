@@ -100,7 +100,11 @@ export default function CookieConsent() {
           <div className="site-wrap flex flex-col gap-3 py-4 md:flex-row md:items-center md:gap-8">
             <p className="flex-1 text-sm leading-5 text-ink-2">
               {M.cookie.banner}{' '}
-              <Link href="/chinh-sach-bao-mat#cookie" prefetch={false}>
+              <Link
+                href="/chinh-sach-bao-mat#cookie"
+                prefetch={false}
+                className="whitespace-nowrap"
+              >
                 {M.footer.privacy}
               </Link>
               .

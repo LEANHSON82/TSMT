@@ -50,7 +50,7 @@ export default function PrivacyPage() {
           body: (
             <p>
               Gửi yêu cầu qua <Link href="/yeu-cau-cap-nhat">form yêu cầu ẩn/sửa thông tin</Link>.
-              Thời gian xử lý: [owner chốt].
+              {M.staticPage.replyByEmail}
             </p>
           ),
         },

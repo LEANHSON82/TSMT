@@ -98,7 +98,10 @@ test('unlock_id hết hạn (410) → tự tạo phiên mới, không bắt xem 
   await startUnlock(page);
   await expect(page.getByTestId('phone-revealed')).toContainText(FULL_PHONE, { timeout: 15_000 });
   expect(await trackEvents(page, 'phone_unlock_ad_shown')).toHaveLength(1);
-  expect(await trackEvents(page, 'phone_unlock_error')).toHaveLength(0);
+  // Spec 8.1: phone_unlock_error ghi cả 410 (dù FE tự tạo phiên mới, người dùng không phải xem lại video).
+  const errors = await trackEvents(page, 'phone_unlock_error');
+  expect(errors).toHaveLength(1);
+  expect(JSON.stringify(errors[0])).toContain('410');
 });
 
 test('lỗi server (500) sau khi xem xong → Thử lại lấy được số, không phải xem lại video', async ({

@@ -18,12 +18,12 @@ function pageList(page, total) {
 }
 
 // Hệ A: «‹ Trước · 1 2 3 · Sau ›» bên trái, «Trang 1 / 2» bên phải. Ô vuông viền mảnh 44×44 (vùng bấm
-// ≥ 44px, spec 7.3), trang hiện tại nền xanh. Điện thoại: «Trước/Sau» chỉ còn mũi tên, ẩn bớt số trang xa,
+// ≥ 44px, spec 7.3), trang hiện tại nền than chì. Điện thoại: «Trước/Sau» chỉ còn mũi tên, ẩn bớt số trang xa,
 // «Trang x / y» xuống dòng dưới.
 const box =
   'press inline-flex h-11 min-w-11 items-center justify-center gap-1 rounded-lg border px-3 text-body font-semibold tabular-nums no-underline';
 const live = `${box} border-line-strong bg-white text-brand hover:border-brand hover:text-brand`;
-const off = `${box} border-line text-[#8a929e]`;
+const off = `${box} border-line text-muted`;
 
 export default function Pagination({ page, totalPages, basePath, params = {} }) {
   if (totalPages <= 1) return null;

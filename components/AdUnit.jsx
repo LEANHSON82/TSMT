@@ -1,11 +1,13 @@
 'use client';
 
-// Phần tử giữ chỗ của một ô quảng cáo. Với NEXT_PUBLIC_AD_PROVIDER=gpt: khi ô sắp vào màn hình (cách 200px)
-// thì mới nạp GPT và đổ banner (spec 5.2); rời trang thì huỷ slot. mock / fallback: chỉ là khung xám.
+// Phần tử giữ chỗ của một ô quảng cáo. Với NEXT_PUBLIC_AD_PROVIDER=gpt: sau khi người dùng trả lời banner cookie
+// và trang đã tải xong (bannerGate), ô sắp vào màn hình (cách 200px) thì mới nạp GPT và đổ banner (spec 5.2, 7.2,
+// 8.3); rời trang thì huỷ slot. mock / fallback: chỉ là khung xám.
 // size: 'inline' → 728×90 nếu khung đủ 728px, không thì 300×250 (đo lúc đổ, khớp container query của AdSlot);
 //       'rail' → 300×600 (hoặc 300×250); 'fallback' → 336×280 hoặc 300×250 (modal quảng cáo dự phòng).
 import { useEffect, useRef } from 'react';
 import { AD_PROVIDER, renderBanner } from '@/lib/ads';
+import { bannerGate } from '@/lib/ads/gpt-loader';
 
 function pickSizes(size, el) {
   // Cột phải: ưu tiên 300×600, nhận thêm 300×250 để luôn có quảng cáo (tăng tỉ lệ lấp đầy). Cùng rộng 300px nên
@@ -34,33 +36,38 @@ export default function AdUnit({ slotId, size = 'inline', className = '', ...res
     if (!el || typeof IntersectionObserver === 'undefined') return undefined;
     let cancelled = false;
     let destroy;
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((e) => e.isIntersecting)) return;
-        io.disconnect();
-        // Cột phải: Google trả cỡ nhỏ hơn 300×600 → khung co theo quảng cáo, không để thừa mảng xám.
-        // Chỉ cột phải (cột riêng, co lại không xô nội dung chính); ô trong bài đã đúng cỡ sẵn.
-        const onRender = size === 'rail' ? ([, h]) => (el.style.height = `${h}px`) : undefined;
-        // Google không có quảng cáo: ô còn nằm dưới màn hình (người dùng chưa thấy) thì gỡ cả khung + nhãn, không
-        // để mảng xám — co lại ngoài màn hình không xô nội dung đang xem (CLS). Ô đã trong màn hình thì giữ khung
-        // giữ chỗ (spec 5.4). Cột phải: luôn gỡ được (cột riêng, không xô nội dung chính).
-        const onEmpty = () => {
-          const wrap = el.closest('[data-ad-wrap]');
-          if (wrap && (size === 'rail' || el.getBoundingClientRect().top > window.innerHeight))
-            wrap.hidden = true;
-        };
-        renderBanner(slotId, el, { sizes: pickSizes(size, el), onRender, onEmpty })
-          .then((fn) => (cancelled ? fn?.() : (destroy = fn)))
-          .catch(() => {
-            /* bị chặn / lỗi mạng: giữ khung giữ chỗ */
-          });
-      },
-      { rootMargin: '200px 0px' },
-    );
-    io.observe(el);
+    let io;
+    const observe = () => {
+      if (cancelled) return;
+      io = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((e) => e.isIntersecting)) return;
+          io.disconnect();
+          // Cột phải: Google trả cỡ nhỏ hơn 300×600 → khung co theo quảng cáo, không để thừa mảng xám.
+          // Chỉ cột phải (cột riêng, co lại không xô nội dung chính); ô trong bài đã đúng cỡ sẵn.
+          const onRender = size === 'rail' ? ([, h]) => (el.style.height = `${h}px`) : undefined;
+          // Google không có quảng cáo: ô còn nằm dưới màn hình (người dùng chưa thấy) thì gỡ cả khung + nhãn, không
+          // để mảng xám — co lại ngoài màn hình không xô nội dung đang xem (CLS). Ô đã trong màn hình thì giữ khung
+          // giữ chỗ (spec 5.4). Cột phải: luôn gỡ được (cột riêng, không xô nội dung chính).
+          const onEmpty = () => {
+            const wrap = el.closest('[data-ad-wrap]');
+            if (wrap && (size === 'rail' || el.getBoundingClientRect().top > window.innerHeight))
+              wrap.hidden = true;
+          };
+          renderBanner(slotId, el, { sizes: pickSizes(size, el), onRender, onEmpty })
+            .then((fn) => (cancelled ? fn?.() : (destroy = fn)))
+            .catch(() => {
+              /* bị chặn / lỗi mạng: giữ khung giữ chỗ */
+            });
+        },
+        { rootMargin: '200px 0px' },
+      );
+      io.observe(el);
+    };
+    bannerGate().then(observe);
     return () => {
       cancelled = true;
-      io.disconnect();
+      io?.disconnect();
       destroy?.();
     };
   }, [slotId, size]);

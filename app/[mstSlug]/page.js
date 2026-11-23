@@ -11,6 +11,7 @@ import CompanyInfoTable from '@/components/CompanyInfoTable';
 import IndustryTable from '@/components/IndustryTable';
 import JsonLd from '@/components/JsonLd';
 import SectionHeader from '@/components/SectionHeader';
+import StatusBadge from '@/components/StatusBadge';
 import TrackOnMount from '@/components/TrackOnMount';
 import { getCompany, getRelatedCompanies } from '@/lib/api';
 import { areaAddress, formatDate, formatDateTime, truncate } from '@/lib/format';
@@ -42,8 +43,11 @@ function pageTitle(c) {
 }
 
 function pageDescription(c) {
+  const founded = formatDate(c.founded_date);
+  const full = M.company.metaDescription(c, founded, c.address);
+  if (full.length <= 155) return full;
   const address = areaAddress(c.address, c.province?.name);
-  return truncate(M.company.metaDescription(c, formatDate(c.founded_date), address), 155);
+  return truncate(M.company.metaDescription(c, founded, address), 155);
 }
 
 export async function generateMetadata({ params }) {
@@ -103,7 +107,8 @@ export default async function CompanyPage({ params }) {
   };
 
   return (
-    <div className="site-wrap pb-12 md:pb-16">
+    // <main> bọc toàn bộ nội dung (H1, bảng thông tin…) — landmark «nội dung chính» không bỏ sót phần quan trọng nhất.
+    <main className="site-wrap pb-12 md:pb-16">
       <JsonLd data={orgLd} />
       <TrackOnMount name="view_company" params={{ mst: c.mst, province: c.province?.slug }} />
       <div className="pt-3 md:pt-4">
@@ -139,6 +144,14 @@ export default async function CompanyPage({ params }) {
             )}
           </dl>
         )}
+        {/* Điện thoại: tình trạng ngay dưới tên DN (hàng «Tình trạng» trong bảng nằm dưới màn hình đầu) — việc chính
+            khi kiểm tra đối tác. Máy tính đã thấy cả bảng nên không lặp lại. */}
+        {c.status && (
+          <p className="mt-2 md:hidden">
+            <span className="sr-only">{M.company.status}: </span>
+            <StatusBadge status={c.status} />
+          </p>
+        )}
       </div>
 
       <section aria-labelledby="info-title" className="panel mt-3 md:mt-4">
@@ -151,10 +164,11 @@ export default async function CompanyPage({ params }) {
       <AdSlot slotId="detail-below-info" className="mt-4 md:mt-5" />
 
       <div className={`mt-4 md:mt-5 ${BANNERS_ON ? 'rail-grid' : ''}`}>
-        <main className="flex min-w-0 flex-col gap-4 md:gap-5">
+        <div className="flex min-w-0 flex-col gap-4 md:gap-5">
           {c.industries?.length > 0 ? (
             <section aria-labelledby="ind-title" className="panel">
               <SectionHeader
+                tier="secondary"
                 id="ind-title"
                 title={M.company.industries}
                 meta={M.company.industryCount(c.industries.length)}
@@ -171,6 +185,7 @@ export default async function CompanyPage({ params }) {
           {related.length > 0 && (
             <section aria-labelledby="rel-title" className="panel">
               <SectionHeader
+                tier="secondary"
                 id="rel-title"
                 title={M.company.related(c.province?.name || '')}
                 meta={M.company.relatedCount(related.length)}
@@ -184,7 +199,7 @@ export default async function CompanyPage({ params }) {
               </ul>
             </section>
           )}
-        </main>
+        </div>
 
         {BANNERS_ON && (
           <div className="hidden self-stretch xl:block">
@@ -192,7 +207,7 @@ export default async function CompanyPage({ params }) {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
 

@@ -18,9 +18,10 @@ export const metadata = {
 };
 
 export default async function HomePage() {
+  // Lỗi API thì ném lỗi: Next giữ bản trang chủ cũ đã cache thay vì cache 10 phút một trang trống.
   const [latest, provinces] = await Promise.all([
-    listCompanies({ sort: 'founded_desc', page: 1 }).catch(() => ({ items: [] })),
-    getProvinces().catch(() => []),
+    listCompanies({ sort: 'founded_desc', page: 1 }),
+    getProvinces(),
   ]);
   const newest = (latest.items || []).slice(0, 20);
   // Xếp A–Z theo tiếng Việt; bỏ tiền tố «TP »/«Thành phố » khi so → «TP Hồ Chí Minh» nằm ở vần H, chỗ người
@@ -66,9 +67,10 @@ export default async function HomePage() {
             <div className="mx-auto max-w-[820px] pt-6 pb-7 md:pt-12 md:pb-12">
               <h1
                 id="home-title"
-                className="text-[26px] leading-8 font-semibold tracking-[-0.01em] text-balance text-title md:text-[34px] md:leading-[42px]"
+                className="text-[26px] leading-8 font-semibold tracking-[-0.01em] text-pretty text-title md:text-[34px] md:leading-[42px]"
               >
-                {M.home.title}
+                {/* «thông tin» không bị tách đôi khi tiêu đề xuống dòng trên điện thoại. */}
+                {M.home.title.replace('thông tin', 'thông\u00a0tin')}
               </h1>
               {/* Dòng số liệu: tổng DN và số tỉnh/thành (đã có sẵn từ danh mục tỉnh, không gọi thêm API). */}
               {provinces.length > 0 && (
@@ -99,6 +101,7 @@ export default async function HomePage() {
             đầu trang 40 (điện thoại 24), giữa các khối 48 (điện thoại 40). Footer tự có mt-12 nên không đệm đáy. */}
         <div className="site-wrap flex flex-col gap-5 pt-5 pb-12 md:gap-6 md:pt-6 md:pb-16">
           <section aria-labelledby="prov-title" className="panel">
+            {/* API lỗi / chưa có dữ liệu: nói rõ thay vì để khung trống (spec mục 3: trạng thái lỗi/rỗng). */}
             <SectionHeader
               id="prov-title"
               title={M.home.provincesTitle}
@@ -109,7 +112,9 @@ export default async function HomePage() {
                 (An Giang | Bắc Ninh / Cà Mau | …) — đọc dọc 17 hàng thì mắt phải nhảy từ đáy cột trái lên đầu cột phải,
                 vần A–Z bị đứt. Xem .prov-index trong globals.css. Tỉnh chưa có DN: chữ xám, không làm link (bấm vào
                 chỉ ra trang rỗng). */}
+            {sorted.length === 0 && <HomeEmpty text={M.home.emptyProvinces} />}
             <ul
+              hidden={sorted.length === 0}
               className="prov-index px-4 pt-1 pb-3 md:px-[22px] md:pb-4"
               style={{
                 '--rows-3': Math.ceil(sorted.length / 3),
@@ -146,6 +151,7 @@ export default async function HomePage() {
 
           <section aria-labelledby="new-title" className="panel">
             <SectionHeader
+              tier="secondary"
               id="new-title"
               title={M.home.newTitle}
               action={{ href: '/doanh-nghiep-moi-thanh-lap' }}
@@ -154,7 +160,11 @@ export default async function HomePage() {
                 Lưới 4 cột thành «bức tường» 20 tên in hoa san sát; 2 cột thoáng, thẻ đủ rộng để hiện dạng thẻ A
                 (nhãn tình trạng cùng hàng tên, hàng Mã số thuế · Ngày · Đại diện có nhãn — xem CompanyCard). Thẻ
                 không hộp, ngăn nhau bằng kẻ mảnh dưới; khe ngang 48 như khe cột chính – cột phải (tablet 24). */}
-            <ul className="grid grid-cols-1 px-4 md:grid-cols-2 md:gap-x-10 md:px-[22px]">
+            {newest.length === 0 && <HomeEmpty text={M.home.emptyNew} />}
+            <ul
+              hidden={newest.length === 0}
+              className="grid grid-cols-1 px-4 md:grid-cols-2 md:gap-x-10 md:px-[22px]"
+            >
               {newest.map((c) => (
                 <li key={c.mst} className="min-w-0 border-b border-line-soft">
                   <CompanyCard company={c} variant="card" showNew={false} />
@@ -165,5 +175,17 @@ export default async function HomePage() {
         </div>
       </main>
     </>
+  );
+}
+
+// Khối trống khi API lỗi: câu thông báo + link tải lại (trang chủ là ISR — lần sau tải sẽ lấy bản mới).
+function HomeEmpty({ text }) {
+  return (
+    <p className="flex flex-wrap items-center gap-x-4 px-4 py-4 text-body text-ink-2 md:px-[22px]">
+      {text}
+      <a href="" className="inline-flex min-h-11 items-center font-semibold">
+        {M.home.retry}
+      </a>
+    </p>
   );
 }

@@ -32,10 +32,13 @@ export default async function UpdateRequestPage({ searchParams }) {
         <Breadcrumb items={[{ name: M.updateRequest.title }]} />
       </div>
       <div className="rail-grid max-xl:max-w-[852px]">
-        <h1 className="text-h1-m font-semibold text-pretty text-ink md:text-h1">
-          {M.updateRequest.title}
-        </h1>
-        <p className="mt-2 text-body leading-7 text-pretty text-ink-2 xl:sticky xl:top-24 xl:col-start-2 xl:row-start-2 xl:mt-8 xl:rounded-xl xl:bg-white xl:p-6 xl:shadow-[0_0_0_0.5px_#dde0e7] xl:text-sm xl:leading-6">
+        {/* Cùng mẫu đầu trang với các trang khác: H1 trong một khung trắng. */}
+        <div className="card px-4 py-3.5 md:px-6 md:py-5">
+          <h1 className="text-h1-m font-semibold text-pretty text-title md:text-h1">
+            {M.updateRequest.title}
+          </h1>
+        </div>
+        <p className="mt-2 text-body leading-7 text-pretty text-ink-2 xl:sticky xl:top-24 xl:col-start-2 xl:row-start-2 xl:mt-8 xl:rounded-xl xl:bg-white xl:p-6 xl:shadow-[0_0_0_1px_var(--color-line)] xl:text-sm xl:leading-6">
           {M.updateRequest.intro}
         </p>
         <div className="mt-5 md:mt-8 xl:col-start-1 xl:row-start-2">

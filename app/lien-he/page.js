@@ -2,6 +2,10 @@ import Link from 'next/link';
 import StaticPage from '@/components/StaticPage';
 import { M } from '@/lib/messages';
 
+// Email liên hệ do chủ dự án cung cấp qua biến môi trường; chưa có thì chỉ đường sang form (không hiện chỗ trống).
+const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || '';
+const ADS_EMAIL = process.env.NEXT_PUBLIC_ADS_EMAIL || '';
+
 export const metadata = { ...M.staticPage.meta.contact, alternates: { canonical: '/lien-he' } };
 
 export default function ContactPage() {
@@ -12,12 +16,23 @@ export default function ContactPage() {
         {
           id: 'thong-tin',
           title: 'Thông tin liên hệ',
-          body: (
-            <ul>
-              <li>Email: [email liên hệ — owner cung cấp]</li>
-              <li>Hợp tác quảng cáo: [email — owner cung cấp]</li>
-            </ul>
-          ),
+          body:
+            CONTACT_EMAIL || ADS_EMAIL ? (
+              <ul>
+                {CONTACT_EMAIL && (
+                  <li>
+                    {M.staticPage.contactEmail}: <span className="select-all">{CONTACT_EMAIL}</span>
+                  </li>
+                )}
+                {ADS_EMAIL && (
+                  <li>
+                    {M.staticPage.adsEmail}: <span className="select-all">{ADS_EMAIL}</span>
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <p>{M.staticPage.contactViaForm}</p>
+            ),
         },
         {
           id: 'an-sua',

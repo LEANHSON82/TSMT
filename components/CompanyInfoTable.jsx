@@ -64,7 +64,8 @@ const ACT =
   'group inline-flex items-center gap-1.5 py-3 -my-3 text-sm leading-5 font-semibold whitespace-nowrap text-brand no-underline hover:text-brand-hover hover:underline hover:underline-offset-[3px]';
 const COPY_FIX = '-my-3! py-3 leading-5 max-md:gap-1';
 
-// Bảng thông tin DN (spec mục 3.4), kiểu CafeF: nhãn đậm, kẻ dòng mảnh; trường trống thì ẩn dòng.
+// Bảng thông tin DN (spec mục 3.4): nhãn xám nhạt, giá trị chữ đậm màu chính (mắt lướt theo giá trị), kẻ dòng
+// mảnh; trường trống thì ẩn dòng.
 //   ≥ 768px: [icon + nhãn 200px] [giá trị] [hành động, dạt phải].
 //   < 768px: nhãn (icon + chữ xám 14px) ở trên, giá trị ở dưới; hành động bên phải giá trị (pair) hoặc dưới
 //            giá trị (stack); dòng điện thoại (phone): khối PhoneReveal tự xếp số che + nút rộng hết ngang.
@@ -72,7 +73,7 @@ function Row({ icon: Icon, label, children, action, layout = 'pair' }) {
   const full = layout === 'phone' || !action;
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 border-b border-line-soft py-2.5 last:border-b-0 md:grid-cols-[200px_minmax(0,1fr)_auto] md:gap-x-4 md:py-[11px]">
-      <dt className="col-span-2 flex items-baseline gap-2 text-sm leading-5 font-semibold text-ink-2 md:col-span-1 md:gap-3 md:text-[15px] md:leading-6">
+      <dt className="col-span-2 flex items-baseline gap-2 text-sm leading-5 text-muted md:col-span-1 md:gap-3 md:text-[15px] md:leading-6">
         <Icon className="h-4 w-4 flex-none self-center text-field md:h-[18px] md:w-[18px]" />
         <span>{label}</span>
       </dt>
@@ -106,7 +107,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
       >
         {/* Không tabular-nums / giãn chữ: số «1» Inter dạng bảng rộng bằng số khác → MST trông như hai cụm.
             Điện thoại 18px: MST + «Sao chép» vừa một dòng cả ở 360px. */}
-        <span className="text-[18px] leading-6 font-semibold tracking-[0.02em] whitespace-nowrap">
+        <span className="text-[20px] leading-7 font-semibold tracking-[0.02em] whitespace-nowrap md:text-[22px]">
           {c.mst}
         </span>
       </Row>
@@ -146,7 +147,12 @@ export default function CompanyInfoTable({ company: c, parent }) {
           action={
             // Người này (cùng họ tên) đại diện thêm DN khác: link xem tất cả (API trả representative_company_count).
             c.representative_company_count > 1 ? (
-              <Link href={`${repHref}&theo=dai-dien`} rel="nofollow" className={ACT}>
+              <Link
+                href={`${repHref}&theo=dai-dien`}
+                prefetch={false}
+                rel="nofollow"
+                className={ACT}
+              >
                 {M.company.repCompanies(c.representative_company_count)}
                 <IconArrow />
               </Link>
@@ -156,8 +162,9 @@ export default function CompanyInfoTable({ company: c, parent }) {
           {/* Vùng bấm 44px (spec 7.3) bằng padding + margin âm — dòng không cao thêm. */}
           <Link
             href={repHref}
+            prefetch={false}
             rel="nofollow"
-            className="-my-2.5 inline-block py-2.5 font-semibold text-brand no-underline hover:underline hover:underline-offset-[3px]"
+            className="-my-2.5 inline-block py-2.5 font-semibold text-brand underline decoration-line-strong decoration-1 underline-offset-4 hover:decoration-brand"
           >
             {c.representative}
           </Link>
@@ -187,7 +194,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
             />
           }
         >
-          <a href={`mailto:${c.email}`} className="break-all">
+          <a href={`mailto:${c.email}`} className="-my-3 inline-block py-3 break-all">
             {c.email}
           </a>
         </Row>

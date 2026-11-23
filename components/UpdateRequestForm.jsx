@@ -327,8 +327,9 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
           className={`${inputCls(show('content'))} h-auto py-2.5 leading-6`}
           {...aria('content')}
         />
+        {/* order-last: dòng báo lỗi (nếu có) nằm sát ngay dưới ô, bộ đếm xuống dưới cùng bên phải. */}
         <p
-          className={`self-end text-sm tabular-nums ${values.content.length > MAX_CONTENT ? 'font-semibold text-danger' : 'text-muted'}`}
+          className={`order-last self-end text-sm tabular-nums ${values.content.length > MAX_CONTENT ? 'font-semibold text-danger' : 'text-muted'}`}
         >
           {values.content.length}/{MAX_CONTENT}
         </p>
@@ -412,13 +413,14 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
         )}
       </div>
 
-      {/* Cloudflare Turnstile — đang giả lập; khi có site key sẽ render widget thật ở đây. */}
-      <div className="flex h-[65px] w-[300px] max-w-full items-center gap-3 rounded border border-line bg-page px-3 text-sm text-ink-2">
-        <IconShield size={22} className="flex-none text-chrome" />
-        <span>
-          {TURNSTILE_SITE_KEY ? M.updateRequest.turnstileChecking : M.updateRequest.turnstileMock}
-        </span>
-      </div>
+      {/* Cloudflare Turnstile: có site key thì lấy token thật lúc bấm gửi (lib/turnstile.js — widget chỉ hiện khi
+          Cloudflare cần người dùng tương tác). Chỉ ghi một dòng cho biết form được bảo vệ. */}
+      {TURNSTILE_SITE_KEY && (
+        <p className="flex items-center gap-2 text-sm text-muted">
+          <IconShield size={18} className="flex-none" />
+          {M.updateRequest.turnstileNote}
+        </p>
+      )}
 
       <p className="text-sm text-muted">
         {M.updateRequest.privacyNote} <Link href="/chinh-sach-bao-mat">{M.footer.privacy}</Link>.

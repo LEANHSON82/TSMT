@@ -93,7 +93,9 @@ const CONSENT_BOOTSTRAP =
   "try{if(localStorage.getItem('cookie_consent'))document.documentElement.setAttribute('data-consent','1')}catch(e){}";
 
 export default async function RootLayout({ children }) {
-  const provinces = await getProvinces().catch(() => []);
+  // Lỗi API thì ném lỗi (không nuốt thành danh mục rỗng): trang ISR đang có bản cũ được giữ nguyên thay vì bị cache
+  // lại thành bản thiếu menu tỉnh/thành.
+  const provinces = await getProvinces();
   return (
     // suppressHydrationWarning: thuộc tính data-consent do script trên gắn trước khi React hydrate.
     <html lang="vi" className={fontVars} suppressHydrationWarning>

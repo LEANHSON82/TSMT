@@ -90,7 +90,10 @@ function redirect301(request, pathname) {
 }
 
 function notFound(request) {
-  return NextResponse.rewrite(new URL('/khong-tim-thay', request.url), { status: 404 });
+  const res = NextResponse.rewrite(new URL('/khong-tim-thay', request.url), { status: 404 });
+  // Trang 404 dựng tĩnh mang cache 1 năm; một MST vừa đăng ký mà bị cache 404 lâu như vậy thì không ai thấy.
+  res.headers.set('Cache-Control', 'public, max-age=0, s-maxage=300, must-revalidate');
+  return res;
 }
 
 async function company(request, segment) {

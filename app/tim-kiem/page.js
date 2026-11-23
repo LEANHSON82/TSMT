@@ -183,14 +183,53 @@ export default async function SearchPage({ searchParams }) {
       : `/tinh/${intent.province.slug}`
     : null;
 
-  const intentBox = intent ? (
-    <p className="flex flex-wrap items-center gap-x-3 rounded-sm bg-brand-50 px-4 py-0.5 text-body text-ink-2">
-      {M.search.provinceIntent(intent.province.name)}
-      <a href={intentHref} className="inline-flex min-h-11 items-center font-semibold">
-        {M.search.provinceIntentAction(intent.province.name)} →
-      </a>
-    </p>
-  ) : null;
+  // Đếm trước số kết quả của «Lọc tại …» (cùng API tìm kiếm): 0 kết quả thì không đưa người dùng vào ngõ cụt.
+  const intentCount = intent?.rest
+    ? await searchCompanies({ q: intent.rest, province: [intent.province.code] })
+        .then((d) => d.total ?? null)
+        .catch(() => null)
+    : null;
+
+  // 0 kết quả cho một từ khoá chữ: lối đi tiếp bấm được (bỏ bớt từng từ, tìm trong người đại diện, DN mới).
+  const words = q.split(/\s+/).filter(Boolean);
+  const emptyActions =
+    data.total === 0 && q && !hasFilter
+      ? [
+          ...(words.length > 1
+            ? words.slice(0, 3).map((_, i) => {
+                const rest = words.filter((__, k) => k !== i).join(' ');
+                return {
+                  href: buildHref('/tim-kiem', { q: rest }),
+                  label: M.search.tryQuery(rest),
+                };
+              })
+            : []),
+          ...(queryType === 'text' && tab.value !== 'dai-dien'
+            ? [
+                {
+                  href: buildHref('/tim-kiem', { q, theo: 'dai-dien' }),
+                  label: M.search.tryRepresentative(q),
+                },
+              ]
+            : []),
+          { href: '/doanh-nghiep-moi-thanh-lap', label: M.search.tryNew },
+        ]
+      : null;
+  const digits = q.replace(/\D/g, '');
+  const mstHint =
+    data.total === 0 && /^[\d\s.-]+$/.test(q) && digits.length < 10
+      ? M.search.mstTooShort(digits.length)
+      : null;
+
+  const intentBox =
+    intent && intentCount !== 0 ? (
+      <p className="flex flex-wrap items-center gap-x-3 rounded-sm bg-brand-50 px-4 py-0.5 text-body text-ink-2">
+        {M.search.provinceIntent(intent.province.name)}
+        <a href={intentHref} className="inline-flex min-h-11 items-center font-semibold">
+          {M.search.provinceIntentAction(intent.province.name, intentCount ?? undefined)} →
+        </a>
+      </p>
+    ) : null;
 
   return (
     <>
@@ -237,8 +276,15 @@ export default async function SearchPage({ searchParams }) {
         params={params}
         emptyTitle={M.search.emptyTitle}
         emptyHints={
-          !q ? M.search.emptyFilterHints : tab.value ? [M.search.emptyInField] : M.search.emptyHints
+          mstHint
+            ? [mstHint]
+            : !q
+              ? M.search.emptyFilterHints
+              : tab.value
+                ? [M.search.emptyInField]
+                : M.search.emptyHints
         }
+        emptyActions={emptyActions}
         slotPrefix="search"
       />
     </>

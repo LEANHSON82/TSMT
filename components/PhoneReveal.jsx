@@ -229,7 +229,7 @@ function PhoneUnlocker({ mst, masked, indent }) {
               aria-disabled={busy || undefined}
               aria-describedby={`phone-note-${mst}`}
               aria-busy={busy}
-              className="inline-flex h-11 w-full flex-none items-center justify-center gap-2 rounded-full bg-cta px-5 text-body font-semibold whitespace-nowrap text-white hover:bg-cta-hover aria-busy:cursor-progress aria-busy:hover:bg-cta disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-2 md:h-[34px] md:w-auto md:px-4 md:text-sm"
+              className="inline-flex h-11 w-full flex-none items-center justify-center gap-2 rounded-full bg-cta px-5 text-body font-semibold whitespace-nowrap text-white hover:bg-cta-hover aria-busy:cursor-progress aria-busy:hover:bg-cta disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-2 md:h-11 md:w-auto md:px-5"
             >
               {icon}
               {label}

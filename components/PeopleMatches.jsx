@@ -59,7 +59,7 @@ export default function PeopleMatches({ people, q, tab, params }) {
           </li>
         ))}
       </ul>
-      <p className="text-meta text-muted md:w-full">{M.search.peopleNote}</p>
+      <p className="text-meta text-muted max-md:hidden md:w-full">{M.search.peopleNote}</p>
     </section>
   );
 }

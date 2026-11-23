@@ -117,7 +117,8 @@ export function usePhoneUnlock(mst) {
       } catch (err) {
         const status = err?.status ?? 0;
         if (status === 410 && renewals < MAX_RENEWALS) {
-          // Phiên hết hạn: tự tạo phiên mới, không bắt xem lại vì đã granted.
+          // Phiên hết hạn: tự tạo phiên mới, không bắt xem lại vì đã granted. Vẫn ghi sự kiện lỗi (spec 8.1).
+          track('phone_unlock_error', { mst, error_code: '410' });
           renewals += 1;
           unlockRef.current = null;
           continue;

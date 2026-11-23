@@ -17,7 +17,10 @@ async function load(params, searchParams) {
 export async function provinceListMetadata({ params, searchParams }) {
   const { province, page } = await load(params, searchParams);
   const suffix = M.common.pageSuffix(page);
+  // Tỉnh chưa có DN nào: trang mỏng (soft-404) → không cho index, vẫn cho đi theo link (như ngành × tỉnh rỗng).
+  const empty = !province.company_count;
   return {
+    ...(empty ? { robots: { index: false, follow: true } } : {}),
     title: `${M.list.province.title(province.name)}${suffix}`,
     description: M.list.province.metaDescription(province.name, suffix),
     alternates: { canonical: buildHref(`/tinh/${province.slug}`, { page }) },

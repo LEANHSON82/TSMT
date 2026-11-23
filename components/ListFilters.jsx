@@ -21,7 +21,7 @@ import MultiSelectFilter from './MultiSelectFilter';
  *   "panel" (mặc định, bộ lọc nâng cao /tim-kiem): hàng ô chọn có nhãn; điện thoại thu gọn sau nút «Lọc». Bộ lọc
  *     đang bật hiện thành thẻ có nút × (bấm để bỏ riêng bộ lọc đó), cả khi bảng lọc đang thu gọn.
  *   "inline": ô chọn gọn nằm bên phải hàng «N doanh nghiệp» (như bản mẫu A), nhãn ẩn vì chữ trong ô tự nói rõ
- *     («Tất cả tỉnh/thành»); không thẻ ×. Điện thoại: ô rộng hết hàng.
+ *     («Tất cả tỉnh/thành»); không thẻ ×. Điện thoại: vẫn cùng hàng với số đếm (ô rộng theo chữ).
  */
 // Ô vừa đổi trước khi chuyển trang — trang mới dựng lại bộ lọc thì đưa focus về đúng ô đó.
 let refocusName = null;
@@ -45,6 +45,35 @@ export default function ListFilters({ action, fields, hidden = {}, variant = 'pa
   // ô — không chuyển trang sau mỗi lần nhấn phím (WCAG 3.2.2).
   const keyboardRef = useRef(false);
   const pendingRef = useRef(null);
+
+  // Back/Forward: router của Next 15.5 đôi khi dựng lại trang với ô chọn còn giữ lựa chọn của URL trước (H1, danh
+  // sách đã đúng URL mới). Ô chọn một giá trị luôn lấy lại giá trị từ URL hiện tại sau khi dựng và sau popstate.
+  useEffect(() => {
+    const sync = () => {
+      const form = formRef.current;
+      if (!form) return;
+      const sp = new URLSearchParams(window.location.search);
+      for (const f of fields) {
+        if (f.multiple) continue;
+        const el = form.querySelector(`select[name="${f.name}"]`);
+        if (!el || document.activeElement === el) continue;
+        const v = sp.get(f.name) || '';
+        const want = f.options.some((o) => o.value === v) ? v : '';
+        if (el.value !== want) el.value = want;
+      }
+    };
+    sync();
+    let timers = [];
+    const onPop = () => {
+      timers.forEach(clearTimeout);
+      timers = [50, 300, 800].map((ms) => setTimeout(sync, ms));
+    };
+    window.addEventListener('popstate', onPop);
+    return () => {
+      window.removeEventListener('popstate', onPop);
+      timers.forEach(clearTimeout);
+    };
+  });
   useEffect(() => {
     if (!refocusName) return undefined;
     // Trang có thể có 2 form lọc (bộ lọc + «Sắp xếp»): form nào chứa ô vừa đổi thì đưa focus về; form kia bỏ qua.
@@ -149,11 +178,7 @@ export default function ListFilters({ action, fields, hidden = {}, variant = 'pa
         ) : (
           <div
             key={f.name}
-            className={
-              inline
-                ? 'flex min-w-0 items-center gap-2 max-md:flex-1'
-                : 'flex min-w-0 flex-col gap-1'
-            }
+            className={inline ? 'flex min-w-0 items-center gap-2' : 'flex min-w-0 flex-col gap-1'}
           >
             <label
               htmlFor={`${uid}-${f.name}`}
@@ -189,7 +214,7 @@ export default function ListFilters({ action, fields, hidden = {}, variant = 'pa
                 keyboardRef.current = false;
                 if (pendingRef.current === f.name) commit(f.name);
               }}
-              className={`select-chevron h-11 cursor-pointer rounded-lg border border-field bg-white px-3 text-body text-ink hover:border-ink-2 ${inline ? 'w-full min-w-0 md:w-auto md:min-w-[200px]' : 'w-full'}`}
+              className={`select-chevron h-11 cursor-pointer rounded-lg border border-field bg-white px-3 text-body text-ink hover:border-ink-2 ${inline ? 'w-auto max-w-full min-w-0 md:min-w-[200px]' : 'w-full'}`}
             >
               <option value="">{f.allLabel}</option>
               {f.options.map((o) => (
@@ -220,7 +245,7 @@ export default function ListFilters({ action, fields, hidden = {}, variant = 'pa
         method="get"
         action={action}
         onSubmit={(e) => (e.preventDefault(), apply())}
-        className="flex w-full min-w-0 md:w-auto"
+        className="flex min-w-0"
       >
         {hiddenInputs}
         {controls}

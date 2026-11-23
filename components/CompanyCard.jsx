@@ -8,9 +8,11 @@ import Highlight from './Highlight';
 // Dòng doanh nghiệp dùng chung (spec mục 3.3), kiểu danh sách CafeF. KHÔNG BAO GIỜ hiện SĐT.
 // Luôn nằm trong một khung .panel (danh sách kết quả / tỉnh / ngành / DN mới, khối DN mới trang chủ, DN cùng
 // ngành trang DN); các dòng ngăn nhau bằng vạch mảnh (do danh sách bao ngoài vẽ).
-//   Hàng 1: tên DN (link navy đậm, cả dòng bấm được) + nhãn «MỚI» · tình trạng bên phải (máy tính).
-//   Hàng 2: «MST … · Hoạt động từ … · Đại diện: …» (điện thoại: thêm tình trạng ở cuối).
-//   Hàng 3: địa chỉ một dòng.
+//   Hàng 1: tên DN (link than chì đậm, cả dòng bấm được) + nhãn «MỚI».
+//   Hàng 2 (máy tính): MST · Hoạt động từ … · Đại diện … · tình trạng — nằm sát nhau, không dạt mép phải.
+//   Điện thoại: hàng 2 = MST + tình trạng căn phải (chỗ cố định ở mọi thẻ); hàng 3 = ngày + người đại diện.
+//   Hàng cuối: địa chỉ một dòng. Các mục ngăn nhau bằng khoảng trống (không dùng «·» — dễ đứng lẻ đầu dòng).
+// Nhãn tình trạng chỉ render MỘT lần (thứ tự hiển thị đổi bằng CSS order).
 // Không tải trước trang DN (prefetch={false}). MST nằm trên lớp phủ để vẫn bôi đen/chép được.
 //
 // variant: 'row' (CompanyList, đệm ngang theo khung) | 'card' (lưới/khối, khung cha tự đệm). Giữ để tương thích.
@@ -41,68 +43,46 @@ export default function CompanyCard({
   const phone = c.matched === 'phone';
   // Chỉ tô sáng ở trường đã khớp (API trả matched). Không có matched (trang danh sách) → tô như trước.
   const hl = (field) => (!c.matched || c.matched === field ? highlight : undefined);
-  // Dấu «·» ngăn các mục, có dấu cách hai bên để dòng được ngắt giữa các mục (không tràn khung trên điện thoại).
-  const sep = (
-    <>
-      {' '}
-      <span aria-hidden="true" className="px-0.5 text-line-strong">
-        ·
-      </span>{' '}
-    </>
-  );
-
   return (
     <article
-      className={`group relative py-3.5 transition-colors duration-150 hover:bg-[#fafbfc] ${variant === 'row' ? 'px-4 md:px-5' : ''}`}
+      className={`group relative py-3.5 transition-colors duration-150 hover:bg-page/60 ${variant === 'row' ? 'px-4 md:px-5' : ''}`}
     >
-      <div className="flex items-start justify-between gap-4">
-        <H className="min-w-0 text-[15px] leading-6 font-semibold md:text-base">
-          <Link
-            href={href}
-            prefetch={false}
-            title={c.name}
-            className="text-brand no-underline decoration-1 underline-offset-[3px] group-hover:underline after:absolute after:inset-0"
-          >
-            <Highlight text={c.name} query={hl('name')} />
-          </Link>
-          {fresh && <span className="tag tag-new ml-2 align-[2px]">{M.list.newBadge}</span>}
-          {phone && (
-            <span className="tag tag-brand ml-2 align-[1px]">{M.search.matchedPhoneBadge}</span>
-          )}
-        </H>
-        <StatusBadge status={c.status} className="flex-none pt-0.5 max-md:hidden" />
-      </div>
-      <p className="mt-1 text-sm leading-5 text-ink-2">
-        <span className="whitespace-nowrap">
+      <H className="text-[15px] leading-6 font-semibold md:text-base">
+        <Link
+          href={href}
+          prefetch={false}
+          title={c.name}
+          className="text-brand no-underline decoration-1 underline-offset-[3px] group-hover:underline after:absolute after:inset-0"
+        >
+          <Highlight text={c.name} query={hl('name')} />
+        </Link>
+        {fresh && <span className="tag tag-new ml-2 align-[2px]">{M.list.newBadge}</span>}
+        {phone && (
+          <span className="tag tag-brand ml-2 align-[1px]">{M.search.matchedPhoneBadge}</span>
+        )}
+      </H>
+      <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-0.5 text-sm leading-5 text-ink-2">
+        <span className="order-1 whitespace-nowrap">
           MST{' '}
           <span className="relative z-10 font-semibold text-ink">
             <span className="sr-only">{M.company.mst}: </span>
             <Highlight text={c.mst} query={hl('mst')} />
           </span>
         </span>
+        <StatusBadge status={c.status} className="order-2 ml-auto md:order-6 md:ml-0" />
+        <span aria-hidden="true" className="order-3 h-0 basis-full md:hidden" />
         {date && (
-          <>
-            {sep}
-            <span className="whitespace-nowrap tabular-nums">
-              <span className="sr-only">{M.company.foundedDate}: </span>
-              {M.list.activeSince(date)}
-            </span>
-          </>
+          <span className="order-4 whitespace-nowrap tabular-nums">
+            <span className="sr-only">{M.company.foundedDate}: </span>
+            {M.list.activeSince(date)}
+          </span>
         )}
         {c.representative && (
-          <>
-            {sep}
-            <span>
-              {M.company.repShort}:{' '}
-              <Highlight text={c.representative} query={hl('representative')} />
-            </span>
-          </>
+          <span className="order-5 min-w-0">
+            {M.company.repShort}: <Highlight text={c.representative} query={hl('representative')} />
+          </span>
         )}
-        <span className="md:hidden">
-          {sep}
-          <StatusBadge status={c.status} />
-        </span>
-      </p>
+      </div>
       {addr && (
         <p className="mt-0.5 truncate text-sm leading-5 text-muted" title={c.address}>
           <span className="sr-only">{M.company.address}: </span>

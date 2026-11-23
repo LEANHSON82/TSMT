@@ -35,7 +35,12 @@ export async function industryListMetadata({ params, searchParams }) {
   return {
     ...(empty ? { robots: { index: false, follow: true } } : {}),
     title: `${M.list.industry.title(industry.code, industry.name)}${where}${M.common.pageSuffix(page)}`,
-    description: M.list.industry.metaDescription(industry.code, industry.name, where),
+    description: M.list.industry.metaDescription(
+      industry.code,
+      industry.name,
+      where,
+      M.common.pageSuffix(page),
+    ),
     alternates: {
       canonical: buildHref(`/nganh/${industry.code}-${slug}`, { tinh: province?.slug, page }),
     },

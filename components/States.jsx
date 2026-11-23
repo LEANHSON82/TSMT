@@ -1,5 +1,33 @@
 import Link from 'next/link';
 import { M } from '@/lib/messages';
+import { IconChevronRight } from './Icons';
+
+/** Danh sách lối đi tiếp (trang 404, trang 0 kết quả): mỗi dòng một link cao 48px, mũi tên bên phải. */
+export function LinkList({ label, links, className = '' }) {
+  if (!links?.length) return null;
+  return (
+    <nav aria-label={label} className={`border-t border-line ${className}`}>
+      <ul>
+        {links.map((l) => (
+          <li key={l.href} className="border-b border-line">
+            <Link
+              href={l.href}
+              prefetch={false}
+              rel={l.rel}
+              className="flex min-h-12 items-center justify-between gap-3 py-2 font-semibold no-underline hover:underline hover:underline-offset-[3px]"
+            >
+              <span className="min-w-0">
+                {l.label}
+                {l.note && <span className="ml-2 text-sm font-normal text-muted">{l.note}</span>}
+              </span>
+              <IconChevronRight size={18} className="flex-none text-muted" />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 // Trạng thái rỗng: một thẻ trắng như thẻ DN, tiêu đề + gợi ý (spec mục 3: câu thông báo + gợi ý).
 export function EmptyState({ title, hints = [], children }) {

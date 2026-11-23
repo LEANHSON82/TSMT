@@ -1,6 +1,7 @@
 // File sitemap con: pages.xml (trang chủ, danh sách, trang tĩnh) và companies-{n}.xml (lastmod = updated_at).
-import { getProvinces, getSitemapCompanies } from '@/lib/api';
+import { getIndustries, getProvinces, getSitemapCompanies } from '@/lib/api';
 import { POPULAR_INDUSTRIES } from '@/lib/popular-industries';
+import { toSlug } from '@/lib/slug';
 import { absoluteUrl } from '@/lib/site';
 import { urlSet, xmlResponse } from '@/lib/sitemap';
 import { companyPath } from '@/lib/mst';
@@ -11,12 +12,19 @@ export async function GET(_request, { params }) {
   const { name } = await params;
 
   if (name === 'pages.xml') {
-    const provinces = await getProvinces().catch(() => []);
+    const [provinces, industries] = await Promise.all([
+      getProvinces().catch(() => []),
+      getIndustries().catch(() => []),
+    ]);
+    // Mọi ngành trong danh mục (lỗi thì dùng danh sách ngành phổ biến); bỏ tỉnh chưa có DN (trang noindex).
+    const industryPaths = industries.length
+      ? industries.map((i) => `/nganh/${i.code}-${i.slug || toSlug(i.name)}`)
+      : POPULAR_INDUSTRIES.map((n) => n.href);
     const paths = [
       '/',
       '/doanh-nghiep-moi-thanh-lap',
-      ...provinces.map((p) => `/tinh/${p.slug}`),
-      ...POPULAR_INDUSTRIES.map((n) => n.href),
+      ...provinces.filter((p) => p.company_count !== 0).map((p) => `/tinh/${p.slug}`),
+      ...industryPaths,
       '/gioi-thieu',
       '/lien-he',
       '/dieu-khoan',

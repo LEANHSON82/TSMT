@@ -2,9 +2,10 @@
 import { notFound } from 'next/navigation';
 import ListFilters from '@/components/ListFilters';
 import ListPageShell from '@/components/ListPageShell';
+import ScopedSearch from '@/components/ScopedSearch';
 import { listCompanies } from '@/lib/api';
 import { resolveIndustry } from '@/lib/industry';
-import { M } from '@/lib/messages';
+import { M, STATUS_FILTER_OPTIONS } from '@/lib/messages';
 import { provinceOptions } from '@/lib/provinces';
 import { buildHref, firstParam, pageNumber } from '@/lib/url';
 
@@ -64,6 +65,23 @@ export async function IndustryList({ params, searchParams }) {
       breadcrumb={[{ name: M.list.industry.crumb(industry.code) }]}
       title={M.list.industry.title(industry.code, industry.name)}
       description={M.list.industry.lead(where)}
+      // Tìm / lọc trong ngành → trang kết quả với ngành (và tỉnh đang chọn) chọn sẵn. Bộ lọc tỉnh của spec 3.5 vẫn ở
+      // hàng số đếm, giữ người dùng trên trang ngành.
+      intro={
+        <ScopedSearch
+          fixed={{ nganh: industry.code, ...(province ? { tinh: province.slug } : {}) }}
+          label={M.search.scopedLabel(`ngành ${industry.code}${where}`)}
+          placeholder={M.search.scopedPlaceholder(`ngành ${industry.code}`)}
+          selects={[
+            {
+              name: 'trangthai',
+              label: M.list.statusFilter,
+              allLabel: M.list.allStatuses,
+              options: STATUS_FILTER_OPTIONS,
+            },
+          ]}
+        />
+      }
       // Bộ lọc tỉnh (spec 3.5) nằm bên phải hàng số đếm. «Lọc nâng cao» đã có ở hàng ô tìm trên header.
       filters={
         <ListFilters

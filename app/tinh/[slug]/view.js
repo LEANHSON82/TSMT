@@ -1,10 +1,12 @@
 // DN theo tỉnh /tinh/{slug-tinh}?page= (spec mục 2, 3.5).
 import { notFound } from 'next/navigation';
 import ListPageShell from '@/components/ListPageShell';
+import ScopedSearch from '@/components/ScopedSearch';
 import { listCompanies } from '@/lib/api';
+import { industryOptions } from '@/lib/industry';
 import { provinceOptions } from '@/lib/provinces';
 import { buildHref, pageNumber } from '@/lib/url';
-import { M } from '@/lib/messages';
+import { M, STATUS_FILTER_OPTIONS } from '@/lib/messages';
 
 async function load(params, searchParams) {
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
@@ -29,12 +31,37 @@ export async function provinceListMetadata({ params, searchParams }) {
 
 export async function ProvinceList({ params, searchParams }) {
   const { province, page } = await load(params, searchParams);
-  const data = await listCompanies({ province: province.code, sort: 'founded_desc', page });
+  const [data, { options: industryOpts }] = await Promise.all([
+    listCompanies({ province: province.code, sort: 'founded_desc', page }),
+    industryOptions(),
+  ]);
   return (
     <ListPageShell
       breadcrumb={[{ name: province.name }]}
       title={M.list.province.title(province.name)}
       description={M.list.province.lead(province.name)}
+      // Tìm / lọc trong tỉnh → trang kết quả với tỉnh chọn sẵn (trang tỉnh giữ nguyên danh sách theo spec 3.5).
+      intro={
+        <ScopedSearch
+          fixed={{ tinh: province.slug }}
+          label={M.search.scopedLabel(`tại ${province.name}`)}
+          placeholder={M.search.scopedPlaceholder(province.name)}
+          selects={[
+            {
+              name: 'nganh',
+              label: M.search.industryFilter,
+              allLabel: M.search.allIndustries,
+              options: industryOpts,
+            },
+            {
+              name: 'trangthai',
+              label: M.list.statusFilter,
+              allLabel: M.list.allStatuses,
+              options: STATUS_FILTER_OPTIONS,
+            },
+          ]}
+        />
+      }
       data={data}
       basePath={`/tinh/${province.slug}`}
       params={{}}

@@ -120,12 +120,13 @@ export default async function CompanyPage({ params }) {
         />
       </div>
 
-      {/* Kiểu CafeF (spec 3.4, đúng thứ tự): khung tên DN (H1 đỏ + tên quốc tế / viết tắt) → khung «Thông tin doanh
-          nghiệp» (tab navy, bảng thông tin) rộng hết khung → quảng cáo dưới bảng → cột chính (ngành nghề + dòng cập
+      {/* Spec 3.4, đúng thứ tự: tên DN (H1 + tên quốc tế / viết tắt + tình trạng) → khung «Thông tin doanh
+          nghiệp» (bảng thông tin) rộng hết khung → quảng cáo dưới bảng → cột chính (ngành nghề + dòng cập
           nhật, DN cùng ngành) cạnh cột phải 300×600. Cột phải bắt đầu dưới bảng thông tin để ô quảng cáo không nằm
           sát nút «Xem số điện thoại». */}
-      <div className="card mt-2 px-4 py-3.5 md:mt-3 md:px-6 md:py-5">
-        <h1 className="text-[22px] leading-7 font-semibold text-pretty break-words text-title md:text-[28px] md:leading-[34px]">
+      {/* Đầu trang: tên DN trực tiếp trên nền trang (không bọc khung) + tên quốc tế / viết tắt + nhãn tình trạng. */}
+      <header className="mt-3 md:mt-4">
+        <h1 className="text-[24px] leading-[30px] font-semibold text-pretty break-words text-title md:text-[30px] md:leading-[38px]">
           {c.name}
         </h1>
         {(c.name_en || c.name_short) && (
@@ -144,17 +145,16 @@ export default async function CompanyPage({ params }) {
             )}
           </dl>
         )}
-        {/* Điện thoại: tình trạng ngay dưới tên DN (hàng «Tình trạng» trong bảng nằm dưới màn hình đầu) — việc chính
-            khi kiểm tra đối tác. Máy tính đã thấy cả bảng nên không lặp lại. */}
+        {/* Tình trạng ngay dưới tên DN — việc chính khi kiểm tra đối tác. */}
         {c.status && (
-          <p className="mt-2 md:hidden">
+          <p className="mt-2.5">
             <span className="sr-only">{M.company.status}: </span>
             <StatusBadge status={c.status} />
           </p>
         )}
-      </div>
+      </header>
 
-      <section aria-labelledby="info-title" className="panel mt-3 md:mt-4">
+      <section aria-labelledby="info-title" className="panel mt-4 md:mt-5">
         <SectionHeader id="info-title" title={M.company.info} />
         <div className="px-4 md:px-[22px]">
           <CompanyInfoTable company={c} parent={parent} />

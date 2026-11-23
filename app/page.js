@@ -98,7 +98,6 @@ export default async function HomePage() {
                 <SearchBox size="lg" autoFocusDesktop />
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1">
-                <p className="text-sm text-muted">{M.home.mstHint}</p>
                 <AdvancedSearchLink className="text-sm" />
               </div>
             </div>

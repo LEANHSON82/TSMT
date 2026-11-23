@@ -29,7 +29,7 @@ export async function copyText(text) {
 // Cùng kiểu «hành động của dòng» trong bảng thông tin DN (CompanyInfoTable): chữ xanh 14px đậm, vùng bấm 44px
 // với margin âm. Chép lại chuỗi class vì CompanyInfoTable là component server.
 const TEXT_CLS =
-  'inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold whitespace-nowrap text-brand hover:text-brand-hover hover:underline hover:underline-offset-[3px] -mb-2.5 md:-my-2.5';
+  'inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold whitespace-nowrap text-brand hover:text-brand-hover -mb-2.5 md:-my-2.5';
 
 /** Nút sao chép; báo «Đã sao chép» qua aria-live.
  *  variant="icon" (mặc định): nút vuông 44px chỉ có icon.

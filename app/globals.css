@@ -176,7 +176,7 @@
     transform: scale(0.98);
   }
   /* Nhấn thẻ DN (link phủ cả thẻ): cả thẻ đổi nền thay vì chỉ tên mờ đi — rõ trên điện thoại. */
-  article:has(> * a:active, a:active) {
+  article.card-row:has(> * a:active, a:active) {
     background-color: var(--color-brand-50);
   }
   :where(select):active {
@@ -725,10 +725,6 @@ html[data-navigating] [data-list-content] {
 }
 a.prov-link:hover {
   color: var(--color-brand);
-}
-a.prov-link:hover .prov-name {
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 .prov-link.is-empty {
   color: var(--color-muted);

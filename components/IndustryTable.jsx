@@ -47,7 +47,7 @@ export default function IndustryTable({ industries }) {
                 <Link
                   href={`/nganh/${ind.code}-${toSlug(ind.name)}`}
                   aria-label={`${ind.code} – ${ind.name}`}
-                  className="-my-2.5 inline-block min-w-11 py-2.5 no-underline hover:underline hover:underline-offset-[3px]"
+                  className="-my-2.5 inline-block min-w-11 py-2.5 no-underline hover:text-brand-hover"
                 >
                   {ind.code}
                 </Link>
@@ -71,7 +71,7 @@ export default function IndustryTable({ industries }) {
           aria-expanded={expanded}
           aria-controls={tableId}
           onClick={() => setExpanded((v) => !v)}
-          className="mx-4 inline-flex min-h-11 items-center gap-1.5 text-body font-semibold text-brand md:mx-[22px] hover:text-brand-hover hover:underline hover:underline-offset-[3px]"
+          className="mx-4 inline-flex min-h-11 items-center gap-1.5 text-body font-semibold text-brand md:mx-[22px] hover:text-brand-hover"
         >
           {expanded ? M.company.showLessIndustries : M.company.showMoreIndustries(extra)}
           {expanded ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}

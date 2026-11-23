@@ -22,8 +22,7 @@ export default function PeopleMatches({ people, q, tab, params }) {
     return (
       <p className="text-body text-ink-2">
         <strong className="font-semibold text-ink">{people[0].name}</strong>{' '}
-        {M.search.peopleExact(people[0].count)}{' '}
-        <span className="text-meta text-muted">{M.search.peopleNote}</span>
+        {M.search.peopleExact(people[0].count)}
       </p>
     );
   }
@@ -59,7 +58,6 @@ export default function PeopleMatches({ people, q, tab, params }) {
           </li>
         ))}
       </ul>
-      <p className="text-meta text-muted max-md:hidden md:w-full">{M.search.peopleNote}</p>
     </section>
   );
 }

@@ -352,9 +352,6 @@ export default function SearchBox({
             >
               {M.search.label}
             </label>
-            <span className="search-icon pointer-events-none absolute top-1/2 left-3 flex h-5 w-5 -translate-y-1/2 items-center justify-center md:left-3.5">
-              {loading ? spinner : <IconSearch size={20} strokeWidth={2.2} />}
-            </span>
             <input
               ref={inputRef}
               id={inputId}
@@ -413,14 +410,17 @@ export default function SearchBox({
                 }, 150)
               }
               data-size={size}
-              className={`search-input h-full w-full appearance-none border-0 bg-transparent pr-1 pl-[42px] text-base text-ellipsis md:pr-3 md:pl-[46px] ${size === 'nav' ? 'md:text-[15px]' : 'md:text-[17px]'}`}
+              className={`search-input h-full w-full appearance-none border-0 bg-transparent pr-1 pl-4 text-base text-ellipsis md:pr-3 md:pl-[18px] ${size === 'nav' ? 'md:text-[15px]' : 'md:text-[17px]'}`}
             />
           </div>
+          {/* Nút tìm là biểu tượng kính lúp (tên đọc «Tìm»); đang lấy gợi ý thì kính lúp thành vòng quay. */}
           <button
             type="submit"
-            className={`search-submit inline-flex h-full flex-none items-center justify-center font-semibold ${size === 'nav' ? 'px-4 text-base md:text-[15px]' : 'px-5 text-[17px] md:px-8'}`}
+            aria-label={M.search.submit}
+            title={M.search.submit}
+            className={`search-submit inline-flex h-full flex-none items-center justify-center ${size === 'nav' ? 'w-12' : 'w-14 md:w-16'}`}
           >
-            {M.search.submit}
+            {loading ? spinner : <IconSearch size={size === 'nav' ? 20 : 22} strokeWidth={2.2} />}
           </button>
         </div>
         {addon}

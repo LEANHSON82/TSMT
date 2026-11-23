@@ -61,7 +61,7 @@ const IconArrow = () => (
 // Điện thoại: ngay bên phải giá trị (MST) hoặc xuống dưới giá trị (địa chỉ, layout="stack").
 // Vùng bấm 44px bằng py-3 + margin âm -my-3 → không làm dòng cao thêm.
 const ACT =
-  'group inline-flex items-center gap-1.5 py-3 -my-3 text-sm leading-5 font-semibold whitespace-nowrap text-brand no-underline hover:text-brand-hover hover:underline hover:underline-offset-[3px]';
+  'group inline-flex items-center gap-1.5 py-3 -my-3 text-sm leading-5 font-semibold whitespace-nowrap text-brand no-underline hover:text-brand-hover';
 const COPY_FIX = '-my-3! py-3 leading-5 max-md:gap-1';
 
 // Bảng thông tin DN (spec mục 3.4): nhãn xám nhạt, giá trị chữ đậm màu chính (mắt lướt theo giá trị), kẻ dòng

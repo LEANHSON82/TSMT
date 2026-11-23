@@ -43,7 +43,7 @@ export default function SiteFooter() {
         <Link
           prefetch={false}
           href="/yeu-cau-cap-nhat"
-          className="inline-flex min-h-11 items-center text-sm font-semibold no-underline hover:underline hover:underline-offset-[3px] md:col-start-2 md:row-start-1"
+          className="inline-flex min-h-11 items-center text-sm font-semibold no-underline hover:text-brand-hover md:col-start-2 md:row-start-1"
         >
           {M.nav.updateRequest}
         </Link>

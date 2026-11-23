@@ -61,8 +61,12 @@ export default function CompanyCard({
 
   return (
     <article
-      className={`group relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-0.5 py-3.5 transition-colors duration-150 hover:bg-page/60 ${
-        table ? `px-4 md:px-5 ${TABLE_COLS} lg:items-center lg:gap-x-6 lg:py-3` : ''
+      // Rê chuột: tên DN đổi màu. Nền nhạt chỉ ở dạng bảng (hàng rộng hết khung); dạng gọn nằm trong ô có đệm nên
+      // nền sẽ không phủ hết chiều ngang — không dùng.
+      className={`group relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-0.5 py-3.5 transition-colors duration-150 ${
+        table
+          ? `card-row px-4 hover:bg-page/60 md:px-5 ${TABLE_COLS} lg:items-center lg:gap-x-6 lg:py-3`
+          : ''
       }`}
     >
       {/* Cột 1: tên (dạng gọn: rộng hết hàng) + (dạng bảng) địa chỉ. */}
@@ -71,8 +75,7 @@ export default function CompanyCard({
           <Link
             href={href}
             prefetch={false}
-            title={c.name}
-            className="text-title no-underline decoration-1 underline-offset-[3px] group-hover:text-brand group-hover:underline after:absolute after:inset-0"
+            className="text-title no-underline group-hover:text-brand after:absolute after:inset-0"
           >
             <Highlight text={c.name} query={hl('name')} />
           </Link>

@@ -66,7 +66,7 @@ function SectionAction({ href, label = M.home.viewAll, shortLabel = M.home.viewA
     <Link
       href={href}
       aria-label={short ? label : undefined}
-      className="group -my-2 inline-flex min-h-11 items-center gap-1 text-sm font-semibold no-underline hover:underline hover:underline-offset-[3px]"
+      className="group -my-2 inline-flex min-h-11 items-center gap-1 text-sm font-semibold no-underline hover:text-brand-hover"
     >
       {short ? (
         <>

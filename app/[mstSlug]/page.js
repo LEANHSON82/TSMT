@@ -222,7 +222,7 @@ function UpdatedLine({ c, first = false }) {
       </span>
       <Link
         href={`/yeu-cau-cap-nhat?mst=${encodeURIComponent(c.mst)}`}
-        className="inline-flex min-h-11 items-center font-semibold no-underline hover:underline hover:underline-offset-[3px]"
+        className="inline-flex min-h-11 items-center font-semibold no-underline hover:text-brand-hover"
       >
         {M.company.requestUpdate} ›
       </Link>

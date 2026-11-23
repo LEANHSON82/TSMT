@@ -23,7 +23,7 @@ export default function StaticPage({ title, intro, sections, updated = '15/11/20
     <li key={s.id}>
       <a
         href={`#${s.id}`}
-        className="flex min-h-11 items-start gap-2 py-2.5 text-body leading-6 no-underline hover:underline hover:underline-offset-[3px]"
+        className="flex min-h-11 items-start gap-2 py-2.5 text-body leading-6 no-underline hover:text-brand-hover"
       >
         <span className="w-5 flex-none text-muted tabular-nums">{i + 1}.</span>
         {s.title}

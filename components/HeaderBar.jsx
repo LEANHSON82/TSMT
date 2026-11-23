@@ -75,7 +75,7 @@ export function AdvancedSearchLink({ href = '/tim-kiem', className = '' }) {
     <Link
       href={href}
       prefetch={false}
-      className={`inline-flex min-h-11 items-center gap-2 font-semibold whitespace-nowrap no-underline hover:underline hover:underline-offset-[3px] ${className}`}
+      className={`inline-flex min-h-11 items-center gap-2 font-semibold whitespace-nowrap no-underline hover:text-brand-hover ${className}`}
     >
       <FilterIcon />
       {M.list.advancedFilter}
@@ -235,11 +235,6 @@ function MobileMenu({ provinces, industries, pathname, onClose }) {
                 <IconClose size={24} strokeWidth={1.6} />
               </button>
             </div>
-            <p className="px-4 pt-3 pb-2 text-meta text-muted">
-              {sub === 'provinces'
-                ? M.nav.provincesNote(provinces.length)
-                : M.nav.industriesSubNote}
-            </p>
             <nav
               aria-label={sub === 'provinces' ? M.nav.provinces : M.nav.industries}
               className="min-h-0 flex-1 overflow-y-auto"
@@ -476,9 +471,6 @@ export default function HeaderBar({ provinces, industries }) {
                 <div className="mb-3 flex items-baseline gap-3">
                   {/* Không dùng h2: bảng nằm trước H1 của trang (sai thứ bậc heading). */}
                   <p className="text-base font-semibold text-ink">{M.nav.provincesHeading}</p>
-                  <span className="text-meta text-muted">
-                    {M.nav.provincesNote(provinces.length)}
-                  </span>
                 </div>
                 {/* A–Z theo CỘT dọc (đọc hết cột 1 rồi sang cột 2) — cùng chiều đọc với bảng tỉnh trang chủ. */}
                 <ul
@@ -493,7 +485,7 @@ export default function HeaderBar({ provinces, industries }) {
                       <Link
                         href={`/tinh/${p.slug}`}
                         aria-current={pathname === `/tinh/${p.slug}` ? 'page' : undefined}
-                        className={`flex min-h-11 items-center border-b border-line text-base no-underline hover:underline hover:underline-offset-[3px] ${
+                        className={`flex min-h-11 items-center border-b border-line text-base no-underline hover:text-brand-hover ${
                           pathname === `/tinh/${p.slug}` ? 'font-semibold text-brand' : ''
                         }`}
                       >
@@ -513,7 +505,6 @@ export default function HeaderBar({ provinces, industries }) {
               >
                 <div className="mb-3 flex items-baseline gap-3">
                   <p className="text-base font-semibold text-ink">{M.nav.industriesHeading}</p>
-                  <span className="text-meta text-muted">{M.nav.industriesNote}</span>
                 </div>
                 <ul className="grid grid-cols-2 gap-x-12">
                   {industries.map((n) => (

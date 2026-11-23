@@ -14,7 +14,7 @@ export function LinkList({ label, links, className = '' }) {
               href={l.href}
               prefetch={false}
               rel={l.rel}
-              className="flex min-h-12 items-center justify-between gap-3 py-2 font-semibold no-underline hover:underline hover:underline-offset-[3px]"
+              className="flex min-h-12 items-center justify-between gap-3 py-2 font-semibold no-underline hover:text-brand-hover"
             >
               <span className="min-w-0">
                 {l.label}

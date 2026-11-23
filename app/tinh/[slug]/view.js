@@ -45,7 +45,6 @@ export async function ProvinceList({ params, searchParams }) {
         <ScopedSearch
           fixed={{ tinh: province.slug }}
           label={M.search.scopedLabel(`tại ${province.name}`)}
-          placeholder={M.search.scopedPlaceholder(province.name)}
           selects={[
             {
               name: 'nganh',

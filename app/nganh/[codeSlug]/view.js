@@ -71,7 +71,6 @@ export async function IndustryList({ params, searchParams }) {
         <ScopedSearch
           fixed={{ nganh: industry.code, ...(province ? { tinh: province.slug } : {}) }}
           label={M.search.scopedLabel(`ngành ${industry.code}${where}`)}
-          placeholder={M.search.scopedPlaceholder(`ngành ${industry.code}`)}
           selects={[
             {
               name: 'trangthai',

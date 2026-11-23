@@ -5,28 +5,31 @@
 // với tỉnh / ngành chọn sẵn, nơi đã có đủ bộ lọc, sắp xếp, phân trang. Là <form method="get"> thật nên vẫn chạy khi
 // JS chưa tải; có JS thì bỏ tham số rỗng khỏi URL.
 //   fixed   — tham số cố định của trang: { tinh: 'ha-noi' } hoặc { nganh: '4101' }
-//   label   — tên đọc của ô tìm, vd «Tìm doanh nghiệp tại Hà Nội»; placeholder — chữ gợi ý ngắn
+//   label   — tên đọc của ô tìm (trình đọc màn hình), vd «Tìm doanh nghiệp tại Hà Nội». Chữ gợi ý trong ô giống ô
+//             tìm chính (câu ngắn trên điện thoại).
 //   selects — [{ name, label, allLabel, options: [{ value, label }] }]
 // Chuột / chạm đổi ô chọn là áp dụng ngay; bàn phím chỉ áp dụng khi Enter hoặc rời ô (WCAG 3.2.2).
 import { useRouter } from 'next/navigation';
-import { useId, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { buildHref } from '@/lib/url';
 import { M } from '@/lib/messages';
 import { IconSearch } from './Icons';
 import { startNavigation } from './NavigationProgress';
 
-export default function ScopedSearch({
-  action = '/tim-kiem',
-  fixed,
-  label,
-  placeholder,
-  selects = [],
-}) {
+export default function ScopedSearch({ action = '/tim-kiem', fixed, label, selects = [] }) {
   const router = useRouter();
   const uid = useId();
   const formRef = useRef(null);
   const keyboardRef = useRef(false);
   const pendingRef = useRef(null);
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639.98px)');
+    const update = () => setNarrow(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   function apply() {
     const fd = new FormData(formRef.current);
@@ -69,7 +72,7 @@ export default function ScopedSearch({
           enterKeyHint="search"
           autoComplete="off"
           spellCheck={false}
-          placeholder={placeholder}
+          placeholder={narrow ? M.search.placeholderNarrow : M.search.placeholder}
           className="search-input h-full w-full min-w-0 appearance-none border-0 bg-transparent px-3.5 text-base text-ellipsis md:text-[15px]"
         />
         <button

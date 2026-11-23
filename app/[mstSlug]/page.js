@@ -150,27 +150,31 @@ export default async function CompanyPage({ params }) {
       </PageHero>
 
       <div className="site-wrap">
-        <section aria-labelledby="info-title" className="panel mt-4 md:mt-5">
-          <SectionHeader id="info-title" title={M.company.info} />
-          <div className="px-4 md:px-[22px]">
-            <CompanyInfoTable company={c} parent={parent} />
-          </div>
+        {/* Thông tin DN: lưới ô trắng ngay trên nền trang (không khung bao, tiêu đề chỉ cho trình đọc màn hình). */}
+        <section aria-labelledby="info-title" className="mt-5 md:mt-6">
+          <h2 id="info-title" className="sr-only">
+            {M.company.info}
+          </h2>
+          <CompanyInfoTable company={c} parent={parent} />
         </section>
 
-        <AdSlot slotId="detail-below-info" className="mt-4 md:mt-5" />
+        <AdSlot slotId="detail-below-info" className="mt-5 md:mt-6" />
 
-        <div className={`mt-4 md:mt-5 ${BANNERS_ON ? 'rail-grid-lg' : ''}`}>
-          <div className="flex min-w-0 flex-col gap-4 md:gap-5">
+        {/* Khối sau: tiêu đề đặt ngoài khung (như «Officers» của BizLookup), khung trắng bên dưới. */}
+        <div className={`mt-6 md:mt-8 ${BANNERS_ON ? 'rail-grid-lg' : ''}`}>
+          <div className="flex min-w-0 flex-col gap-6 md:gap-8">
             {c.industries?.length > 0 ? (
-              <section aria-labelledby="ind-title" className="panel">
+              <section aria-labelledby="ind-title">
                 <SectionHeader
-                  tier="secondary"
+                  tab={false}
                   id="ind-title"
                   title={M.company.industries}
                   meta={M.company.industryCount(c.industries.length)}
                 />
-                <IndustryTable industries={c.industries} />
-                <UpdatedLine c={c} />
+                <div className="panel">
+                  <IndustryTable industries={c.industries} />
+                  <UpdatedLine c={c} />
+                </div>
               </section>
             ) : (
               <div className="card">
@@ -179,15 +183,15 @@ export default async function CompanyPage({ params }) {
             )}
 
             {related.length > 0 && (
-              <section aria-labelledby="rel-title" className="panel">
+              <section aria-labelledby="rel-title">
                 <SectionHeader
-                  tier="secondary"
+                  tab={false}
                   id="rel-title"
                   title={M.company.related(c.province?.name || '')}
                   meta={M.company.relatedCount(related.length)}
                 />
                 {/* Thẻ «Nhãn │ Giá trị» (đọc trên → dưới), 2 cột từ 768px để khung rộng không bỏ trống nửa phải. */}
-                <ul className="grid grid-cols-1 px-4 md:grid-cols-2 md:gap-x-8 md:px-[22px]">
+                <ul className="panel grid grid-cols-1 px-4 md:grid-cols-2 md:gap-x-8 md:px-[22px]">
                   {related.map((r) => (
                     <li key={r.mst} className="min-w-0 border-b border-line-soft">
                       <CompanyCard company={r} variant="card" />

@@ -54,40 +54,25 @@ const IconArrow = () => (
   </svg>
 );
 
-// Hành động của một dòng (Sao chép, Xem bản đồ, Đại diện của N DN): chữ xanh đậm 14px + icon. Máy tính: cột riêng
-// sát mép phải bảng — mọi hành động (kể cả nút «Xem số điện thoại») thẳng một cột như cột nút của Pappers.
-// Điện thoại: ngay bên phải giá trị (MST) hoặc xuống dưới giá trị (địa chỉ,).
-// Vùng bấm 44px bằng py-3 + margin âm -my-3 → không làm dòng cao thêm.
+// Hành động của một ô (Sao chép, Xem bản đồ, Đại diện của N DN): chữ xanh đậm 14px + icon, ở chân ô. Vùng bấm 44px
+// bằng py-3 + margin âm -my-3 → không làm ô cao thêm.
 const ACT =
-  'group inline-flex items-center gap-1.5 py-3 -my-3 text-sm leading-5 font-semibold text-brand no-underline hover:text-brand-hover md:whitespace-nowrap';
-const COPY_FIX = '-my-3! py-3 leading-5 max-md:gap-1';
+  'group inline-flex items-center gap-1.5 py-3 -my-3 text-sm leading-5 font-semibold text-brand no-underline hover:text-brand-hover';
+const COPY_FIX = '-my-3! py-3 leading-5';
 
-// Bảng thông tin DN (spec mục 3.4 — đúng thứ tự trường, mỗi dòng icon + nhãn + giá trị, trường trống thì ẩn). MỌI
-// trường cùng một dạng hàng ngang «Nhãn │ Giá trị │ hành động», ở mọi cỡ màn hình — mắt chỉ đọc từ trên xuống, mỗi
-// hàng trái → phải. Tình trạng hiện một lần, dưới tên DN ở đầu trang.
-//   ≥ 768px: [icon + nhãn 180px] [giá trị] [hành động, dạt phải — thẳng một cột].
-//   < 768px: [icon + nhãn 112px — nhãn dài dùng tên ngắn] [giá trị; hành động ngay dưới giá trị]. Dòng điện thoại: số che + nút rộng hết cột
-//            giá trị (PhoneReveal).
-function Row({ icon: Icon, label, short, children, action }) {
+// Thông tin DN (spec mục 3.4 — đúng thứ tự trường; mỗi trường icon + nhãn + giá trị; trường trống thì ẩn). Kiểu
+// BizLookup: mỗi trường một ô trắng viền mảnh — nhãn chữ hoa nhỏ xám (kèm icon) ở trên, giá trị ở dưới, hành động ở
+// chân ô. Mọi trường cùng một dạng ô. 2 cột từ 768px (đọc trái → phải, rồi xuống), 1 cột trên điện thoại. Các ô cùng
+// hàng cao bằng nhau; hành động dồn xuống chân ô nên thẳng hàng. Tình trạng hiện một lần, dưới tên DN ở đầu trang.
+function Row({ icon: Icon, label, children, action }) {
   return (
-    <div className="grid grid-cols-[112px_minmax(0,1fr)] items-baseline gap-x-3 border-b border-line-soft py-3 last:border-b-0 md:grid-cols-[180px_minmax(0,1fr)_auto] md:gap-x-5 md:py-3.5">
-      <dt className="flex items-baseline gap-2 text-[13px] leading-6 whitespace-nowrap text-muted md:gap-2.5 md:text-sm">
-        <Icon className="h-4 w-4 flex-none self-center text-field md:h-[18px] md:w-[18px]" />
-        {short ? (
-          <>
-            <span className="md:hidden">{short}</span>
-            <span className="max-md:hidden">{label}</span>
-          </>
-        ) : (
-          <span>{label}</span>
-        )}
+    <div className="flex min-w-0 flex-col rounded-lg border border-line bg-white px-4 py-3.5 md:px-5 md:py-4">
+      <dt className="flex items-center gap-1.5 text-xs leading-5 font-medium tracking-[0.04em] text-muted uppercase">
+        <Icon className="h-3.5 w-3.5 flex-none text-field" />
+        <span>{label}</span>
       </dt>
-      <dd className="min-w-0 text-[15px] leading-6 break-words text-ink">{children}</dd>
-      {action && (
-        <dd className="col-start-2 mt-1 justify-self-start md:col-start-3 md:mt-0 md:justify-self-end">
-          {action}
-        </dd>
-      )}
+      <dd className="mt-1 min-w-0 text-[15px] leading-6 break-words text-ink">{children}</dd>
+      {action && <dd className="mt-auto pt-2.5">{action}</dd>}
     </div>
   );
 }
@@ -96,7 +81,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address || '')}`;
   const repHref = `/tim-kiem?q=${encodeURIComponent(c.representative || '')}`;
   return (
-    <dl>
+    <dl className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-4">
       <Row
         icon={IconHash}
         label={M.company.mst}
@@ -142,7 +127,6 @@ export default function CompanyInfoTable({ company: c, parent }) {
         <Row
           icon={IconUser}
           label={M.company.representative}
-          short={M.company.repShort}
           action={
             // Người này (cùng họ tên) đại diện thêm DN khác: link xem tất cả (API trả representative_company_count).
             c.representative_company_count > 1 ? (
@@ -199,7 +183,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
         </Row>
       )}
       {c.founded_date && (
-        <Row icon={IconCalendar} label={M.company.foundedDate} short={M.list.activeLabelShort}>
+        <Row icon={IconCalendar} label={M.company.foundedDate}>
           <span className="tabular-nums">{formatDate(c.founded_date)}</span>
         </Row>
       )}
@@ -209,7 +193,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
         </Row>
       )}
       {c.business_type && (
-        <Row icon={IconLayers} label={M.company.businessType} short={M.company.businessTypeShort}>
+        <Row icon={IconLayers} label={M.company.businessType}>
           {c.business_type}
         </Row>
       )}

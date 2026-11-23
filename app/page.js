@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import AdSlot from '@/components/AdSlot';
-import CompanyCard from '@/components/CompanyCard';
+import CompanyList from '@/components/CompanyList';
 import JsonLd from '@/components/JsonLd';
 import SearchBox from '@/components/SearchBox';
 import { AdvancedSearchLink } from '@/components/HeaderBar';
@@ -183,16 +183,10 @@ export default async function HomePage() {
                 )}
               </div>
             )}
-            {/* Danh sách liệt kê gọn trong một khung trắng: mỗi DN 3 dòng (tên + tình trạng · MST, đại diện · khu vực,
-                ngày), 2 cột từ 768px → 20 DN chỉ 10 hàng. */}
+            {/* Cùng kiểu danh sách với trang DN mới / tỉnh / ngành: máy tính mỗi DN một hàng ngang (bảng), điện thoại
+                mỗi DN một thẻ «Nhãn │ Giá trị». Không chèn quảng cáo (ô quảng cáo trang chủ nằm giữa các khối). */}
             {newest.length > 0 && (
-              <ol className="panel grid grid-cols-1 px-4 md:grid-cols-2 md:gap-x-10 md:px-5">
-                {newest.map((c) => (
-                  <li key={c.mst} className="min-w-0 border-b border-line-soft">
-                    <CompanyCard company={c} variant="card" headingLevel={3} showNew={false} />
-                  </li>
-                ))}
-              </ol>
+              <CompanyList items={newest} ads={false} headingLevel={3} showNew={false} />
             )}
             {newest.length > 0 && (
               <p className="mt-5 text-center md:mt-6">

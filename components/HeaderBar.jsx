@@ -11,11 +11,9 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { M } from '@/lib/messages';
-import { SITE_NAME } from '@/lib/site';
 import { buildHref } from '@/lib/url';
 import IndustryCode from './IndustryCode';
 import { trapTab } from './focusTrap';
-import Logo from './Logo';
 import SearchBox from './SearchBox';
 import {
   IconBriefcase,
@@ -39,18 +37,6 @@ const navSearch = (filterHref) => ({
 function SearchWithQuery({ filterHref }) {
   const q = useSearchParams().get('q') || '';
   return <SearchBox key={q} defaultValue={q} {...navSearch(filterHref)} />;
-}
-
-function SiteLogo() {
-  return (
-    <Link
-      href="/"
-      aria-label={`${SITE_NAME} — ${M.nav.home}`}
-      className="inline-flex min-h-11 flex-none items-center no-underline"
-    >
-      <Logo className="h-[18px] w-auto md:h-5" />
-    </Link>
-  );
 }
 
 // Lối vào bộ lọc nâng cao (/tim-kiem) theo trang đang xem: trang tỉnh / ngành / DN mới mở sẵn bộ lọc đó.
@@ -292,7 +278,13 @@ function MobileMenu({ provinces, industries, pathname, onClose }) {
         ) : (
           <>
             <div className="flex h-14 flex-none items-center justify-between border-b border-line pr-2 pl-4 md:h-16 md:px-4">
-              <SiteLogo />
+              <Link
+                href="/"
+                onClick={onClose}
+                className="inline-flex min-h-11 items-center text-base font-semibold text-brand no-underline"
+              >
+                {M.nav.home}
+              </Link>
               <button
                 ref={closeRef}
                 type="button"
@@ -400,6 +392,17 @@ export default function HeaderBar({ provinces, industries }) {
   const closeDropdown = () => setDropdown(null);
   const filterHref = advancedHref(pathname);
 
+  // Ô tìm của header: trang kết quả giữ sẵn từ khoá đang tìm (useSearchParams chỉ chạy trên /tim-kiem — trang vốn
+  // render động; các trang tĩnh/ISR khác không bị chuyển sang render phía trình duyệt).
+  const search =
+    pathname === '/tim-kiem' ? (
+      <Suspense fallback={<SearchBox {...navSearch(filterHref)} />}>
+        <SearchWithQuery filterHref={filterHref} />
+      </Suspense>
+    ) : (
+      <SearchBox {...navSearch(filterHref)} />
+    );
+
   return (
     <>
       <header
@@ -408,68 +411,29 @@ export default function HeaderBar({ provinces, industries }) {
           isHome ? '' : 'border-b border-line'
         }`}
       >
-        {/* Hàng 1: logo trái, menu phải (điện thoại: nút menu). */}
-        <div className="site-wrap flex h-14 items-center justify-between gap-4 max-md:pr-1.5 md:h-16 lg:gap-8">
-          <SiteLogo />
-
-          {/* Từ 1024px (kiểu Pappers): ô tìm nằm ngay trên hàng logo, header chỉ còn một hàng. Trang chủ: ẩn khi ô
-              tìm lớn của hero còn trong tầm nhìn (vẫn giữ chỗ để menu không nhảy). */}
-          <div
-            data-header-search
-            inert={!showHeaderSearch}
-            className={`ml-auto hidden min-w-0 flex-1 items-center justify-end gap-5 lg:flex ${showHeaderSearch ? '' : 'invisible'}`}
-          >
-            <div className="min-w-0 flex-1 lg:max-w-[440px]">
-              {pathname === '/tim-kiem' ? (
-                <Suspense fallback={<SearchBox {...navSearch(filterHref)} />}>
-                  <SearchWithQuery filterHref={filterHref} />
-                </Suspense>
-              ) : (
-                <SearchBox {...navSearch(filterHref)} />
-              )}
+        {/* Không có logo (quyết định của chủ dự án 23/11/2026, khác spec mục 3). Điện thoại (< 768px): một hàng gồm ô
+            tìm (kèm nút icon «Lọc nâng cao») và nút menu. Từ 768px: chỉ còn dải menu xanh, ô tìm nằm bên phải dải. */}
+        <div ref={findRef} className="md:hidden">
+          <div className="site-wrap flex items-center gap-1.5 py-2 max-md:pr-2">
+            {/* Trang chủ: ô tìm ẩn (vẫn giữ chỗ, nút menu vẫn hiện) cho tới khi ô tìm lớn của hero cuộn khuất. */}
+            <div
+              data-header-search
+              inert={!showHeaderSearch}
+              className={`min-w-0 flex-1 ${showHeaderSearch ? '' : 'invisible'}`}
+            >
+              {search}
             </div>
-            <AdvancedSearchLink href={filterHref} className="text-[15px]" />
-          </div>
-
-          <button
-            ref={menuBtnRef}
-            type="button"
-            aria-label={M.nav.openMenu}
-            aria-expanded={mobileOpen}
-            aria-controls="mobile-menu"
-            onClick={() => setMobileOpen(true)}
-            className="inline-flex h-11 w-11 flex-none items-center justify-center rounded text-ink md:hidden"
-          >
-            <IconMenu size={24} />
-          </button>
-        </div>
-
-        {/* Hàng 2: ô tìm + «Lọc nâng cao». Trang chủ: phủ ngay dưới hàng 1 (absolute, không chiếm chỗ), chỉ
-            hiện khi ô tìm hero đã khuất; khi ẩn thì inert để không focus được. */}
-        <div
-          ref={findRef}
-          data-header-search
-          inert={!showHeaderSearch}
-          className={`lg:hidden ${
-            isHome
-              ? 'absolute inset-x-0 top-full border-b border-line bg-white shadow-[0_4px_16px_rgba(22,27,38,0.08)] transition-opacity duration-150'
-              : ''
-          } ${showHeaderSearch ? 'opacity-100' : 'invisible opacity-0'}`}
-        >
-          {/* Điện thoại: đệm đáy 8px → header 56 + 48 + 8 + viền 1 = 113px (trước: 160px với hàng «Lọc nâng cao»). */}
-          <div className="site-wrap find-grid pb-2 md:pt-1 md:pb-3">
-            {/* Trang kết quả: ô giữ sẵn từ khoá đang tìm. useSearchParams chỉ chạy trên /tim-kiem (trang vốn
-              render động) — các trang tĩnh/ISR khác không bị chuyển sang render phía trình duyệt. */}
-            {pathname === '/tim-kiem' ? (
-              <Suspense fallback={<SearchBox {...navSearch(filterHref)} />}>
-                <SearchWithQuery filterHref={filterHref} />
-              </Suspense>
-            ) : (
-              <SearchBox {...navSearch(filterHref)} />
-            )}
-            <div className="hidden h-10 items-center md:flex">
-              <AdvancedSearchLink href={filterHref} className="text-[15px]" />
-            </div>
+            <button
+              ref={menuBtnRef}
+              type="button"
+              aria-label={M.nav.openMenu}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setMobileOpen(true)}
+              className="inline-flex h-11 w-11 flex-none items-center justify-center rounded text-ink"
+            >
+              <IconMenu size={24} />
+            </button>
           </div>
         </div>
 
@@ -481,7 +445,7 @@ export default function HeaderBar({ provinces, industries }) {
               href="/"
               aria-label={M.nav.home}
               aria-current={pathname === '/' ? 'page' : undefined}
-              className="flex w-11 flex-none items-center justify-center bg-[#0b5a8e] text-white hover:bg-[#0d6aa6] hover:text-white"
+              className="flex w-11 flex-none items-center justify-center bg-[#0a3f86] text-white hover:bg-[#0a3a7e] hover:text-white"
             >
               <svg
                 width="18"
@@ -573,13 +537,20 @@ export default function HeaderBar({ provinces, industries }) {
                 {M.nav.newCompaniesShort}
               </Link>
             </nav>
-            <Link
-              href="/yeu-cau-cap-nhat"
-              prefetch={false}
-              className="ml-auto hidden items-center text-[13px] whitespace-nowrap text-[#d7e4ef] no-underline hover:text-white lg:flex"
+            {/* Ô tìm bên phải dải menu. Trang chủ: ẩn khi ô tìm lớn của hero còn trong tầm nhìn (vẫn giữ chỗ). */}
+            <div
+              data-header-search
+              inert={!showHeaderSearch}
+              className={`ml-auto flex min-w-0 flex-1 items-center justify-end pl-4 ${showHeaderSearch ? '' : 'invisible'}`}
             >
-              {M.nav.updateRequest}
-            </Link>
+              <div className="w-full max-w-[420px]">{search}</div>
+              <span className="ml-4 hidden lg:inline-flex">
+                <AdvancedSearchLink
+                  href={filterHref}
+                  className="text-[13px] text-white hover:text-white [&>svg]:text-white/80"
+                />
+              </span>
+            </div>
           </div>
         </div>
 

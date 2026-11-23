@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
-/* Hệ thiết kế «CafeF» (bản mẫu: .design/cafef-design, theo trang dữ liệu doanh nghiệp của cafef.vn): dải menu
-   xanh navy, tên DN chữ đỏ, nội dung trong các khung trắng viền mảnh bo 10px, tiêu đề khung dạng tab nền navy.
+/* Hệ thiết kế «CafeF» (bản mẫu: .design/cafef-design), bộ màu B (.design/colors): dải menu xanh dương,
+   tên DN xanh than đậm, nội dung trong các khung trắng viền mảnh bo 10px, tiêu đề khung dạng tab nền navy.
    Chữ: Inter, đúng 2 độ đậm 400/600. Nền trang xám nhạt #F5F6F8.
    Khung 1160 = cột chính + khe 20 + cột phải 300. */
 @theme {
@@ -30,17 +30,17 @@
   --default-transition-duration: 150ms;
   --default-transition-timing-function: ease-out;
 
-  /* Xanh navy: menu, link, nút chính (Tìm, Xem số điện thoại), tiêu đề khung. */
-  --color-brand: #004370;
-  --color-brand-hover: #002b49;
-  --color-brand-50: #e6eef5;
-  /* Đỏ: tên doanh nghiệp (H1), nhãn «Ngành chính». */
-  --color-title: #c32022;
-  --color-title-50: #fdecec;
-  --color-navy: #004370;
-  --color-cta: #004370;
-  --color-cta-hover: #002b49;
-  --color-cta-50: #e6eef5;
+  /* Bộ màu B (chủ dự án chọn 23/11/2026): một màu nhấn xanh dương — menu, link, nút chính, tiêu đề khung. */
+  --color-brand: #0e4da4;
+  --color-brand-hover: #0a3a7e;
+  --color-brand-50: #e8f0fc;
+  /* Tên doanh nghiệp (H1, tiêu đề trang): xanh than đậm. «Ngành chính»: nhãn xanh nhạt. */
+  --color-title: #10233d;
+  --color-title-50: #e8f0fc;
+  --color-navy: #0e4da4;
+  --color-cta: #0e4da4;
+  --color-cta-hover: #0a3a7e;
+  --color-cta-50: #e8f0fc;
   /* Chữ «T» của logo (spec: T cam, MST xanh). */
   --color-logo-t: #e8610e;
 
@@ -64,8 +64,9 @@
   --color-danger-bg: #fef3f2;
   --color-warn: #6b4500;
   --color-warn-bg: #fff6e5;
-  --color-new: #ffffff;
-  --color-new-bg: #e8610e;
+  /* Nhãn «MỚI»: nền cam nhạt chữ cam đậm (tương phản 4,9:1 — chữ trắng trên cam chỉ 3,4:1). */
+  --color-new: #b4480a;
+  --color-new-bg: #fff1e6;
 
   --color-ad: #e7eaee;
 
@@ -256,7 +257,7 @@
   }
   .tag-title {
     background: var(--color-title-50);
-    color: var(--color-title);
+    color: var(--color-brand);
   }
   .tag-new {
     background: var(--color-new-bg);
@@ -283,11 +284,11 @@
 /* Header 2 hàng (components/HeaderBar.jsx): dính với top âm = chiều cao hàng 1 trừ 8px → khi cuộn, hàng
    logo/menu trôi đi, chỉ hàng ô tìm ở lại đầu màn hình (ô tìm luôn trong tầm tay, không chiếm 140px). */
 .site-header {
-  top: -48px;
+  top: 0;
 }
 @media (min-width: 768px) {
   .site-header {
-    top: -56px;
+    top: 0;
   }
 }
 /* Từ 1024px header chỉ một hàng (ô tìm nằm trên hàng logo) → dính nguyên khối. */

@@ -5,25 +5,19 @@ import { M } from '@/lib/messages';
 import StatusBadge from './StatusBadge';
 import Highlight from './Highlight';
 
-// Dòng doanh nghiệp dùng chung (spec mục 3.3). KHÔNG BAO GIỜ hiện SĐT. Luôn nằm trong một khung .panel; các dòng
-// ngăn nhau bằng vạch mảnh (do danh sách bao ngoài vẽ). Một bộ phần tử duy nhất, đổi bố cục bằng CSS grid:
+// Dòng doanh nghiệp dùng chung (spec mục 3.3: tên · MST · địa chỉ rút gọn · người đại diện · ngày hoạt động · tình
+// trạng). KHÔNG BAO GIỜ hiện SĐT. Một bộ phần tử, đổi bố cục bằng CSS grid:
 //
-//   Dạng «nhãn – giá trị» (điện thoại, khối DN mới trang chủ, DN cùng ngành):
-//     TÊN DOANH NGHIỆP (+ MỚI)
-//     MST          0321352228              ✓ Đang hoạt động      ← tình trạng luôn ở góc phải, cùng hàng MST
-//     Đại diện     NGÔ MINH CƯỜNG
-//     Hoạt động    11/11/2026
-//     Địa chỉ      Số 123 Đường Lê Duẩn, …
-//   Nhãn xám cột cố định 72px, giá trị chữ đậm màu chính → mắt lướt dọc theo cột giá trị.
+//   Dạng gọn (điện thoại, khối DN mới trang chủ, DN cùng ngành) — 3 dòng, không nhãn lặp:
+//     TÊN DOANH NGHIỆP (rộng hết hàng)
+//     MST 0321352228 · Đại diện NGÔ MINH CƯỜNG          ✓ Đang hoạt động
+//     Phường Hiệp Bình, TP Hồ Chí Minh · 11/11/2026
 //
-//   Dạng bảng (variant="row" từ 1024px — trang kết quả / tỉnh / ngành / DN mới):
-//     TÊN DOANH NGHIỆP              │ MST        │ Người đại diện │ Hoạt động từ │ ✓ Đang hoạt động
-//     địa chỉ (xám)                 │ 0321352228 │ NGÔ MINH CƯỜNG │ 11/11/2026   │
-//   Mỗi trường một cột thẳng hàng giữa các dòng (như bảng), nhãn nhỏ trên giá trị.
+//   Dạng bảng (variant="row" từ 1024px — trang kết quả / tỉnh / ngành / DN mới; tiêu đề cột nằm MỘT lần ở đầu danh
+//   sách, xem CompanyList): Tên DN + địa chỉ │ MST │ Người đại diện │ Ngày hoạt động │ Tình trạng.
 //
 // Không tải trước trang DN (prefetch={false}). MST nằm trên lớp phủ để vẫn bôi đen/chép được.
-// variant: 'row' (CompanyList) | 'card' (khối/lưới hẹp — luôn dạng nhãn – giá trị) | 'tile' (như card, trong khung trắng
-//          viền mảnh riêng — thẻ rời nhau ở khối DN mới trang chủ).
+// variant: 'row' (CompanyList: bảng ≥ 1024px, gọn dưới đó) | 'card' (luôn dạng gọn).
 // highlight: từ khoá tìm kiếm để tô sáng trong tên DN, MST, người đại diện.
 // showNew: nhãn «MỚI» cho DN thành lập trong 7 ngày (tắt ở khối/trang «DN mới thành lập»).
 // showProvince=false: trang theo tỉnh — địa chỉ chỉ ghi phường/xã (tỉnh đã có ở tiêu đề trang).
@@ -33,6 +27,9 @@ function isNew(foundedDate) {
   return Number.isFinite(t) && Date.now() - t < NEW_DAYS * 86400000 && t <= Date.now() + 86400000;
 }
 
+/** Lưới cột của dạng bảng — CompanyList dùng cùng giá trị cho hàng tiêu đề cột. */
+export const TABLE_COLS = 'lg:grid-cols-[minmax(0,1fr)_116px_minmax(0,200px)_132px_150px]';
+
 export default function CompanyCard({
   company: c,
   variant = 'card',
@@ -40,138 +37,135 @@ export default function CompanyCard({
   highlight,
   showNew = true,
   showProvince = true,
-  showDate = true, // false: ngày hoạt động đã hiện ở tiêu đề nhóm (khối DN mới trang chủ, nhóm theo ngày)
 }) {
   const H = `h${headingLevel}`;
   const href = companyPath(c);
   const addr = showProvince
     ? shortAddress(c.address) || areaAddress(c.address, c.province?.name)
     : areaAddress(c.address, c.province?.name, { withProvince: false });
-  const date = showDate ? formatDate(c.founded_date) : '';
+  // Dạng gọn: chỉ phường/xã + tỉnh (một dòng ngắn, còn chỗ cho ngày hoạt động).
+  const area = areaAddress(c.address, c.province?.name, { withProvince: showProvince }) || addr;
+  const date = formatDate(c.founded_date);
   const fresh = showNew && isNew(c.founded_date);
   const phone = c.matched === 'phone';
   // Chỉ tô sáng ở trường đã khớp (API trả matched). Không có matched (trang danh sách) → tô như trước.
   const hl = (field) => (!c.matched || c.matched === field ? highlight : undefined);
   const table = variant === 'row';
-  const tile = variant === 'tile'; // thẻ rời: khung trắng viền mảnh bo 10px (khối DN mới trang chủ)
-
-  // Một trường: nhãn + giá trị. Dạng nhãn – giá trị: 2 cột (nhãn 84px). Dạng bảng: nhãn nhỏ nằm trên giá trị.
-  // min-w-0: ô lưới được co nhỏ hơn nội dung → địa chỉ dài cắt «…» thay vì tràn sang cột bên cạnh.
-  const field = table
-    ? 'grid min-w-0 grid-cols-[72px_minmax(0,1fr)] items-baseline gap-x-2 lg:flex lg:flex-col lg:items-stretch lg:gap-0.5'
-    : 'grid min-w-0 grid-cols-[72px_minmax(0,1fr)] items-baseline gap-x-2';
-  const label = `text-[13px] leading-5 text-muted ${table ? 'lg:text-xs lg:leading-4' : ''}`;
-  const value = 'min-w-0 text-sm leading-5 text-ink';
+  const sep = (
+    <span aria-hidden="true" className="px-1.5 text-line-strong">
+      ·
+    </span>
+  );
+  // Phần chỉ dùng cho dạng gọn (ẩn ở dạng bảng ≥ 1024px).
+  const compactOnly = table ? 'lg:hidden' : '';
 
   return (
     <article
-      className={`group relative grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 py-4 transition-colors duration-150 ${
-        tile
-          ? 'h-full rounded-[10px] border border-line bg-white px-4 hover:border-brand hover:shadow-[0_4px_14px_-6px_rgba(37,99,235,0.35)]'
-          : 'hover:bg-page/60'
-      } ${
-        table
-          ? `px-4 md:px-5 lg:items-center lg:gap-x-6 lg:gap-y-0.5 ${
-              showDate
-                ? 'lg:grid-cols-[minmax(0,1fr)_112px_minmax(0,190px)_104px_148px]'
-                : 'lg:grid-cols-[minmax(0,1fr)_112px_minmax(0,220px)_148px]'
-            }`
-          : ''
+      className={`group relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-0.5 py-3.5 transition-colors duration-150 hover:bg-page/60 ${
+        table ? `px-4 md:px-5 ${TABLE_COLS} lg:items-center lg:gap-x-6 lg:py-3` : ''
       }`}
     >
-      <H
-        className={`col-span-2 mb-1 text-[15px] leading-6 font-semibold text-pretty md:text-base ${
-          table ? 'lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:mb-0' : ''
-        }`}
+      {/* Cột 1: tên (dạng gọn: rộng hết hàng) + (dạng bảng) địa chỉ. */}
+      <div className={`col-span-2 min-w-0 ${table ? 'lg:col-span-1' : ''}`}>
+        <H className="text-[15px] leading-6 font-semibold text-pretty md:text-base">
+          <Link
+            href={href}
+            prefetch={false}
+            title={c.name}
+            className="text-title no-underline decoration-1 underline-offset-[3px] group-hover:text-brand group-hover:underline after:absolute after:inset-0"
+          >
+            <Highlight text={c.name} query={hl('name')} />
+          </Link>
+          {fresh && <span className="tag tag-new ml-2 align-[2px]">{M.list.newBadge}</span>}
+          {phone && (
+            <span className="tag tag-brand ml-2 align-[1px]">{M.search.matchedPhoneBadge}</span>
+          )}
+        </H>
+        {table && addr && (
+          <p
+            className="mt-0.5 hidden truncate text-sm leading-5 text-muted lg:block"
+            title={c.address}
+          >
+            <span className="sr-only">{M.company.address}: </span>
+            {addr}
+          </p>
+        )}
+      </div>
+
+      {/* Tình trạng: dạng gọn ở cuối dòng MST (tên được rộng hết hàng); dạng bảng là cột cuối. */}
+      <div
+        className={`col-start-2 row-start-2 self-center justify-self-end ${table ? 'lg:col-start-5 lg:row-start-1' : ''}`}
       >
-        <Link
-          href={href}
-          prefetch={false}
-          title={c.name}
-          className="text-title no-underline decoration-1 underline-offset-[3px] group-hover:text-brand group-hover:underline after:absolute after:inset-0"
-        >
-          <Highlight text={c.name} query={hl('name')} />
-        </Link>
-        {fresh && <span className="tag tag-new ml-2 align-[2px]">{M.list.newBadge}</span>}
-        {phone && (
-          <span className="tag tag-brand ml-2 align-[1px]">{M.search.matchedPhoneBadge}</span>
-        )}
-      </H>
+        <span className="sr-only">{M.company.status}: </span>
+        <StatusBadge status={c.status} />
+      </div>
 
-      <dl className="contents">
-        <div className={`${field} ${table ? 'lg:col-start-2 lg:row-span-2 lg:row-start-1' : ''}`}>
-          <dt className={label}>MST</dt>
-          <dd className={`${value} relative z-10 font-semibold tracking-[0.01em] tabular-nums`}>
+      {/* Dạng gọn: MST và «Đại diện …» là hai cụm; hết chỗ thì cả cụm «Đại diện …» xuống dòng (không ngắt giữa). */}
+      <p
+        className={`col-start-1 row-start-2 flex min-w-0 flex-wrap gap-x-3 text-sm leading-5 text-ink-2 ${compactOnly}`}
+      >
+        <span className="whitespace-nowrap">
+          MST{' '}
+          <span className="relative z-10 font-semibold text-ink tabular-nums">
             <Highlight text={c.mst} query={hl('mst')} />
-          </dd>
-        </div>
-
-        {/* Tình trạng: dạng nhãn – giá trị nằm góc phải hàng MST; dạng bảng là cột cuối. */}
-        <div
-          className={`col-start-2 row-start-2 self-center justify-self-end ${
-            table
-              ? `lg:row-span-2 lg:row-start-1 lg:self-center ${showDate ? 'lg:col-start-5' : 'lg:col-start-4'}`
-              : ''
-          }`}
-        >
-          <dt className="sr-only">{M.company.status}</dt>
-          <dd>
-            <StatusBadge status={c.status} />
-          </dd>
-        </div>
-
+          </span>
+        </span>
         {c.representative && (
-          <div
-            className={`${field} col-span-2 ${table ? 'lg:col-span-1 lg:col-start-3 lg:row-span-2 lg:row-start-1' : ''}`}
-          >
-            <dt className={label}>
-              {table ? (
-                <>
-                  <span className="lg:hidden">{M.company.repShort}</span>
-                  <span className="max-lg:hidden">{M.company.representative}</span>
-                </>
-              ) : (
-                M.company.repShort
-              )}
-            </dt>
-            <dd className={`${value} truncate font-semibold`} title={c.representative}>
+          <span className="min-w-0">
+            {M.company.repShort}{' '}
+            <span className="font-semibold text-ink">
               <Highlight text={c.representative} query={hl('representative')} />
-            </dd>
-          </div>
+            </span>
+          </span>
         )}
+      </p>
+      {(area || date) && (
+        <p
+          className={`col-span-2 truncate text-sm leading-5 text-muted ${compactOnly}`}
+          title={c.address}
+        >
+          {area && (
+            <>
+              <span className="sr-only">{M.company.address}: </span>
+              {area}
+            </>
+          )}
+          {area && date && sep}
+          {date && (
+            <span className="tabular-nums">
+              <span className="sr-only">{M.company.foundedDate}: </span>
+              {date}
+            </span>
+          )}
+        </p>
+      )}
 
-        {date && (
-          <div
-            className={`${field} col-span-2 ${table ? 'lg:col-span-1 lg:col-start-4 lg:row-span-2 lg:row-start-1' : ''}`}
+      {/* Dạng bảng: mỗi giá trị một cột (tiêu đề cột ở đầu danh sách). */}
+      {table && (
+        <>
+          <p className="hidden text-sm font-semibold text-ink tabular-nums lg:col-start-2 lg:row-start-1 lg:block">
+            <span className="sr-only">{M.company.mst}: </span>
+            <span className="relative z-10">
+              <Highlight text={c.mst} query={hl('mst')} />
+            </span>
+          </p>
+          <p
+            className="hidden truncate text-sm text-ink lg:col-start-3 lg:row-start-1 lg:block"
+            title={c.representative}
           >
-            <dt className={label}>
-              {table ? (
-                <>
-                  <span className="lg:hidden">{M.list.activeLabelShort}</span>
-                  <span className="max-lg:hidden">{M.list.activeLabel}</span>
-                </>
-              ) : (
-                M.list.activeLabelShort
-              )}
-            </dt>
-            <dd className={`${value} tabular-nums`}>{date}</dd>
-          </div>
-        )}
-
-        {addr && (
-          <div
-            className={`${field} col-span-2 ${table ? 'lg:col-span-1 lg:col-start-1 lg:row-start-2' : ''}`}
-          >
-            <dt className={`${label} ${table ? 'lg:sr-only' : ''}`}>{M.company.addressShort}</dt>
-            <dd
-              className={`min-w-0 truncate text-sm leading-5 text-ink-2 ${table ? 'lg:text-muted' : ''}`}
-              title={c.address}
-            >
-              {addr}
-            </dd>
-          </div>
-        )}
-      </dl>
+            <span className="sr-only">{M.company.representative}: </span>
+            {c.representative ? (
+              <Highlight text={c.representative} query={hl('representative')} />
+            ) : (
+              <span className="text-muted">—</span>
+            )}
+          </p>
+          <p className="hidden text-sm text-ink-2 tabular-nums lg:col-start-4 lg:row-start-1 lg:block">
+            <span className="sr-only">{M.company.foundedDate}: </span>
+            {date || '—'}
+          </p>
+        </>
+      )}
     </article>
   );
 }

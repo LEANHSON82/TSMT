@@ -8,7 +8,6 @@ import SectionHeader from '@/components/SectionHeader';
 import { getProvinces, listCompanies, searchCompanies } from '@/lib/api';
 import { POPULAR_INDUSTRIES } from '@/lib/popular-industries';
 import { daysAgoVN } from '@/lib/filters';
-import { groupByDay } from '@/lib/day-groups';
 import { formatNumber } from '@/lib/format';
 import { SITE_NAME, absoluteUrl } from '@/lib/site';
 import { M, NEW_WINDOW_DAYS } from '@/lib/messages';
@@ -31,7 +30,6 @@ export default async function HomePage() {
   const newTotal = await searchCompanies({ foundedFrom: daysAgoVN(NEW_WINDOW_DAYS) })
     .then((d) => d.total ?? null)
     .catch(() => null);
-  const dayGroups = groupByDay(newest);
 
   // Xếp A–Z theo tiếng Việt; bỏ tiền tố «TP »/«Thành phố » khi so → «TP Hồ Chí Minh» nằm ở vần H, chỗ người
   // dùng tìm (như bản mẫu A), không lạc xuống cuối vần T.
@@ -168,8 +166,7 @@ export default async function HomePage() {
           <AdSlot slotId="home-mid" />
 
           {/* Khối DN mới (spec 3.1 mục 4: 20 DN mới nhất, thẻ DN mục 3.3 + link xem tất cả), cùng kiểu hai khối duyệt ở
-              trên: tiêu đề giữa, dòng tóm tắt, rồi các thẻ trắng rời nhau (2 cột máy tính) nhóm theo
-              ngày hoạt động — ngày ở tiêu đề nhóm nên thẻ không lặp lại. */}
+              trên: tiêu đề giữa, dòng tóm tắt, rồi danh sách liệt kê gọn. */}
           <section aria-labelledby="new-title" className="pt-4 md:pt-6">
             <h2 id="new-title" className="browse-title">
               {M.home.newTitle}
@@ -187,31 +184,17 @@ export default async function HomePage() {
                 )}
               </div>
             )}
-            <div className="flex flex-col gap-5 md:gap-6">
-              {dayGroups.map((g) => (
-                <div key={g.date}>
-                  <h3 className="mb-2.5 flex items-baseline gap-2 text-sm font-semibold text-ink-2">
-                    <span>{g.heading}</span>
-                    <span className="font-normal text-muted tabular-nums">
-                      · {M.home.dayGroupCount(g.items.length)}
-                    </span>
-                  </h3>
-                  <ol className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-3">
-                    {g.items.map((c) => (
-                      <li key={c.mst} className="min-w-0">
-                        <CompanyCard
-                          company={c}
-                          variant="tile"
-                          headingLevel={4}
-                          showNew={false}
-                          showDate={false}
-                        />
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              ))}
-            </div>
+            {/* Danh sách liệt kê gọn trong một khung trắng: mỗi DN 3 dòng (tên + tình trạng · MST, đại diện · khu vực,
+                ngày), 2 cột từ 768px → 20 DN chỉ 10 hàng. */}
+            {newest.length > 0 && (
+              <ol className="panel grid grid-cols-1 px-4 md:grid-cols-2 md:gap-x-10 md:px-5">
+                {newest.map((c) => (
+                  <li key={c.mst} className="min-w-0 border-b border-line-soft">
+                    <CompanyCard company={c} variant="card" headingLevel={3} showNew={false} />
+                  </li>
+                ))}
+              </ol>
+            )}
             {newest.length > 0 && (
               <p className="mt-5 text-center md:mt-6">
                 <Link

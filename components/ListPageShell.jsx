@@ -31,7 +31,6 @@ export default function ListPageShell({
   slotPrefix,
   highlight,
   showNew = true,
-  groupByDate = false, // trang DN mới: nhóm danh sách theo ngày hoạt động
   showProvince = true,
 }) {
   const size = data.page_size || 20;
@@ -82,7 +81,7 @@ export default function ListPageShell({
             ô chọn cùng đường chân chữ (dòng chữ cao 44px như ô chọn); bảng bắt đầu cùng y dù trang có bộ lọc hay không. Không có DN nào: bỏ dòng
             «0 doanh nghiệp» (thông báo rỗng ngay dưới đã nói), vẫn giữ ô lọc để đổi lựa chọn. */}
           {/* role="status": đổi bộ lọc / trang thì trình đọc màn hình đọc số kết quả mới (WCAG 4.1.3). Điện thoại:
-              «Sắp xếp» cùng hàng với số đếm. Khoảng «Hiển thị 1–20» nằm ở tiêu đề khung danh sách. */}
+              «Sắp xếp» cùng hàng với số đếm (cạnh khoảng «Hiển thị 1–20»). */}
           {(total > 0 || filters) && (
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-3 md:gap-x-6 md:pb-4">
               <p role="status" className="text-sm leading-11 text-muted">
@@ -92,6 +91,14 @@ export default function ListPageShell({
                       {formatNumber(total)}
                     </span>{' '}
                     {M.list.countUnit}
+                    {range && (
+                      <span className="whitespace-nowrap">
+                        <span aria-hidden="true" className="px-2 text-line-strong">
+                          ·
+                        </span>
+                        <span className="tabular-nums">{range}</span>
+                      </span>
+                    )}
                   </>
                 )}
               </p>
@@ -105,10 +112,7 @@ export default function ListPageShell({
                 slotPrefix={slotPrefix}
                 highlight={highlight}
                 showNew={showNew}
-                groupByDate={groupByDate}
                 showProvince={showProvince}
-                title={M.list.listTitle}
-                meta={range}
               />
               <Pagination
                 page={data.page}

@@ -120,7 +120,7 @@ export default function CookieConsent() {
               <button
                 type="button"
                 onClick={acceptAll}
-                className="h-11 rounded border border-brand bg-brand px-5 text-body font-semibold text-white hover:bg-chrome-2 md:min-w-36"
+                className="h-11 rounded border border-brand bg-brand px-5 text-body font-semibold text-white hover:bg-cta-hover active:bg-chrome-2 md:min-w-36"
               >
                 {M.cookie.accept}
               </button>
@@ -145,7 +145,7 @@ export default function CookieConsent() {
             <button
               type="button"
               onClick={acceptAll}
-              className="h-11 rounded-lg bg-brand px-4 text-body font-semibold text-white hover:bg-chrome-2"
+              className="h-11 rounded-lg bg-brand px-4 text-body font-semibold text-white hover:bg-cta-hover active:bg-chrome-2"
             >
               {M.cookie.acceptAll}
             </button>

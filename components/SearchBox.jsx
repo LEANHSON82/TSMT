@@ -58,8 +58,8 @@ function recalledQuery() {
   }
 }
 
-// size: 'lg' (ô tìm lớn trong trang: trang chủ, 404… — cao 56px, điện thoại 52px) | 'nav' (header — cao 40px,
-// điện thoại 44px). Kiểu CafeF: ô nhập và nút «Tìm» navy dính liền nhau thành một viên bo tròn.
+// size: 'lg' (ô tìm lớn trong trang: trang chủ, 404… — cao 56px, điện thoại 52px) | 'nav' (header — cao 44px).
+// Ô nhập và nút «Tìm» than chì nằm chung một khung trắng bo góc 6px.
 export default function SearchBox({
   size = 'lg',
   defaultValue = '',
@@ -337,7 +337,15 @@ export default function SearchBox({
     >
       {/* Ô nhập (kính lúp bên trong) + nút «Tìm» luôn cùng một hàng, kể cả điện thoại 360px. */}
       <div className="flex w-full gap-2">
-        <div className="search-pill flex min-w-0 flex-1 rounded-full">
+        {/* Khung ô tìm bo góc nhẹ (6px): ô nhập + nút «Tìm» than chì nằm TRONG một khung trắng — trên dải menu tối,
+            khung trắng tách nút tối khỏi nền tối; trên nền trắng, khung có viền xám. Focus: viền + quầng bao cả khung. */}
+        <div
+          className={`search-box flex min-w-0 flex-1 items-stretch gap-1 rounded-md border bg-white p-1 ${
+            size === 'nav'
+              ? 'h-11 border-white'
+              : 'h-[52px] border-field hover:border-ink-2 md:h-14'
+          }`}
+        >
           <div className="relative min-w-0 flex-1">
             <label
               htmlFor={inputId}
@@ -346,7 +354,7 @@ export default function SearchBox({
             >
               {M.search.label}
             </label>
-            <span className="pointer-events-none absolute top-1/2 left-4 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-brand md:left-[18px]">
+            <span className="pointer-events-none absolute top-1/2 left-2.5 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-brand md:left-3">
               {loading ? spinner : <IconSearch size={20} strokeWidth={2.2} />}
             </span>
             <input
@@ -407,12 +415,12 @@ export default function SearchBox({
                 }, 150)
               }
               data-size={size}
-              className={`search-input w-full appearance-none rounded-l-full rounded-r-none border border-r-0 border-field bg-white pr-1 pl-[44px] text-base text-ink text-ellipsis placeholder:text-placeholder hover:border-ink-2 md:pr-4 md:pl-[46px] ${size === 'nav' ? 'h-11 md:text-[15px]' : 'h-[52px] md:h-14 md:text-[17px]'}`}
+              className={`search-input h-full w-full appearance-none rounded-[4px] border-0 bg-transparent pr-1 pl-[38px] text-base text-ink text-ellipsis placeholder:text-placeholder md:pr-3 md:pl-[42px] ${size === 'nav' ? 'md:text-[15px]' : 'md:text-[17px]'}`}
             />
           </div>
           <button
             type="submit"
-            className={`inline-flex flex-none items-center justify-center rounded-l-none rounded-r-full font-semibold ${size === 'nav' ? 'h-11 bg-silver px-4 text-base text-chrome hover:bg-white md:text-[15px]' : 'h-[52px] bg-cta px-5 text-[17px] text-white hover:bg-cta-hover md:h-14 md:px-8'}`}
+            className={`inline-flex h-full flex-none items-center justify-center rounded-[4px] bg-cta font-semibold text-white hover:bg-cta-hover active:bg-chrome-2 ${size === 'nav' ? 'px-4 text-base md:text-[15px]' : 'px-5 text-[17px] md:px-8'}`}
           >
             {M.search.submit}
           </button>

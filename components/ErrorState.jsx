@@ -26,7 +26,7 @@ export default function ErrorState({
         <button
           type="button"
           onClick={onRetry}
-          className="mt-5 h-11 rounded-lg bg-brand px-5 text-base font-semibold text-white hover:bg-chrome-2"
+          className="mt-5 h-11 rounded-lg bg-brand px-5 text-base font-semibold text-white hover:bg-cta-hover active:bg-chrome-2"
         >
           {M.list.retry}
         </button>

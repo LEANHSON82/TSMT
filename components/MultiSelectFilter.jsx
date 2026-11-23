@@ -175,7 +175,7 @@ export default function MultiSelectFilter({
             <button
               type="button"
               onClick={apply}
-              className="press h-11 rounded-lg bg-brand px-4 text-body font-semibold text-white hover:bg-chrome-2"
+              className="press h-11 rounded-lg bg-brand px-4 text-body font-semibold text-white hover:bg-cta-hover active:bg-chrome-2"
             >
               {M.search.multiApply}
               {draft.length ? ` (${draft.length})` : ''}

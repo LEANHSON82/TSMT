@@ -92,17 +92,19 @@ function AdvancedSearchIcon({ href, className = '' }) {
       prefetch={false}
       aria-label={M.list.advancedFilter}
       title={M.list.advancedFilter}
-      className={`inline-flex h-11 w-11 flex-none items-center justify-center rounded-full border border-field bg-white text-brand no-underline hover:border-ink-2 ${className}`}
+      className={`inline-flex h-11 w-11 flex-none items-center justify-center rounded-md border border-field bg-white text-brand no-underline hover:border-ink-2 hover:bg-page ${className}`}
     >
       <FilterIcon size={20} />
     </Link>
   );
 }
 
-// Dải menu than chì kiểu CafeF (cao 48px): chữ trắng in hoa 14px đậm; mục của trang đang xem có vạch bạc 3px sát đáy.
+// Dải menu than chì kiểu CafeF (cao 48px): chữ trắng in hoa 14px đậm (85%); trang đang xem: trắng hẳn + vạch trắng 3px.
 const NAV_ITEM =
-  'nav-item inline-flex h-12 items-center gap-1 px-4 text-sm font-semibold tracking-[0.02em] whitespace-nowrap text-white uppercase no-underline hover:bg-white/10 hover:text-white';
-const CURRENT_BAR = 'shadow-[inset_0_-3px_0_var(--color-silver)]';
+  'nav-item inline-flex h-12 items-center gap-1 px-4 text-sm font-semibold tracking-[0.02em] whitespace-nowrap text-white/85 uppercase no-underline hover:bg-white/15 hover:text-white';
+// Trang đang xem: chữ trắng hẳn + nền sáng nhẹ + vạch trắng 3px sát đáy (rõ hơn hẳn mục thường chữ trắng 85%).
+// Rê chuột: nền sáng hơn (trắng 15%). Bảng thả xuống đang mở: giữ nền trắng 15%.
+const CURRENT_BAR = 'bg-white/10 text-white shadow-[inset_0_-3px_0_#ffffff]';
 
 function DesktopDropdown({ id, label, open, current, onToggle, onClose, children }) {
   const btnRef = useRef(null);
@@ -140,7 +142,7 @@ function DesktopDropdown({ id, label, open, current, onToggle, onClose, children
         aria-current={current ? 'true' : undefined}
         onClick={onToggle}
         className={`${NAV_ITEM} cursor-pointer bg-transparent ${
-          current ? CURRENT_BAR : open ? 'bg-white/10' : ''
+          current ? CURRENT_BAR : open ? 'bg-white/15 text-white' : ''
         }`}
       >
         {label}
@@ -450,7 +452,9 @@ export default function HeaderBar({ provinces, industries }) {
               href="/"
               aria-label={M.nav.home}
               aria-current={pathname === '/' ? 'page' : undefined}
-              className="nav-item flex w-12 flex-none items-center justify-center bg-chrome-2 text-white hover:bg-black hover:text-white"
+              className={`nav-item flex w-12 flex-none items-center justify-center text-white hover:bg-white/15 hover:text-white ${
+                pathname === '/' ? 'bg-white/10 shadow-[inset_0_-3px_0_#ffffff]' : 'bg-chrome-2'
+              }`}
             >
               <svg
                 width="18"

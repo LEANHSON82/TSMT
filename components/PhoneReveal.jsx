@@ -106,7 +106,7 @@ function PhoneUnlocker({ mst, masked, indent }) {
     const btn =
       // Nút phụ kiểu A (viền xám đậm, chữ xanh, bo 4px; hover viền xanh). press: nhấn thu nhỏ như <button>;
       // sm:min-w: «Sao chép» ↔ «Đã sao chép» không làm xô hàng nút.
-      'press inline-flex h-11 items-center justify-center gap-1 rounded-full border border-line-strong bg-white px-1.5 text-sm font-semibold whitespace-nowrap text-brand no-underline hover:border-brand hover:text-brand sm:min-w-[136px] sm:gap-1.5 sm:px-3 sm:text-body';
+      'press inline-flex h-11 items-center justify-center gap-1 rounded-md border border-line-strong bg-white px-1.5 text-sm font-semibold whitespace-nowrap text-brand no-underline hover:border-brand hover:text-brand sm:min-w-[136px] sm:gap-1.5 sm:px-3 sm:text-body';
     return (
       <>
         {live}
@@ -229,7 +229,7 @@ function PhoneUnlocker({ mst, masked, indent }) {
               aria-disabled={busy || undefined}
               aria-describedby={`phone-note-${mst}`}
               aria-busy={busy}
-              className="inline-flex h-11 w-full flex-none items-center justify-center gap-2 rounded-full bg-cta px-5 text-body font-semibold whitespace-nowrap text-white hover:bg-cta-hover aria-busy:cursor-progress aria-busy:hover:bg-cta disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-2 md:h-11 md:w-auto md:px-5"
+              className="inline-flex h-11 w-full flex-none items-center justify-center gap-2 rounded-md bg-cta px-5 text-body font-semibold whitespace-nowrap text-white hover:bg-cta-hover active:bg-chrome-2 aria-busy:cursor-progress aria-busy:hover:bg-cta disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-2 md:h-11 md:w-auto md:px-5"
             >
               {icon}
               {label}
@@ -269,7 +269,7 @@ function PhoneUnlocker({ mst, masked, indent }) {
               <button
                 type="button"
                 onClick={cancel}
-                className="h-11 rounded-full bg-page px-4 text-body font-semibold text-brand hover:bg-line-soft"
+                className="h-11 rounded-md bg-page px-4 text-body font-semibold text-brand hover:bg-line-soft"
               >
                 {M.phone.confirmCancel}
               </button>
@@ -277,7 +277,7 @@ function PhoneUnlocker({ mst, masked, indent }) {
                 ref={confirmBtnRef}
                 type="button"
                 onClick={confirm}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-cta px-4 text-body font-semibold text-white hover:bg-cta-hover"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-cta px-4 text-body font-semibold text-white hover:bg-cta-hover active:bg-chrome-2"
               >
                 <IconPlay size={14} />
                 {M.phone.confirmOk}

@@ -45,7 +45,8 @@
   --color-title-50: #e3e6ea;
   --color-navy: #1f2937;
   --color-cta: #1f2937;
-  --color-cta-hover: #111827;
+  /* Rê chuột lên nút than chì: SÁNG lên (#374151) cho thấy rõ; nhấn giữ: tối hơn (chrome-2). */
+  --color-cta-hover: #374151;
   --color-cta-50: #f1f2f4;
   --color-accent: #1f2937;
   /* Chữ «T» của logo (spec: T cam, MST xanh). */
@@ -340,20 +341,23 @@
 .search-input:placeholder-shown::-webkit-search-cancel-button {
   display: none;
 }
-/* Ô tìm: focus = viền trong than chì 2px + quầng 3px bao CẢ ô nhập lẫn nút «Tìm» (đặt trên khung .search-pill
-   nên không còn khía ở chỗ nối). Trên nền than chì, quầng màu trắng. */
+/* Ô tìm: khung .search-box (ô nhập + nút) nhận focus — viền than chì + quầng 3px bao cả khung. Trên nền than chì:
+   viền trắng + quầng trắng mờ. Ô nhập bên trong không tự vẽ viền focus. */
 .search-input:focus {
-  border-color: var(--color-brand);
-  box-shadow: inset 0 0 0 1px var(--color-brand);
+  outline: none;
+  box-shadow: none;
 }
-.search-pill:focus-within {
+.search-box:focus-within {
+  border-color: var(--color-brand);
   box-shadow: 0 0 0 3px #b9bfc8;
 }
-.bg-chrome .search-pill:focus-within {
-  box-shadow: 0 0 0 3px #ffffff;
+.bg-chrome .search-box:focus-within {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
 }
-.search-pill :where(button):focus-visible {
-  outline: none;
+.search-box :where(button):focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 1px;
 }
 
 /* Thanh tiến độ khi chuyển trang (components/NavigationProgress.jsx). Hiện sau 150 ms để không nháy

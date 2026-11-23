@@ -18,7 +18,7 @@ export default function GlobalError() {
             <p className="mt-2 text-body text-ink-2">{M.home.retryBody}</p>
             <a
               href=""
-              className="mt-5 inline-flex h-11 items-center rounded-full bg-cta px-6 font-semibold text-white no-underline hover:bg-cta-hover"
+              className="mt-5 inline-flex h-11 items-center rounded-md bg-cta px-6 font-semibold text-white no-underline hover:bg-cta-hover"
             >
               {M.home.retry}
             </a>

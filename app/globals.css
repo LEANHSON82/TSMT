@@ -49,6 +49,7 @@
   --color-cta-hover: #1d4ed8;
   --color-cta-50: #eff6ff;
   --color-accent: #2563eb;
+  /* Vạch mục đang xem trên dải menu navy (5,6:1). */
   --color-accent-on-dark: #60a5fa;
   /* Logo footer: «T» navy, «MST» xanh. */
   --color-logo-t: #142d4e;
@@ -349,7 +350,7 @@
 /* Ô tìm: khung .search-box chứa ô nhập + nút «Tìm» xanh liền nhau,
    khung nhận focus (ô nhập bên trong không tự vẽ viền).
    --lg  (ô lớn trong trang: trang chủ, 404): nền trắng, viền mảnh bo 8px, đổ bóng nhẹ; nút than chì liền bên phải.
-   --nav (header trắng): cùng kiểu ô lớn nhưng gọn: viền xám bo 6px, nút «Tìm» xanh liền bên phải. */
+   --nav (dải menu navy): ô trắng gọn bo 6px, nút «Tìm» xanh liền bên phải; focus quầng trắng mờ. */
 .search-input:focus {
   outline: none;
   box-shadow: none;
@@ -412,9 +413,12 @@
 .search-box--nav:hover {
   border-color: var(--color-field);
 }
+.search-box--nav {
+  border-color: #ffffff;
+}
 .search-box--nav:focus-within {
-  border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px #bfdbfe;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.45);
 }
 .search-box--nav .search-input {
   color: var(--color-ink);

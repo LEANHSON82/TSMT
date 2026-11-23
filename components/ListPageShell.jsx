@@ -47,31 +47,26 @@ export default function ListPageShell({
     count > 0 ? M.list.showing(formatNumber(from), formatNumber(from + count - 1)) : null;
   return (
     <main className="flex flex-col">
-      {/* Kiểu CafeF: breadcrumb, rồi khung trắng chứa H1 (đỏ), mô tả và phần đầu riêng của trang (tab, bộ lọc…);
-          bên dưới là thanh số đếm + khung danh sách. */}
-      <div className="site-wrap">
-        {breadcrumb && (
-          <div className="pt-3 md:pt-4">
-            <Breadcrumb items={breadcrumb} />
-          </div>
-        )}
-        <div
-          className={`card px-4 py-3.5 md:px-6 md:py-5 ${breadcrumb ? 'mt-2 md:mt-3' : 'mt-4 md:mt-6'}`}
-        >
-          <header>
-            <h1 className="text-[22px] leading-7 font-semibold text-pretty text-title md:text-[28px] md:leading-[34px]">
+      {/* Dải đầu trang nền xanh xám nhạt (cùng kiểu hero trang chủ, không bọc khung trắng): breadcrumb, H1, câu mô
+          tả ngắn (SEO, spec 3.5) và phần đầu riêng của trang (thanh tìm trong tỉnh / ngành, tab, bộ lọc…). Bên dưới là
+          thanh số đếm + danh sách. */}
+      <div className="list-hero">
+        <div className="site-wrap pt-3 pb-6 md:pt-4 md:pb-8">
+          {breadcrumb && <Breadcrumb items={breadcrumb} />}
+          <header className={breadcrumb ? 'mt-3 md:mt-4' : 'mt-2'}>
+            <h1 className="text-[24px] leading-[30px] font-semibold text-pretty text-title md:text-[32px] md:leading-10">
               {title}
               {data.page > 1 && (
                 <span className="font-normal text-muted"> – {M.pagination.page(data.page)}</span>
               )}
             </h1>
             {description && (
-              <p className="mt-1.5 max-w-[760px] text-sm text-pretty text-muted md:text-[15px]">
+              <p className="mt-2 max-w-[760px] text-sm text-pretty text-ink-2 md:text-[15px]">
                 {description}
               </p>
             )}
           </header>
-          {intro && <div className="mt-4 flex flex-col gap-4 md:mt-5">{intro}</div>}
+          {intro && <div className="mt-5 flex flex-col gap-4 md:mt-6">{intro}</div>}
         </div>
       </div>
       <div className="site-wrap pb-12 md:pb-16">

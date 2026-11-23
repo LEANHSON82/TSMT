@@ -657,6 +657,16 @@ html[data-navigating] [data-list-content] {
 .hero-tint {
   background: linear-gradient(180deg, #e8f0fb 0%, #f3f6fa 100%);
 }
+/* Dải đầu trang danh sách (DN mới / tỉnh / ngành / kết quả tìm): cùng tông hero trang chủ, đáy có vạch mảnh để tách
+   phần danh sách bên dưới. Ô tìm / ô chọn trên dải: nền trắng, bóng nhẹ cho nổi lên. */
+.list-hero {
+  background: linear-gradient(180deg, #e8f0fb 0%, #eef3fa 100%);
+  border-bottom: 1px solid var(--color-line);
+}
+.list-hero .search-box,
+.list-hero select {
+  box-shadow: 0 6px 18px -10px rgba(15, 23, 42, 0.25);
+}
 @supports (animation-timeline: scroll()) {
   .header-lift {
     animation: header-lift linear both;

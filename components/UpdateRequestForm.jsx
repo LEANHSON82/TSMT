@@ -182,7 +182,7 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
         className="card motion-rise flex flex-col items-start gap-3 px-5 py-6 outline-none md:px-8 md:py-8"
       >
         <h2 className="flex items-center gap-2 text-h2-m font-semibold text-ink md:text-h2">
-          <IconCheckCircle size={24} strokeWidth={1.8} className="flex-none text-ok" />
+          <IconCheckCircle size={24} strokeWidth={1.8} className="flex-none text-chrome" />
           {M.updateRequest.doneTitle}
         </h2>
         <p className="max-w-[640px] text-body leading-7 text-ink-2">
@@ -414,7 +414,7 @@ export default function UpdateRequestForm({ initialMst = '', initialCompany = nu
 
       {/* Cloudflare Turnstile — đang giả lập; khi có site key sẽ render widget thật ở đây. */}
       <div className="flex h-[65px] w-[300px] max-w-full items-center gap-3 rounded border border-line bg-page px-3 text-sm text-ink-2">
-        <IconShield size={22} className="flex-none text-ok" />
+        <IconShield size={22} className="flex-none text-chrome" />
         <span>
           {TURNSTILE_SITE_KEY ? M.updateRequest.turnstileChecking : M.updateRequest.turnstileMock}
         </span>

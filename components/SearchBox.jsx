@@ -312,7 +312,7 @@ export default function SearchBox({
           </div>
           <button
             type="submit"
-            className={`inline-flex flex-none items-center justify-center rounded-l-none rounded-r-full bg-cta font-semibold text-white hover:bg-cta-hover ${size === 'nav' ? 'h-11 px-4 text-base md:h-10 md:text-[15px]' : 'h-[52px] px-5 text-[17px] md:h-14 md:px-8'}`}
+            className={`inline-flex flex-none items-center justify-center rounded-l-none rounded-r-full font-semibold ${size === 'nav' ? 'h-11 bg-silver px-4 text-base text-chrome hover:bg-white md:h-10 md:text-[15px]' : 'h-[52px] bg-cta px-5 text-[17px] text-white hover:bg-cta-hover md:h-14 md:px-8'}`}
           >
             {M.search.submit}
           </button>

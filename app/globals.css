@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* Hệ thiết kế «CafeF» (bản mẫu: .design/cafef-design), bộ màu than chì + cam đất: dải menu than chì,
+/* Hệ thiết kế «CafeF» (bản mẫu: .design/cafef-design), bộ màu đơn sắc than chì – bạc – trắng: dải menu than chì,
    tên DN gần đen, nội dung trong các khung trắng viền mảnh bo 10px, tiêu đề khung dạng tab nền navy.
    Chữ: Inter, đúng 2 độ đậm 400/600. Nền trang xám nhạt #F5F6F8.
    Khung 1160 = cột chính + khe 20 + cột phải 300. */
@@ -30,25 +30,26 @@
   --default-transition-duration: 150ms;
   --default-transition-timing-function: ease-out;
 
-  /* Bộ màu «than chì + cam đất» (chủ dự án chọn 23/11/2026). Than chì là màu chính: dải menu, tiêu đề khung,
-     link, tên DN, nút thường. Cam đất (cùng họ chữ «T» của logo) là màu nhấn DUY NHẤT, chỉ cho hai nút chính
-     («Tìm», «Xem số điện thoại»), vạch mục đang xem, nhãn «MỚI» / «Ngành chính» và viền focus. Không dùng xanh
-     dương; xanh lá chỉ cho nhãn «Đang hoạt động» (spec 3.3).
-     brand = màu chữ link / nút thường (than chì); cta = nút chính (cam đất, chữ trắng 5,2:1). */
+  /* Bộ màu đơn sắc «than chì – bạc – trắng» (chủ dự án chọn 23/11/2026): không dùng màu sáng / màu nhấn.
+     Than chì #1F2937: dải menu, tiêu đề khung, link, tên DN, nút. Bạc #C7CCD4 / #E3E6EA: nút trên nền than chì,
+     nhãn, tô sáng từ khoá, vạch mục đang xem. Ngoại lệ bắt buộc: xanh lá cho nhãn «Đang hoạt động» (spec 3.3) và
+     đỏ cho chữ báo lỗi của form. */
   --color-chrome: #1f2937;
   --color-chrome-2: #111827;
+  --color-silver: #c7ccd4;
+  --color-silver-2: #e3e6ea;
   --color-brand: #1f2937;
-  --color-brand-hover: #c2410c;
-  --color-brand-50: #fff4ec;
+  --color-brand-hover: #4b5563;
+  --color-brand-50: #f1f2f4;
   --color-title: #111827;
-  --color-title-50: #fff4ec;
+  --color-title-50: #e3e6ea;
   --color-navy: #1f2937;
-  --color-cta: #c2410c;
-  --color-cta-hover: #9a3412;
-  --color-cta-50: #fff4ec;
-  --color-accent: #c2410c;
+  --color-cta: #1f2937;
+  --color-cta-hover: #111827;
+  --color-cta-50: #f1f2f4;
+  --color-accent: #1f2937;
   /* Chữ «T» của logo (spec: T cam, MST xanh). */
-  --color-logo-t: #e8610e;
+  --color-logo-t: #9ca3af;
 
   --color-page: #f5f6f8;
   --color-surface: #f5f6f8;
@@ -60,7 +61,7 @@
   --color-line-strong: #c9d0da;
   --color-line-soft: #eef0f3;
   --color-field: #858c99;
-  --color-focus: #c2410c;
+  --color-focus: #1f2937;
 
   --color-ok: #0a7c33;
   --color-ok-bg: #e6f4ea;
@@ -68,11 +69,11 @@
   --color-off-bg: #eceef1;
   --color-danger: #b42318;
   --color-danger-bg: #fef3f2;
-  --color-warn: #6b4500;
-  --color-warn-bg: #fff6e5;
-  /* Nhãn «MỚI»: nền cam nhạt chữ cam đậm (tương phản 4,9:1 — chữ trắng trên cam chỉ 3,4:1). */
-  --color-new: #b4480a;
-  --color-new-bg: #fff1e6;
+  --color-warn: #374151;
+  --color-warn-bg: #f1f2f4;
+  /* Nhãn «MỚI»: nền bạc chữ than chì. */
+  --color-new: #1f2937;
+  --color-new-bg: #e3e6ea;
 
   --color-ad: #e7eaee;
 
@@ -262,8 +263,8 @@
     white-space: nowrap;
   }
   .tag-title {
-    background: var(--color-title-50);
-    color: #9a3412;
+    background: var(--color-silver-2);
+    color: var(--color-chrome);
   }
   .tag-new {
     background: var(--color-new-bg);
@@ -310,7 +311,7 @@
 /* Ô tìm hệ A: focus = viền xanh + quầng nhạt 3px bên ngoài (rõ hơn ô form thường). */
 .search-input:focus {
   border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px #fed7aa;
+  box-shadow: 0 0 0 3px #d5d9df;
 }
 
 /* Thanh tiến độ khi chuyển trang (components/NavigationProgress.jsx). Hiện sau 150 ms để không nháy

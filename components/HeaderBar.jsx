@@ -99,10 +99,10 @@ function AdvancedSearchIcon({ href, className = '' }) {
 }
 
 // Mục menu hàng 1: chữ 16px đậm; mục của trang đang xem màu xanh + vạch 2px sát đáy vùng bấm.
-// Dải menu than chì kiểu CafeF: chữ trắng in hoa 13px; mục của trang đang xem có vạch cam 3px sát đáy.
+// Dải menu than chì kiểu CafeF: chữ trắng in hoa 13px; mục của trang đang xem có vạch bạc 3px sát đáy.
 const NAV_ITEM =
   'inline-flex h-11 items-center gap-1 px-4 text-[13px] tracking-[0.02em] whitespace-nowrap text-white uppercase no-underline hover:bg-white/10 hover:text-white';
-const CURRENT_BAR = 'font-semibold shadow-[inset_0_-3px_0_#f59e0b]';
+const CURRENT_BAR = 'font-semibold shadow-[inset_0_-3px_0_#c7ccd4]';
 
 function DesktopDropdown({ id, label, open, current, onToggle, onClose, children }) {
   const btnRef = useRef(null);

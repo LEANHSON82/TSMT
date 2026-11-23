@@ -5,7 +5,7 @@ export default function Highlight({ text, query }) {
   if (!query) return text;
   return highlightParts(text, query).map((p, i) =>
     p.hit ? (
-      <mark key={i} className="rounded-sm bg-[#fde7b0] text-inherit">
+      <mark key={i} className="rounded-sm bg-silver-2 text-inherit">
         {p.text}
       </mark>
     ) : (

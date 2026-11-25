@@ -34,8 +34,10 @@ function isNew(foundedDate) {
 }
 
 /** Cột của dạng bảng — CompanyList dùng cùng giá trị cho hàng tiêu đề cột. */
+// Cột tên rộng nhất (~400px ở khung 1160): đo trên dữ liệu mẫu, tên chữ hoa 14px vừa một dòng ~80% (trước 286px/15px:
+// ~20%). MST 120 (đủ MST chi nhánh 14 ký tự), tình trạng 124 (đủ «Ngừng hoạt động»).
 export const TABLE_COLS =
-  'lg:grid-cols-[minmax(0,1fr)_132px_minmax(0,160px)_minmax(0,210px)_104px_128px]';
+  'lg:grid-cols-[minmax(0,1fr)_120px_minmax(0,140px)_minmax(0,170px)_88px_124px]';
 
 export default function CompanyCard({
   company: c,
@@ -74,13 +76,13 @@ export default function CompanyCard({
     <article
       className={`group relative grid grid-cols-1 gap-y-0.5 py-3.5 ${
         table
-          ? `card-row px-4 transition-colors duration-150 hover:bg-page/60 md:px-5 ${TABLE_COLS} lg:items-center lg:gap-x-5 lg:py-3`
+          ? `card-row px-4 transition-colors duration-150 hover:bg-page/60 md:px-5 ${TABLE_COLS} lg:items-center lg:gap-x-4 lg:py-3`
           : ''
       }`}
     >
       <H
-        className={`mb-1 min-w-0 text-[15px] leading-6 font-semibold text-pretty md:text-base ${
-          table ? 'lg:col-start-1 lg:row-start-1 lg:mb-0 lg:line-clamp-2 lg:text-[15px]' : ''
+        className={`mb-1 min-w-0 text-[15px] leading-6 font-semibold text-pretty ${
+          table ? 'lg:col-start-1 lg:row-start-1 lg:mb-0 lg:line-clamp-2 lg:text-sm' : ''
         }`}
       >
         <Link

@@ -30,7 +30,7 @@ export default function CompanyList({
     <div className="panel">
       <div
         aria-hidden="true"
-        className={`hidden border-b border-line bg-white px-5 py-3 lg:grid lg:gap-x-5 ${TABLE_COLS}`}
+        className={`hidden border-b border-line bg-white px-5 py-3 lg:grid lg:gap-x-4 ${TABLE_COLS}`}
       >
         <span className={th}>{M.list.colCompany}</span>
         <span className={th}>{M.company.mst}</span>

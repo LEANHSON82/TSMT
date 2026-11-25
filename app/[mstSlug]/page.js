@@ -261,7 +261,7 @@ function RelatedRow({ r }) {
   const dot = "max-lg:before:mr-2 max-lg:before:text-line-strong max-lg:before:content-['·']";
   return (
     <li className="relative border-b border-line-soft px-4 py-2.5 last:border-b-0 hover:bg-thead md:px-5">
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm leading-6 text-ink-2 lg:grid lg:grid-cols-[minmax(0,1fr)_100px_minmax(0,170px)_minmax(0,190px)_88px_128px] lg:gap-x-4">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm leading-6 text-ink-2 lg:grid lg:grid-cols-[minmax(0,1fr)_120px_minmax(0,140px)_minmax(0,170px)_88px_124px] lg:gap-x-4">
         <h3 className="w-full min-w-0 text-[15px] font-semibold text-pretty lg:line-clamp-2 lg:w-auto lg:text-sm">
           <Link
             href={companyPath(r)}

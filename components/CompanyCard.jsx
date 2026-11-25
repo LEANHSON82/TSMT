@@ -34,10 +34,10 @@ function isNew(foundedDate) {
 }
 
 /** Cột của dạng bảng — CompanyList dùng cùng giá trị cho hàng tiêu đề cột. */
-// Cột tên rộng nhất (~400px ở khung 1160): đo trên dữ liệu mẫu, tên chữ hoa 14px vừa một dòng ~80% (trước 286px/15px:
+// Cột tên rộng nhất (~430px ở khung 1160; cột thứ 4 chỉ ghi tỉnh/thành nên hẹp): đo trên dữ liệu mẫu, tên chữ hoa 14px vừa một dòng ~80% (trước 286px/15px:
 // ~20%). MST 120 (đủ MST chi nhánh 14 ký tự), tình trạng 124 (đủ «Ngừng hoạt động»).
 export const TABLE_COLS =
-  'lg:grid-cols-[minmax(0,1fr)_120px_minmax(0,140px)_minmax(0,170px)_88px_124px]';
+  'lg:grid-cols-[minmax(0,1fr)_120px_minmax(0,150px)_minmax(0,130px)_88px_124px]';
 
 export default function CompanyCard({
   company: c,
@@ -56,7 +56,6 @@ export default function CompanyCard({
   const area =
     areaAddress(c.address, c.province?.name, { withProvince: showProvince }) ||
     shortAddress(c.address);
-  const splitArea = Boolean(provinceName && ward && ward !== area);
   const date = formatDate(c.founded_date);
   const fresh = showNew && isNew(c.founded_date);
   const phone = c.matched === 'phone';
@@ -118,23 +117,12 @@ export default function CompanyCard({
             )}
           </dd>
         </div>
+        {/* Địa chỉ rút gọn một dòng (spec 3.3): chỉ tỉnh/thành (đủ để lọc nhanh, cần thì bấm xem chi tiết). Trang theo
+            tỉnh (tỉnh đã ở tiêu đề): ghi phường/xã. Địa chỉ đầy đủ ở tooltip. */}
         <div className={field('lg:col-start-4')}>
-          <dt className={label}>{M.company.addressShort}</dt>
-          <dd
-            className={`min-w-0 text-sm leading-6 text-ink-2 ${table ? 'lg:text-[13px]' : ''} ${table && splitArea ? 'lg:flex' : table ? 'lg:truncate' : ''}`}
-            title={table ? c.address : undefined}
-          >
-            {table && splitArea ? (
-              <>
-                <span className="lg:truncate">{ward},</span>
-                <span className="lg:flex-none lg:pl-1 lg:whitespace-nowrap">
-                  <span className="lg:hidden"> </span>
-                  {provinceName}
-                </span>
-              </>
-            ) : (
-              area || <span className="text-muted">—</span>
-            )}
+          <dt className={label}>{showProvince ? M.company.provinceShort : M.company.wardShort}</dt>
+          <dd className={`${value} text-ink-2`} title={table ? c.address : undefined}>
+            {(showProvince ? provinceName : ward) || area || <span className="text-muted">—</span>}
           </dd>
         </div>
         <div className={field('lg:col-start-5')}>

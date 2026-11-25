@@ -35,7 +35,7 @@ export default function CompanyList({
         <span className={th}>{M.list.colCompany}</span>
         <span className={th}>{M.company.mst}</span>
         <span className={th}>{M.company.representative}</span>
-        <span className={th}>{M.company.addressShort}</span>
+        <span className={th}>{showProvince ? M.company.provinceShort : M.company.wardShort}</span>
         <span className={th}>{M.company.foundedDate}</span>
         <span className={`${th} text-right`}>{M.company.status}</span>
       </div>

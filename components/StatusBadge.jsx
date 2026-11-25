@@ -12,11 +12,14 @@ export default function StatusBadge({ status, plain = false, className = '' }) {
   // theo nên không chỉ dựa vào màu (WCAG 1.4.1).
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-semibold whitespace-nowrap ${
-        plain ? 'text-sm leading-5' : 'text-sm leading-5 md:text-[15px]'
-      } ${active ? 'text-ok' : 'text-off'} ${className}`}
+      className={`inline-flex items-center font-semibold whitespace-nowrap ${
+        plain
+          ? `gap-1.5 text-sm leading-5 ${active ? 'text-ok' : 'text-off'}`
+          : `rounded-full px-2.5 py-0.5 text-[13px] leading-5 ${active ? 'bg-[#dcfce7] text-[#166534]' : 'bg-off-bg text-off'}`
+      } ${className}`}
     >
-      <span aria-hidden="true" className="h-2 w-2 flex-none rounded-full bg-current" />
+      {/* Danh sách: chấm + chữ. Đầu trang DN: nhãn nền xanh lá nhạt (không chấm). */}
+      {plain && <span aria-hidden="true" className="h-2 w-2 flex-none rounded-full bg-current" />}
       {label}
     </span>
   );

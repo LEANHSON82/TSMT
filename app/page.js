@@ -144,7 +144,7 @@ export default async function HomePage() {
             {sorted.length === 0 && <HomeEmpty text={M.home.emptyProvinces} />}
             {sorted.length > 0 && (
               <MobileMore moreLabel={M.home.moreProvinces(sorted.length)}>
-                <ul className="browse-grid is-dense panel p-2 md:p-3">
+                <ul className="browse-grid is-dense">
                   {sorted.map((p, i) => (
                     // Tỉnh nào cũng là link (tỉnh chưa có DN mở trang báo «chưa có doanh nghiệp»), không có ô xám.
                     <li key={p.code} className={`min-w-0 ${i >= 12 ? 'mobile-extra' : ''}`}>
@@ -172,7 +172,7 @@ export default async function HomePage() {
               {M.home.industriesTitle}
             </h2>
             <MobileMore moreLabel={M.home.moreIndustries}>
-              <ul className="browse-grid panel p-2 md:p-3">
+              <ul className="browse-grid">
                 {POPULAR_INDUSTRIES.map((n, i) => (
                   <li key={n.code} className={`min-w-0 ${i >= 8 ? 'mobile-extra' : ''}`}>
                     <Link href={n.href} prefetch={false} className="browse-tile" title={n.name}>

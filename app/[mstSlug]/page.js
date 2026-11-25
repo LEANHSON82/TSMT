@@ -11,6 +11,7 @@ import IndustryTable from '@/components/IndustryTable';
 import JsonLd from '@/components/JsonLd';
 import PageHero, { PAGE_H1 } from '@/components/PageHero';
 import SectionHeader from '@/components/SectionHeader';
+import CopyButton from '@/components/CopyButton';
 import StatusBadge from '@/components/StatusBadge';
 import TrackOnMount from '@/components/TrackOnMount';
 import { getCompany, getRelatedCompanies } from '@/lib/api';
@@ -124,8 +125,22 @@ export default async function CompanyPage({ params }) {
         ]}
       >
         <h1 className={PAGE_H1}>{c.name}</h1>
+        {/* Ngay dưới tên DN: mã số thuế (nút sao chép) + tình trạng — hai thứ người tra cần nhất. */}
+        <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="text-[17px] font-semibold tracking-[0.02em] text-ink-2 tabular-nums">
+            <span className="sr-only">{M.company.mst}: </span>
+            {c.mst}
+          </span>
+          <CopyButton text={c.mst} label={M.company.copyMst} className="-mx-2.5 -my-2.5" />
+          {c.status && (
+            <span>
+              <span className="sr-only">{M.company.status}: </span>
+              <StatusBadge status={c.status} />
+            </span>
+          )}
+        </p>
         {(c.name_en || c.name_short) && (
-          <dl className="mt-1.5 flex flex-wrap gap-x-6 gap-y-0.5 text-sm text-muted md:text-[15px]">
+          <dl className="mt-2 flex flex-wrap gap-x-6 gap-y-0.5 text-sm text-muted">
             {c.name_en && (
               <div>
                 <dt className="mr-1 inline">{M.company.nameEn}:</dt>
@@ -140,43 +155,6 @@ export default async function CompanyPage({ params }) {
             )}
           </dl>
         )}
-        {/* Dòng tóm tắt ngay dưới tên DN (nhìn một lần là biết): tình trạng · ngày hoạt động · tỉnh · cập nhật. */}
-        <p className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-ink-2 md:text-[15px]">
-          {c.status && (
-            <span>
-              <span className="sr-only">{M.company.status}: </span>
-              <StatusBadge status={c.status} />
-            </span>
-          )}
-          {c.founded_date && (
-            <>
-              <span aria-hidden="true" className="text-line-strong">
-                ·
-              </span>
-              <span className="tabular-nums">
-                {M.company.foundedShort} {formatDate(c.founded_date)}
-              </span>
-            </>
-          )}
-          {c.province?.name && (
-            <>
-              <span aria-hidden="true" className="text-line-strong">
-                ·
-              </span>
-              <span>{c.province.name}</span>
-            </>
-          )}
-          {c.updated_at && (
-            <>
-              <span aria-hidden="true" className="text-line-strong">
-                ·
-              </span>
-              <span className="text-muted tabular-nums">
-                {M.company.updatedShort} {formatDate(c.updated_at)}
-              </span>
-            </>
-          )}
-        </p>
       </PageHero>
 
       <div className="site-wrap">

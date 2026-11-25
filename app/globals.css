@@ -956,53 +956,37 @@ article h3,
   border-color: var(--color-brand);
   box-shadow: 0 0 0 3px rgba(31, 72, 200, 0.15);
 }
-.block-title,
-.block-title.text-center {
-  text-align: left;
-  margin-bottom: 12px;
+.block-title {
+  margin-bottom: 14px;
   font-size: 20px;
   line-height: 28px;
 }
 @media (min-width: 768px) {
   .block-title {
+    margin-bottom: 18px;
     font-size: 22px;
     line-height: 30px;
   }
 }
-/* Tỉnh/thành, ngành nghề: các dòng link trong MỘT khung trắng (tên trái, số DN phải), rê chuột nền xám nhạt. */
-.browse-grid,
-.browse-grid.is-dense {
-  gap: 2px 16px;
-}
-.browse-tile,
-.browse-tile.is-row {
-  min-height: 42px;
-  padding: 8px 10px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  text-align: left;
-  color: var(--color-ink);
-}
-@media (min-width: 640px) {
-  .browse-tile {
-    min-height: 42px;
-    padding: 8px 10px;
-  }
+/* Tỉnh/thành, ngành nghề trang chủ: lưới ô trắng như cũ (tiêu đề giữa), làm gọn: viền mảnh bo 10px, không bóng; rê
+   chuột viền + nền xanh rất nhạt. Ô tỉnh: tên trái, số DN phải (xám); ô ngành: tên giữa. */
+.browse-tile {
+  border-color: var(--color-line);
+  border-radius: 10px;
 }
 a.browse-tile:hover {
-  background: var(--color-silver-2);
-  color: var(--color-brand);
+  border-color: var(--color-brand);
+  background: var(--color-brand-50);
   box-shadow: none;
 }
-.browse-tile .browse-name {
+.browse-name {
   font-weight: 500;
 }
-.browse-tile .browse-count {
+.browse-tile.is-row {
+  justify-content: space-between;
+  padding: 8px 14px;
+}
+.browse-count {
   font-weight: 500;
   color: var(--color-muted);
 }

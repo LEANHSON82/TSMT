@@ -661,14 +661,15 @@ html[data-navigating] [data-list-content] {
 }
 
 /* Hero trang chủ: nền xanh xám nhạt chuyển dần xuống màu nền trang. */
+/* Dải đầu trang: xanh nhạt ở đỉnh, đáy đúng bằng màu nền trang (--color-page) → tan vào phần dưới, không lộ mép
+   (trước đáy #edf2f9 / #eef3fa lệch nền #f3f6fa nên thấy một đường ngang). */
 .hero-tint {
-  background: linear-gradient(180deg, #dde8f8 0%, #edf2f9 100%);
+  background: linear-gradient(180deg, #dde8f8 0%, var(--color-page) 100%);
 }
-/* Dải đầu trang danh sách (DN mới / tỉnh / ngành / kết quả tìm): cùng tông hero trang chủ, đáy có vạch mảnh để tách
-   phần danh sách bên dưới. Ô tìm / ô chọn trên dải: nền trắng, bóng nhẹ cho nổi lên. */
+/* Dải đầu trang trong (DN mới / tỉnh / ngành / kết quả tìm / trang DN…): cùng cách với hero trang chủ, không vạch
+   kẻ đáy. Ô tìm / ô chọn trên dải: nền trắng, bóng nhẹ cho nổi lên. */
 .list-hero {
-  background: linear-gradient(180deg, #e8f0fb 0%, #eef3fa 100%);
-  border-bottom: 1px solid var(--color-line);
+  background: linear-gradient(180deg, #e6eefa 0%, var(--color-page) 100%);
 }
 .list-hero .search-box,
 .list-hero select {

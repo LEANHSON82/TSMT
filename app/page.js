@@ -112,33 +112,21 @@ export default async function HomePage() {
         {/* Phần dưới hero: cùng khung .site-wrap với header/hero → mép trái mọi khối x=120 ở 1440. Nhịp dọc: đầu trang
             48 (điện thoại 32), giữa các khối 48 (điện thoại 40). */}
         <div className="site-wrap flex flex-col gap-10 pt-8 pb-12 md:gap-12 md:pt-12 md:pb-16">
-          {/* Khối DN mới (spec 3.1 mục 4: 20 DN mới nhất, thẻ DN mục 3.3 + link xem tất cả; không phân trang): tiêu đề
-              căn trái, link «Xem tất cả» cùng hàng dòng tóm tắt. */}
+          {/* Khối DN mới (spec 3.1 mục 4: 20 DN mới nhất, thẻ DN mục 3.3; không phân trang, không link «Xem tất cả»):
+              tiêu đề căn trái, dòng tóm tắt. */}
           <section aria-labelledby="new-title">
             <h2 id="new-title" className="block-title mb-1!">
               {M.home.newTitle}
             </h2>
-            {/* Dòng tóm tắt + «Xem tất cả» cùng một hàng dưới tiêu đề (điện thoại không đẩy tiêu đề xuống 2 dòng). */}
-            {newest.length > 0 && (
-              <div className="mb-3 flex items-center justify-between gap-x-4 md:mb-4">
-                <p className="min-w-0 text-sm text-ink-2 md:text-[15px]">
-                  {newTotal != null && (
-                    <>
-                      <span className="font-semibold text-title tabular-nums">
-                        {formatNumber(newTotal)}
-                      </span>{' '}
-                      {M.home.newCount}
-                    </>
-                  )}
-                </p>
-                <Link
-                  href="/doanh-nghiep-moi-thanh-lap"
-                  className="inline-flex min-h-11 flex-none items-center gap-1 text-sm font-semibold whitespace-nowrap text-brand no-underline hover:text-brand-hover md:text-[15px]"
-                >
-                  {M.home.seeAll} <span aria-hidden="true">→</span>
-                  <span className="sr-only">{M.home.newTitle.toLowerCase()}</span>
-                </Link>
-              </div>
+            {/* Dòng tóm tắt dưới tiêu đề. Không có link «Xem tất cả» sang danh sách phân trang (chủ dự án yêu cầu
+                25/11/2026: trang chủ không dẫn vào phân trang; trang DN mới vẫn vào được từ menu header). */}
+            {newest.length > 0 && newTotal != null && (
+              <p className="mb-3 text-sm leading-11 text-ink-2 md:mb-4 md:text-[15px]">
+                <span className="font-semibold text-title tabular-nums">
+                  {formatNumber(newTotal)}
+                </span>{' '}
+                {M.home.newCount}
+              </p>
             )}
             {newest.length === 0 && <HomeEmpty text={M.home.emptyNew} />}
             {/* Cùng kiểu danh sách với trang DN mới / tỉnh / ngành: máy tính mỗi DN một hàng ngang (bảng), điện thoại

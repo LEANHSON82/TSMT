@@ -236,7 +236,9 @@ Các lệch trước đây (308 thay 301, trang danh sách không ISR, `?page=99
    sẽ được thay bằng bản owner gửi/luật sư duyệt, không phải chữ giao diện. Mọi chữ giao diện khác đã ở
    `lib/messages.js`.
 3. **Header dính đầu trang** (ô tìm luôn trong màn hình) là thêm ngoài spec, không trái spec.
-4. **Quy trình:** spec yêu cầu pull request < 400 dòng kèm ảnh chụp; mockup này đang là các commit trên `main`.
+4. **Trang chủ không có link «Xem tất cả»** ở khối DN mới (spec 3.1 mục 4 có): chủ dự án yêu cầu trang chủ không dẫn vào
+   danh sách phân trang. Trang DN mới vẫn vào được từ menu header.
+5. **Quy trình:** spec yêu cầu pull request < 400 dòng kèm ảnh chụp; mockup này đang là các commit trên `main`.
 
 ## Câu hỏi mở cho owner (spec mục 9.4, cộng thêm)
 

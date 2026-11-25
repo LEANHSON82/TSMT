@@ -14,6 +14,8 @@ const appEnv = {
   NEXT_PUBLIC_GA_ID: 'G-TEST000000',
   // Ghi sự kiện analytics vào window.__trackLog để test kiểm (lib/analytics.js).
   NEXT_PUBLIC_TRACK_LOG: '1',
+  // Mọi test cùng một IP (localhost): nới giới hạn số vé mở danh sách mỗi giờ (lib/list-gate.js).
+  LIST_GATE_PER_IP: '100000',
   ...(API_MODE
     ? { NEXT_PUBLIC_API_BASE: `http://localhost:${API_PORT}`, NEXT_PUBLIC_MOCK_SCENARIOS: '1' }
     : { NEXT_PUBLIC_API_BASE: '' }),

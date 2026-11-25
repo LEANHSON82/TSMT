@@ -20,6 +20,8 @@ export async function newListMetadata({ searchParams }) {
   return {
     title: `${M.list.newCompanies.title}${where}${M.common.pageSuffix(page)}`,
     description: M.list.newCompanies.metaDescription(where, M.common.pageSuffix(page)),
+    // Sau cổng quảng cáo (lib/list-gate.js): máy tìm kiếm không vào được → không lập chỉ mục.
+    robots: { index: false, follow: true },
     // Lọc theo tỉnh: nội dung trùng y hệt /tinh/{slug} (cùng sắp xếp mới nhất) → canonical về trang tỉnh.
     alternates: {
       canonical: province

@@ -32,6 +32,14 @@ export async function startUnlock(page) {
   await dialog.getByRole('button', { name: 'Xem', exact: true }).click();
 }
 
+/** Xin vé mở danh sách bị chặn (lib/list-gate.js) cho request context / page.request — cookie lưu vào context. */
+export async function getListPass(request) {
+  const res = await request.post('/api/list-pass', {
+    data: { ad_result: { type: 'mock' }, turnstile_token: 'e2e' },
+  });
+  if (res.status() !== 204) throw new Error(`list-pass ${res.status()}`);
+}
+
 export async function trackEvents(page, name) {
   return page.evaluate((n) => (window.__trackLog || []).filter((e) => e.name === n), name);
 }

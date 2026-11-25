@@ -1,6 +1,6 @@
 // Tiêu chí nghiệm thu mục 9.2 (phần kiểm được bằng mock).
 import { expect, test } from './fixtures';
-import { BRANCH_PATH, DETAIL, FULL_PHONE, acceptCookies } from './helpers';
+import { BRANCH_PATH, DETAIL, FULL_PHONE, acceptCookies, getListPass } from './helpers';
 
 test.beforeEach(async ({ page }) => acceptCookies(page));
 
@@ -58,6 +58,8 @@ test('/{mst}, slug sai, ngành sai slug → 301 về URL chuẩn (giữ tham s�
 test('trang danh sách có ?page= / ?tinh= được cache ISR (lượt sau HIT), ?tinh= sai bị bỏ', async ({
   request,
 }) => {
+  // Trang DN mới nằm sau cổng quảng cáo: có vé mới thấy danh sách (tests/e2e/list-gate.spec.js).
+  await getListPass(request);
   for (const path of [
     '/tinh/ha-noi',
     '/tinh/ha-noi?page=2',

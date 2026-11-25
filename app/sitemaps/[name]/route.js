@@ -22,7 +22,6 @@ export async function GET(_request, { params }) {
       : POPULAR_INDUSTRIES.map((n) => n.href);
     const paths = [
       '/',
-      '/doanh-nghiep-moi-thanh-lap',
       ...provinces.filter((p) => p.company_count !== 0).map((p) => `/tinh/${p.slug}`),
       ...industryPaths,
       '/gioi-thieu',

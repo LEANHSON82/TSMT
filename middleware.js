@@ -11,6 +11,7 @@ import { NextResponse } from 'next/server';
 import { parseMstSlug } from './lib/mst.js';
 import { toSlug } from './lib/slug.js';
 import { NEW_WINDOW_DAYS, daysAgoVN } from './lib/filters.js';
+import { PASS_COOKIE, isGatedPath, spendPassPage, verifyPass } from './lib/list-gate.js';
 
 export const config = {
   runtime: 'nodejs',
@@ -18,7 +19,7 @@ export const config = {
     // Đường dẫn MỘT đoạn (chi tiết DN), trừ các trang/tệp có sẵn (ảnh do Next sinh: icon, opengraph-image…). Đoạn có
     // dấu chấm (/wp-login.php, /{mst}-{slug}.html) cũng vào đây để trả 404 / 301 thật — không rơi vào
     // trang [mstSlug] (có loading.js nên đã gửi 200 trước khi biết là 404).
-    '/((?!_next|api|tinh|nganh|tim-kiem|doanh-nghiep-moi-thanh-lap|yeu-cau-cap-nhat|gioi-thieu|lien-he|dieu-khoan|chinh-sach-bao-mat|khong-tim-thay|sitemap|sitemaps|robots|icon|favicon|opengraph-image|twitter-image|apple-icon|ads.txt)[^/]+)',
+    '/((?!_next|api|tinh|nganh|tim-kiem|doanh-nghiep-moi-thanh-lap|yeu-cau-cap-nhat|gioi-thieu|lien-he|dieu-khoan|chinh-sach-bao-mat|khong-tim-thay|mo-khoa|sitemap|sitemaps|robots|icon|favicon|opengraph-image|twitter-image|apple-icon|ads.txt)[^/]+)',
     // Đường dẫn có chữ hoa (link ngoài viết hoa) → 301 về chữ thường.
     '/((?!_next|api)(?:.*[A-Z].*))',
     // Truy cập thẳng trang 404 → trả đúng mã 404.
@@ -162,6 +163,27 @@ async function province(request, slug) {
   return NextResponse.next();
 }
 
+/**
+ * Trang bị chặn (lib/list-gate.js): có vé hợp lệ và còn lượt → cho qua; không → rewrite sang màn hình cổng /mo-khoa
+ * (URL giữ nguyên, HTML không có dữ liệu DN). Không cache ở proxy/CDN: cùng URL trả nội dung khác nhau theo cookie.
+ */
+function gate(request) {
+  const pass = verifyPass(request.cookies.get(PASS_COOKIE)?.value);
+  const used = pass ? spendPassPage(pass) : false;
+  if (used) {
+    const res = NextResponse.next();
+    res.headers.set('Cache-Control', 'private, no-store');
+    return res;
+  }
+  const url = new URL('/mo-khoa', request.url);
+  url.searchParams.set('p', request.nextUrl.pathname);
+  if (pass) url.searchParams.set('het', '1'); // vé còn hạn nhưng đã xem hết số trang
+  const res = NextResponse.rewrite(url);
+  res.headers.set('Cache-Control', 'private, no-store');
+  res.headers.set('X-Robots-Tag', 'noindex');
+  return res;
+}
+
 async function newCompanies(request) {
   const prov = await provinceFilter(request);
   if (prov === null) return dropProvinceParam(request);
@@ -175,7 +197,7 @@ async function newCompanies(request) {
     )
   )
     return notFound(request);
-  return NextResponse.next();
+  return isGatedPath(request.nextUrl.pathname) ? gate(request) : NextResponse.next();
 }
 
 async function industry(request, codeSlug) {

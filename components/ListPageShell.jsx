@@ -5,6 +5,7 @@ import Pagination from './Pagination';
 import { EmptyState, LinkList } from './States';
 import { M } from '@/lib/messages';
 import { formatNumber } from '@/lib/format';
+import { isGatedPath } from '@/lib/list-gate';
 
 /**
  * Bố cục chung cho kết quả tìm kiếm và trang danh sách tỉnh / ngành / DN mới (spec mục 3.2, 3.5), hệ A:
@@ -118,6 +119,7 @@ export default function ListPageShell({
                 totalPages={totalPages}
                 basePath={basePath}
                 params={params}
+                prefetch={isGatedPath(basePath) ? false : undefined}
               />
             </>
           ) : (

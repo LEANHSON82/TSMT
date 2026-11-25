@@ -25,7 +25,8 @@ const box =
 const live = `${box} border-line-strong bg-white text-brand hover:border-brand hover:text-brand`;
 const off = `${box} border-line text-muted`;
 
-export default function Pagination({ page, totalPages, basePath, params = {} }) {
+// prefetch={false}: trang bị chặn bằng cổng quảng cáo (lib/list-gate.js) — mỗi lần tải trước sẽ tiêu một lượt xem của vé.
+export default function Pagination({ page, totalPages, basePath, params = {}, prefetch }) {
   if (totalPages <= 1) return null;
   const href = (p) => buildHref(basePath, { ...params, page: p });
   const prev = (
@@ -48,7 +49,13 @@ export default function Pagination({ page, totalPages, basePath, params = {} }) 
       <ul className="flex flex-wrap items-center gap-2">
         <li>
           {page > 1 ? (
-            <Link href={href(page - 1)} aria-label={M.pagination.prev} rel="prev" className={live}>
+            <Link
+              prefetch={prefetch}
+              href={href(page - 1)}
+              aria-label={M.pagination.prev}
+              rel="prev"
+              className={live}
+            >
               {prev}
             </Link>
           ) : (
@@ -75,7 +82,12 @@ export default function Pagination({ page, totalPages, basePath, params = {} }) 
                   {p}
                 </span>
               ) : (
-                <Link href={href(p)} aria-label={M.pagination.page(p)} className={live}>
+                <Link
+                  prefetch={prefetch}
+                  href={href(p)}
+                  aria-label={M.pagination.page(p)}
+                  className={live}
+                >
                   {p}
                 </Link>
               )}
@@ -84,7 +96,13 @@ export default function Pagination({ page, totalPages, basePath, params = {} }) 
         )}
         <li>
           {page < totalPages ? (
-            <Link href={href(page + 1)} aria-label={M.pagination.next} rel="next" className={live}>
+            <Link
+              prefetch={prefetch}
+              href={href(page + 1)}
+              aria-label={M.pagination.next}
+              rel="next"
+              className={live}
+            >
               {next}
             </Link>
           ) : (

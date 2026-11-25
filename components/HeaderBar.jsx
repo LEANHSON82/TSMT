@@ -315,6 +315,7 @@ function MobileMenu({ provinces, industries, pathname, onClose }) {
               </button>
               <Link
                 href="/doanh-nghiep-moi-thanh-lap"
+                prefetch={false}
                 onClick={onClose}
                 aria-current={pathname === '/doanh-nghiep-moi-thanh-lap' ? 'page' : undefined}
                 className={`${itemCls} ${cur(pathname === '/doanh-nghiep-moi-thanh-lap')}`}
@@ -441,6 +442,7 @@ export default function HeaderBar({ provinces, industries }) {
                   </a>
                   <Link
                     href="/doanh-nghiep-moi-thanh-lap"
+                    prefetch={false}
                     className="text-sm font-semibold whitespace-nowrap text-title hover:text-brand"
                   >
                     {M.nav.newCompaniesShort}
@@ -545,6 +547,7 @@ export default function HeaderBar({ provinces, industries }) {
               </DesktopDropdown>
               <Link
                 href="/doanh-nghiep-moi-thanh-lap"
+                prefetch={false}
                 aria-current={pathname === '/doanh-nghiep-moi-thanh-lap' ? 'page' : undefined}
                 className={`${NAV_ITEM} ${
                   pathname === '/doanh-nghiep-moi-thanh-lap' ? CURRENT_BAR : ''

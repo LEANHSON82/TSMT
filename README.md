@@ -164,6 +164,26 @@ number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
 - Gợi ý < 150 ms trên ~1 triệu DN, có bỏ dấu tiếng Việt và chịu gõ sai → nên dùng Meilisearch / Typesense,
   hoặc Postgres `unaccent` + `pg_trgm`.
 
+## Cổng quảng cáo trước danh sách DN mới (chống crawl)
+
+Theo yêu cầu chủ dự án (25/11/2026): trang `/doanh-nghiep-moi-thanh-lap` (mọi `?page=` / `?tinh=`) chỉ hiện danh sách
+sau khi xem một quảng cáo và qua Cloudflare Turnstile.
+
+- `middleware.js` kiểm cookie vé `list_pass` (ký HMAC, `lib/list-gate.js`). Không có vé → rewrite sang màn hình cổng
+  `app/mo-khoa` (URL giữ nguyên, HTML không có dữ liệu DN, `X-Robots-Tag: noindex`, `Cache-Control: private, no-store`).
+- Màn hình cổng (`components/ListGate.jsx`): video có thưởng → không có thì quảng cáo dự phòng 5 giây → token Turnstile →
+  `POST /api/list-pass` → tải lại đúng URL. Đóng sớm → «Xem lại»; chặn quảng cáo → hướng dẫn tắt; lỗi sau khi đã xem
+  xong → «Thử lại» không bắt xem lại.
+- Giới hạn: vé hạn **30 phút**, mỗi vé **40 trang**, mỗi IP **12 vé/giờ** (đổi trong `lib/list-gate.js`). Bộ đếm nằm
+  trong bộ nhớ máy chủ (một instance Railway); chạy nhiều instance thì chuyển sang Redis hoặc để API Go làm.
+- Trang này bỏ khỏi sitemap, `Disallow` trong robots.txt, `noindex`. Muốn chặn thêm trang tỉnh / ngành: thêm đường dẫn vào
+  `GATED_PATHS`.
+- **Cần đặt trên Railway:** `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` (thiếu secret thì máy chủ nhận mọi
+  token — captcha chưa có tác dụng), `LIST_GATE_SECRET` (`openssl rand -hex 32`; thiếu thì vé mất hiệu lực mỗi lần deploy).
+- Hạn chế còn lại: kết quả quảng cáo không xác minh được ở máy chủ (như luồng SĐT, spec 4.3 — việc của BE); dữ liệu DN mới
+  vẫn lấy được qua trang tỉnh / ngành / `/tim-kiem` (lọc «Thành lập trong»). Lớp chặn bot mạnh nhất là đưa domain qua
+  Cloudflare (Bot Fight Mode, giới hạn tần suất).
+
 ## Đã làm theo spec
 
 - **Trang:** đủ các trang ở mục 2. Header dính đầu trang: logo, ô tìm (máy tính trùng khít ô nhập của ô tìm lớn trang chủ; trang chủ chỉ hiện khi cuộn qua ô lớn), menu Tỉnh/thành · Ngành nghề · DN mới (≥ 768px; nhỏ hơn dùng nút ☰). Hàng 2 header: ô tìm + «Lọc nâng cao» (điện thoại: nút biểu tượng cạnh nút Tìm). Có footer và banner cookie.
@@ -238,7 +258,10 @@ Các lệch trước đây (308 thay 301, trang danh sách không ISR, `?page=99
 3. **Header dính đầu trang** (ô tìm luôn trong màn hình) là thêm ngoài spec, không trái spec.
 4. **Trang chủ không có link «Xem tất cả»** ở khối DN mới (spec 3.1 mục 4 có): chủ dự án yêu cầu trang chủ không dẫn vào
    danh sách phân trang. Trang DN mới vẫn vào được từ menu header.
-5. **Quy trình:** spec yêu cầu pull request < 400 dòng kèm ảnh chụp; mockup này đang là các commit trên `main`.
+5. **Trang DN mới thành lập sau cổng quảng cáo** (spec mục 2: ISR, được lập chỉ mục; 5.3: không chặn cả trang): theo yêu
+   cầu chủ dự án để chống crawl. Trang bị `noindex`, bỏ khỏi sitemap, chặn trong robots.txt; không còn ISR dùng chung
+   cho mọi người (mỗi lượt xem đi qua kiểm vé).
+6. **Quy trình:** spec yêu cầu pull request < 400 dòng kèm ảnh chụp; mockup này đang là các commit trên `main`.
 
 ## Câu hỏi mở cho owner (spec mục 9.4, cộng thêm)
 

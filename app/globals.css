@@ -370,6 +370,11 @@
   outline: none;
   box-shadow: none;
 }
+/* Chữ hoa có hai dấu chồng (Ễ, Ể, Ỗ…) cao hơn dòng chữ thường: dòng 24px làm ô nhập cắt mất dấu ngã («NGUYỄN» hiện
+   như «NGUYÊN»). Dòng cao 2em (vẫn lọt trong ô 42–56px) để dấu không bị cắt. */
+.search-input {
+  line-height: 2;
+}
 .search-box {
   overflow: hidden;
   transition:
@@ -989,4 +994,10 @@ a.browse-tile:hover {
 .browse-count {
   font-weight: 500;
   color: var(--color-muted);
+}
+
+/* Tỉnh chưa có DN: vẫn là link (đủ 34 tỉnh, spec 3.1) nhưng chữ nhạt để mắt bỏ qua. */
+.browse-tile.is-zero .browse-name,
+.browse-tile.is-zero .browse-count {
+  color: var(--color-field);
 }

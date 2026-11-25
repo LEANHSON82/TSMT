@@ -95,10 +95,11 @@ export default function CookieConsent() {
         <section
           data-cookie-banner
           aria-label={M.cookie.region}
-          className="fixed inset-x-0 bottom-0 z-40 border-t border-line-strong bg-white shadow-[0_-4px_16px_rgba(22,27,38,0.08)]"
+          // z-20: dưới header (z-30, chứa menu điện thoại) — banner không đè menu; hộp thoại (z-60) chờ banner xong mới mở.
+          className="fixed inset-x-0 bottom-0 z-20 border-t border-line-strong bg-white shadow-[0_-4px_16px_rgba(22,27,38,0.08)]"
         >
-          <div className="site-wrap flex flex-col gap-3 py-4 md:flex-row md:items-center md:gap-8">
-            <p className="flex-1 text-sm leading-5 text-ink-2">
+          <div className="site-wrap flex flex-col gap-2 py-2.5 md:flex-row md:items-center md:gap-8 md:py-4">
+            <p className="flex-1 text-[13px] leading-[18px] text-ink-2 md:text-sm md:leading-5">
               {M.cookie.banner}{' '}
               <Link
                 href="/chinh-sach-bao-mat#cookie"
@@ -113,14 +114,14 @@ export default function CookieConsent() {
               <button
                 type="button"
                 onClick={() => setShowPrefs(true)}
-                className="h-11 rounded border border-brand bg-white px-5 text-body font-semibold text-brand md:min-w-36"
+                className="h-10 rounded border border-brand bg-white px-5 text-[15px] font-semibold text-brand md:h-11 md:min-w-36 md:text-body"
               >
                 {M.cookie.customize}
               </button>
               <button
                 type="button"
                 onClick={acceptAll}
-                className="h-11 rounded border border-brand bg-brand px-5 text-body font-semibold text-white hover:bg-cta-hover active:bg-chrome-2 md:min-w-36"
+                className="h-10 rounded border border-brand bg-brand px-5 text-[15px] font-semibold text-white hover:bg-cta-hover active:bg-chrome-2 md:h-11 md:min-w-36 md:text-body"
               >
                 {M.cookie.accept}
               </button>

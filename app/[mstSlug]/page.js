@@ -13,6 +13,7 @@ import SectionHeader from '@/components/SectionHeader';
 import CopyButton from '@/components/CopyButton';
 import StatusBadge from '@/components/StatusBadge';
 import TrackOnMount from '@/components/TrackOnMount';
+import { IconAlert } from '@/components/Icons';
 import { getCompany, getRelatedCompanies } from '@/lib/api';
 import { areaAddress, formatDate, formatDateTime, truncate } from '@/lib/format';
 import { M } from '@/lib/messages';
@@ -126,11 +127,16 @@ export default async function CompanyPage({ params }) {
         <h1 className={PAGE_H1}>{c.name}</h1>
         {/* Ngay dưới tên DN: mã số thuế (nút sao chép) + tình trạng — hai thứ người tra cần nhất. */}
         <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="text-[17px] font-semibold tracking-[0.02em] text-ink-2 tabular-nums">
+          <span className="text-[18px] font-bold tracking-[0.02em] text-ink tabular-nums">
             <span className="sr-only">{M.company.mst}: </span>
             {c.mst}
           </span>
-          <CopyButton text={c.mst} label={M.company.copyMst} className="-mx-2.5 -my-2.5" />
+          <CopyButton
+            text={c.mst}
+            label={M.company.copyMst}
+            variant="text"
+            className="-my-3! py-3 leading-5"
+          />
           {c.status && (
             <span>
               <span className="sr-only">{M.company.status}: </span>
@@ -155,6 +161,29 @@ export default async function CompanyPage({ params }) {
           </dl>
         )}
       </PageHero>
+
+      {/* DN ngừng hoạt động / đã đóng MST: cảnh báo rõ ngay dưới tên (kế toán không xuất hoá đơn nhầm). Nhãn tình trạng
+          vẫn xám theo spec 3.3; khung cảnh báo là thông báo riêng. */}
+      {c.status && c.status.code !== 'active' && (
+        <div className="site-wrap">
+          <p
+            role="alert"
+            className={`mt-1 flex items-start gap-2.5 rounded-lg border px-4 py-3 text-[15px] leading-6 ${
+              c.status.code === 'closed'
+                ? 'border-[#fecdca] bg-[#fef3f2] text-[#b42318]'
+                : 'border-[#fedf89] bg-[#fffaeb] text-[#93370d]'
+            }`}
+          >
+            <IconAlert size={20} className="mt-0.5 flex-none" />
+            <span>
+              <strong className="font-semibold">{M.company.statusWarnTitle(c.status.code)}</strong>{' '}
+              {c.status.code === 'closed'
+                ? M.company.statusWarnClosed
+                : M.company.statusWarnSuspended}
+            </span>
+          </p>
+        </div>
+      )}
 
       <div className="site-wrap">
         {/* Thông tin DN: lưới ô trắng ngay trên nền trang (không khung bao, tiêu đề chỉ cho trình đọc màn hình). */}

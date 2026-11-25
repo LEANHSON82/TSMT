@@ -12,10 +12,11 @@ export default function StatusBadge({ status, plain = false, className = '' }) {
   // theo nên không chỉ dựa vào màu (WCAG 1.4.1).
   return (
     <span
-      className={`inline-flex items-center font-semibold whitespace-nowrap ${
+      className={`inline-flex items-center whitespace-nowrap ${
         plain
-          ? `gap-1.5 text-sm leading-5 ${active ? 'text-ok' : 'text-off'}`
-          : `rounded-full px-2.5 py-0.5 text-[13px] leading-5 ${active ? 'bg-[#dcfce7] text-[#166534]' : 'bg-off-bg text-off'}`
+          ? // Danh sách: «Đang hoạt động» chữ thường (không đậm) để 20 hàng xanh không lấn tên DN; ngừng / đóng MST đậm.
+            `gap-1.5 text-sm leading-5 ${active ? 'font-normal text-ok' : 'font-semibold text-off'}`
+          : `rounded-full px-2.5 py-0.5 text-[13px] leading-5 font-semibold ${active ? 'bg-[#dcfce7] text-[#166534]' : 'bg-off-bg text-off'}`
       } ${className}`}
     >
       {/* Danh sách: chấm + chữ. Đầu trang DN: nhãn nền xanh lá nhạt (không chấm). */}

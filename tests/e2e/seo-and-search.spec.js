@@ -397,3 +397,13 @@ test('trang kết quả: người đại diện khớp từ khoá gộp theo tê
   await expect(page).toHaveURL(/theo=dai-dien/);
   await expect(page.locator('main ol > li article')).toHaveCount(1);
 });
+
+test('trang DN đã đóng MST / ngừng hoạt động: có khung cảnh báo ngay dưới tên', async ({
+  request,
+}) => {
+  const closed = await (await request.get('/9494635975-cong-ty-tnhh-nha-hang-phuong-nam')).text();
+  expect(closed).toContain('role="alert"');
+  expect(closed).toContain('không còn dùng để xuất hoá đơn');
+  const active = await (await request.get(DETAIL)).text();
+  expect(active).not.toContain('không còn dùng để xuất hoá đơn');
+});

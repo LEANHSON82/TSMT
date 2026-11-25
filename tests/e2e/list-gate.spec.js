@@ -163,3 +163,13 @@ test('«Để sau» đóng hộp thoại, còn khung «Xem quảng cáo» trên 
   await page.getByRole('button', { name: 'Xem quảng cáo', exact: true }).click();
   await expect(page.getByTestId('mock-video')).toBeVisible();
 });
+
+test('chưa chọn cookie: hộp thoại mời xem quảng cáo chờ, chọn xong mới mở (không đè banner cookie)', async ({
+  page,
+}) => {
+  await page.goto(PAGE);
+  await expect(page.locator('[data-cookie-banner]')).toBeVisible();
+  await expect(page.getByRole('dialog', { name: DIALOG })).toHaveCount(0);
+  await page.locator('[data-cookie-banner]').getByRole('button', { name: 'Đồng ý' }).click();
+  await expect(page.getByRole('dialog', { name: DIALOG })).toBeVisible();
+});

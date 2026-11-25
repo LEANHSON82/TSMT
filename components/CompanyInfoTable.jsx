@@ -50,11 +50,13 @@ function Row({ label, children, action, wide = false }) {
   return (
     <div className="flex min-w-0 flex-col rounded-lg border border-line bg-white px-4 py-3.5">
       <dt className="text-xs leading-5 tracking-[0.04em] text-muted uppercase">{label}</dt>
-      {/* Hành động (Sao chép, Xem bản đồ…) cùng dòng với giá trị, dạt phải → ô thấp, các ô cùng hàng gần bằng nhau. */}
-      <dd className="mt-1 flex min-w-0 flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-[15px] leading-6 break-words text-ink">
-        <span className={wide ? 'w-full min-w-0' : 'min-w-0'}>{children}</span>
-        {action && <span className="flex-none">{action}</span>}
+      <dd
+        className={`mt-1 min-w-0 text-[15px] leading-6 break-words text-ink ${wide ? 'w-full' : ''}`}
+      >
+        {children}
       </dd>
+      {/* Hành động (Sao chép, Xem bản đồ…) luôn một hàng riêng ngay dưới giá trị, căn trái — mọi ô cùng một chỗ. */}
+      {action && <dd className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">{action}</dd>}
     </div>
   );
 }
@@ -82,7 +84,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
 
           action={
             // Sao chép nhanh địa chỉ (dán vào hoá đơn, hợp đồng) + mở bản đồ.
-            <span className="inline-flex flex-wrap items-center gap-x-4 gap-y-1">
+            <>
               <CopyButton
                 text={c.address}
                 label={M.company.copyAddress}
@@ -93,7 +95,7 @@ export default function CompanyInfoTable({ company: c, parent }) {
                 <IconMap size={18} className="flex-none" />
                 {M.company.viewMap}
               </a>
-            </span>
+            </>
           }
         >
           {c.address}

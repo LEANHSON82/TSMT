@@ -183,7 +183,21 @@ export default function ListGate({ mode = 'ad', minutes, pages, used = false }) 
   const confirmRef = useRef(null);
   const [prompt, setPrompt] = useState(false);
   useEffect(() => {
-    if (!human) setPrompt(true);
+    if (human) return undefined;
+    // Banner cookie còn hiện (chưa chọn) → chờ người dùng chọn xong mới mở hộp thoại, không để hai lớp đè nhau.
+    let decided = false;
+    try {
+      decided = Boolean(window.localStorage.getItem('cookie_consent'));
+    } catch {
+      decided = true;
+    }
+    if (decided) {
+      setPrompt(true);
+      return undefined;
+    }
+    const onConsent = () => setPrompt(true);
+    window.addEventListener('cookie-consent-change', onConsent, { once: true });
+    return () => window.removeEventListener('cookie-consent-change', onConsent);
   }, [human]);
   const accept = () => {
     setPrompt(false);

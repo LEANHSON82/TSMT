@@ -16,7 +16,8 @@ import { M } from '@/lib/messages';
 import { IconSearch } from './Icons';
 import { startNavigation } from './NavigationProgress';
 
-export default function ScopedSearch({ action = '/tim-kiem', fixed, label, selects = [] }) {
+// scope: phạm vi hiện trong chữ gợi ý («Hà Nội», «ngành 4330»), để không nhầm với ô tìm toàn site trên header.
+export default function ScopedSearch({ action = '/tim-kiem', fixed, label, scope, selects = [] }) {
   const router = useRouter();
   const uid = useId();
   const formRef = useRef(null);
@@ -72,7 +73,15 @@ export default function ScopedSearch({ action = '/tim-kiem', fixed, label, selec
           enterKeyHint="search"
           autoComplete="off"
           spellCheck={false}
-          placeholder={narrow ? M.search.placeholderNarrow : M.search.placeholder}
+          placeholder={
+            scope
+              ? narrow
+                ? M.search.scopedPlaceholderNarrow(scope)
+                : M.search.scopedPlaceholder(scope)
+              : narrow
+                ? M.search.placeholderNarrow
+                : M.search.placeholder
+          }
           className="search-input h-full w-full min-w-0 appearance-none border-0 bg-transparent px-3.5 text-base text-ellipsis md:text-[15px]"
         />
         <button

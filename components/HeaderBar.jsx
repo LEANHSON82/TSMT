@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { M } from '@/lib/messages';
+import { sortProvinces } from '@/lib/province-order';
 import { SITE_NAME } from '@/lib/site';
 import { buildHref } from '@/lib/url';
 import IndustryCode from './IndustryCode';
@@ -386,7 +387,7 @@ export default function HeaderBar({ provinces, industries }) {
   }, [isHome]);
 
   const showHeaderSearch = !isHome || !heroSearchVisible;
-  const sortedProvinces = [...provinces].sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+  const sortedProvinces = sortProvinces(provinces);
   const closeDropdown = () => setDropdown(null);
   const filterHref = advancedHref(pathname);
 

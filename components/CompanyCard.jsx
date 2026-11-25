@@ -63,24 +63,25 @@ export default function CompanyCard({
   const hl = (field) => (!c.matched || c.matched === field ? highlight : undefined);
   const table = variant === 'row';
 
-  // Một trường: thẻ = hàng «nhãn 96px │ giá trị»; bảng = ô của cột (nhãn chỉ cho trình đọc màn hình).
+  // Một trường. Thẻ (điện thoại, khối hẹp): các cặp «nhãn giá trị» nối nhau trên 2–3 dòng (gọn, ~3–4 DN mỗi màn hình
+  // thay vì 2). Bảng (≥ 1024px): ô của cột, nhãn chỉ cho trình đọc màn hình.
   const field = (col) =>
-    `grid min-w-0 grid-cols-[96px_minmax(0,1fr)] items-baseline gap-x-3 ${
+    `inline-flex min-w-0 max-w-full items-baseline gap-x-1.5 ${
       table ? `lg:block lg:row-start-1 ${col}` : ''
     }`;
-  const label = `text-sm leading-6 text-muted ${table ? 'lg:sr-only' : ''}`;
+  const label = `flex-none text-sm leading-6 text-muted ${table ? 'lg:sr-only' : ''}`;
   const value = `min-w-0 text-sm leading-6 text-ink ${table ? 'lg:truncate' : ''}`;
 
   return (
     <article
-      className={`group relative grid grid-cols-1 gap-y-0.5 py-3.5 ${
+      className={`group relative flex flex-wrap gap-x-4 gap-y-0 py-3 ${
         table
-          ? `card-row px-4 transition-colors duration-150 hover:bg-page/60 md:px-5 ${TABLE_COLS} lg:items-center lg:gap-x-4 lg:py-3`
+          ? `card-row px-4 transition-colors duration-150 hover:bg-page/60 md:px-5 lg:grid ${TABLE_COLS} lg:items-center lg:gap-x-4 lg:py-3`
           : ''
       }`}
     >
       <H
-        className={`mb-1 min-w-0 text-base leading-6 font-semibold text-pretty ${
+        className={`mb-0.5 w-full min-w-0 text-base leading-6 font-semibold text-pretty ${
           table
             ? 'lg:col-start-1 lg:row-start-1 lg:mb-0 lg:line-clamp-2 lg:text-[15px] lg:leading-6'
             : ''
@@ -101,7 +102,7 @@ export default function CompanyCard({
 
       <dl className="contents">
         <div className={field('lg:col-start-2')}>
-          <dt className={label}>{M.company.mst}</dt>
+          <dt className={label}>{M.list.mstShort}</dt>
           {/* MST không bao giờ cắt (MST chi nhánh 14 ký tự vừa cột 132px). */}
           <dd className="relative z-10 min-w-0 text-sm leading-6 font-semibold whitespace-nowrap text-ink tabular-nums">
             <Highlight text={c.mst} query={hl('mst')} />
@@ -120,19 +121,21 @@ export default function CompanyCard({
         {/* Địa chỉ rút gọn một dòng (spec 3.3): chỉ tỉnh/thành ở MỌI danh sách (kể cả trang theo tỉnh), cần thì bấm xem
             chi tiết. Địa chỉ đầy đủ ở tooltip. */}
         <div className={field('lg:col-start-4')}>
-          <dt className={label}>{showProvince ? M.company.provinceShort : M.company.wardShort}</dt>
+          <dt className="sr-only">
+            {showProvince ? M.company.provinceShort : M.company.wardShort}
+          </dt>
           <dd className={`${value} text-ink-2`} title={table ? c.address : undefined}>
             {(showProvince ? provinceName : ward) || area || <span className="text-muted">—</span>}
           </dd>
         </div>
         <div className={field('lg:col-start-5')}>
-          <dt className={label}>{M.list.activeLabelShort}</dt>
+          <dt className={label}>{M.list.activeSince}</dt>
           <dd className={`${value} text-ink-2 tabular-nums`}>{date || '—'}</dd>
         </div>
         <div className={`${field('lg:col-start-6')} ${table ? 'lg:justify-self-end' : ''}`}>
-          <dt className={label}>{M.company.status}</dt>
+          <dt className="sr-only">{M.company.status}</dt>
           <dd className="min-w-0">
-            <StatusBadge status={c.status} plain={table} />
+            <StatusBadge status={c.status} plain />
           </dd>
         </div>
       </dl>

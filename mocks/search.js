@@ -7,7 +7,7 @@
 //    trùng nguyên chữ; riêng từ cuối được khớp phần đầu («Ho» → «Hoàng»), xếp sau khớp nguyên chữ.
 //    Gợi ý (mode 'suggest', đang gõ dở): giữ cả khớp phần đầu. Trang kết quả (mode 'search', đã gõ xong):
 //    có kết quả khớp nguyên chữ thì bỏ các kết quả chỉ khớp phần đầu — «Sơn» không kéo theo «Sông».
-//  - Gõ có dấu thì kết quả đúng dấu xếp trên. Cụm chữ chung («công ty», «TNHH»…) không tính khi so khớp.
+//  - Gõ có dấu thì kết quả đúng dấu xếp trên (kể cả trên khớp tên DN sai dấu). Cụm chữ chung («công ty», «TNHH»…) không tính khi so khớp.
 //  - Khớp tên DN xếp trên khớp người đại diện khi điểm bằng nhau; khớp cả cụm liền nhau được cộng điểm.
 //  - Từ khoá số (bỏ nhãn «MST:», mọi kiểu gạch): tiền tố MST, hoặc ≥ 6 số trong SĐT — KHÔNG BAO GIỜ khớp SĐT DN đã ẩn / không công khai.
 //  - Mỗi kết quả kèm matched: 'name' | 'representative' | 'mst' | 'phone'.
@@ -26,7 +26,7 @@ function fieldScore(words, tokens) {
     let best = 0;
     for (const w of words) best = Math.max(best, wordScore(tokens[i], w, last));
     if (!best) return { score: 0, prefix: false };
-    if (best < 3) prefix = true;
+    if (best < 2) prefix = true; // 1 / 1,5 = chỉ khớp phần đầu; 2 = trùng chữ nhưng sai dấu (vẫn là khớp nguyên chữ)
     total += best;
   }
   if (tokens.length > 1) {

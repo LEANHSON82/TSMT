@@ -23,6 +23,18 @@ const index = buildIndex(companies, phones);
 const msts = (r) => r.map((x) => x.c.mst);
 
 describe('bộ tìm mẫu (mocks/search.js)', () => {
+  it('gõ có dấu: người đại diện đúng dấu xếp trên tên DN sai dấu («NGUYỄN» trước «THẢO NGUYÊN»)', () => {
+    const ix = buildIndex(
+      [
+        co('0000000011', 'CÔNG TY TNHH VẬN TẢI THẢO NGUYÊN', 'LÊ VĂN BA'),
+        co('0000000012', 'CÔNG TY TNHH AN BÌNH', 'NGUYỄN THỊ LAN'),
+      ],
+      {},
+    );
+    const r = search(ix, 'NGUYỄN');
+    expect(msts(r)).toEqual(['0000000012', '0000000011']);
+    expect(r[0].matched).toBe('representative');
+  });
   it('«Sơn»: khớp nguyên chữ, ghi rõ khớp tên hay người đại diện; không kéo theo «Sông»', () => {
     const r = search(index, 'Sơn');
     expect(msts(r)).not.toContain('0000000003');

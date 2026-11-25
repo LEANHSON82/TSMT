@@ -8,6 +8,7 @@ import { AdvancedSearchLink } from '@/components/HeaderBar';
 import SectionHeader from '@/components/SectionHeader';
 import { getProvinces, listCompanies, searchCompanies } from '@/lib/api';
 import { POPULAR_INDUSTRIES } from '@/lib/popular-industries';
+import { sortProvinces } from '@/lib/province-order';
 import { daysAgoVN } from '@/lib/filters';
 import { formatNumber } from '@/lib/format';
 import { SITE_NAME, absoluteUrl } from '@/lib/site';
@@ -32,12 +33,8 @@ export default async function HomePage() {
     .then((d) => d.total ?? null)
     .catch(() => null);
 
-  // Xếp A–Z theo tiếng Việt; bỏ tiền tố «TP »/«Thành phố » khi so → «TP Hồ Chí Minh» nằm ở vần H, chỗ người
-  // dùng tìm (như bản mẫu A), không lạc xuống cuối vần T.
-  const sortKey = (name = '') => name.replace(/^(TP\.?|Thành phố)\s+/i, '');
-  const sorted = [...provinces].sort((a, b) =>
-    sortKey(a.name).localeCompare(sortKey(b.name), 'vi'),
-  );
+  // Hà Nội, TP Hồ Chí Minh đầu tiên; còn lại A–Z (bỏ tiền tố «TP» khi so) — lib/province-order.js.
+  const sorted = sortProvinces(provinces);
   const totalCompanies = provinces.reduce((sum, p) => sum + (p.company_count || 0), 0);
 
   return (
@@ -151,7 +148,7 @@ export default async function HomePage() {
                       <Link
                         href={`/tinh/${p.slug}`}
                         prefetch={false}
-                        className="browse-tile is-row"
+                        className={`browse-tile is-row ${p.company_count ? '' : 'is-zero'}`}
                       >
                         <span className="browse-name">{p.name}</span>
                         <span className="browse-count">

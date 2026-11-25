@@ -18,8 +18,8 @@ const MAX_AUTO_RETRIES = 2;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** Xin vé; ném lỗi có status (0 = lỗi mạng). */
-async function requestPass(adResult) {
-  const token = await getTurnstileToken();
+async function requestPass(adResult, onInteractive) {
+  const token = await getTurnstileToken({ onInteractive });
   let res;
   try {
     res = await fetch('/api/list-pass', {
@@ -46,6 +46,7 @@ async function requestPass(adResult) {
 export default function ListGate({ minutes, pages, used = false }) {
   const [state, setState] = useState('idle');
   const [waitMin, setWaitMin] = useState(0);
+  const [needTick, setNeedTick] = useState(false); // Cloudflare đang chờ người dùng tick ô xác minh
   const [armed, setArmed] = useState(false);
   const adResultRef = useRef(null);
   const busyRef = useRef(false);
@@ -56,14 +57,16 @@ export default function ListGate({ minutes, pages, used = false }) {
 
   const unlock = useCallback(async () => {
     setState('verifying');
+    setNeedTick(false);
     for (let retries = 0; ; retries += 1) {
       try {
-        await requestPass(adResultRef.current);
+        await requestPass(adResultRef.current, () => setNeedTick(true));
         track('list_unlock_success', { ad_type: adResultRef.current?.type });
         // Tải lại đúng URL (giữ ?page= / ?tinh=): request mới mang cookie vé, middleware trả danh sách.
         window.location.reload();
         return;
       } catch (err) {
+        setNeedTick(false);
         if (err.status === 429) {
           setWaitMin(Math.max(1, Math.ceil((err.retryAfter || 60) / 60)));
           setState('rate_limited');
@@ -143,6 +146,7 @@ export default function ListGate({ minutes, pages, used = false }) {
     blocked: M.gate.adBlocked,
     rate_limited: M.gate.rateLimited(waitMin),
     error: M.gate.error,
+    verifying: needTick ? M.gate.tick : undefined,
   }[state];
 
   return (
@@ -170,7 +174,10 @@ export default function ListGate({ minutes, pages, used = false }) {
           {label}
         </button>
       )}
-      <p aria-live="polite" className={`text-meta ${message ? 'text-danger' : 'text-muted'}`}>
+      <p
+        aria-live="polite"
+        className={`text-meta ${needTick && state === 'verifying' ? 'font-semibold text-ink' : message ? 'text-danger' : 'text-muted'}`}
+      >
         {message || M.gate.note(minutes, pages)}
       </p>
       {state === 'blocked' && (

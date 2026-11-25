@@ -214,6 +214,8 @@ test('ô tìm: không có gợi ý thì báo ngay dưới ô, Enter vẫn tìm �
 
 test('header đánh dấu trang đang xem (aria-current)', async ({ page, isMobile }) => {
   await page.goto('/doanh-nghiep-moi-thanh-lap');
+  // Trang DN mới nằm sau cổng quảng cáo: hộp thoại mời xem tự mở → «Để sau» để dùng menu.
+  await page.getByRole('dialog').getByRole('button', { name: 'Để sau' }).click();
   if (isMobile) await page.getByRole('button', { name: 'Mở menu' }).click();
   await expect(
     // Máy tính 1280: «Doanh nghiệp mới thành lập»; menu điện thoại: «Doanh nghiệp mới thành lập».

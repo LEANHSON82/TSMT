@@ -11,6 +11,7 @@ import { getDevice, track } from '@/lib/analytics';
 import { M } from '@/lib/messages';
 import { getTurnstileToken } from '@/lib/turnstile';
 import { IconPlay } from './Icons';
+import Modal from './Modal';
 
 const AdOverlayHost = dynamic(() => import('./AdOverlayHost'), { ssr: false });
 
@@ -160,9 +161,30 @@ export default function ListGate({ mode = 'ad', minutes, pages, used = false }) 
     verifying: needTick ? M.gate.tick : undefined,
   }[state];
 
+  // Hộp thoại mời xem (chỉ cổng quảng cáo): tự mở khi vào trang — quảng cáo có thưởng phải do người dùng tự chọn xem
+  // (chính sách Google, spec 5.1), nên không tự chạy video; bấm «Xem» một lần là chạy. «Để sau» / Esc → còn khung nhỏ.
+  const confirmRef = useRef(null);
+  const [prompt, setPrompt] = useState(false);
+  useEffect(() => {
+    if (!human) setPrompt(true);
+  }, [human]);
+  const accept = () => {
+    setPrompt(false);
+    start();
+  };
+
+  const tone =
+    needTick && state === 'verifying'
+      ? 'font-semibold text-ink'
+      : message
+        ? 'text-danger'
+        : 'text-muted';
   return (
-    <div className="panel flex flex-col items-start gap-4 p-5 md:p-7">
-      <p className="max-w-[640px] text-body text-pretty text-ink-2">
+    <div className="w-full max-w-[440px] rounded-xl border border-line bg-white p-5 text-center shadow-[0_18px_50px_-12px_rgba(15,23,42,0.28)] sm:p-6">
+      <h2 className="text-[18px] leading-[26px] font-semibold text-pretty text-title">
+        {human ? M.gate.humanTitle : M.gate.cardTitle}
+      </h2>
+      <p className="mt-1.5 text-sm text-pretty text-ink-2">
         {human
           ? used
             ? M.gate.humanUsed(pages)
@@ -178,7 +200,7 @@ export default function ListGate({ mode = 'ad', minutes, pages, used = false }) 
           disabled={state === 'rate_limited'}
           aria-disabled={busy || undefined}
           aria-busy={busy}
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-cta px-6 text-body font-semibold text-white hover:bg-cta-hover aria-busy:cursor-progress disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-2 max-sm:w-full"
+          className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-cta px-6 text-body font-semibold text-white hover:bg-cta-hover aria-busy:cursor-progress disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-2"
         >
           {busy ? (
             <span
@@ -186,19 +208,16 @@ export default function ListGate({ mode = 'ad', minutes, pages, used = false }) 
               className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current/30 border-t-current"
             />
           ) : human ? null : (
-            <IconPlay size={18} />
+            <IconPlay size={16} />
           )}
           {label}
         </button>
       )}
-      <p
-        aria-live="polite"
-        className={`text-meta ${needTick && state === 'verifying' ? 'font-semibold text-ink' : message ? 'text-danger' : 'text-muted'}`}
-      >
+      <p aria-live="polite" className={`mt-2.5 text-meta ${tone}`}>
         {message || (human ? M.gate.humanNote(minutes, pages) : M.gate.note(minutes, pages))}
       </p>
       {state === 'blocked' && (
-        <div className="text-meta text-ink-2">
+        <div className="mt-2 text-left text-meta text-ink-2">
           <ol className="list-decimal space-y-1 pl-5">
             {M.gate.adBlockedSteps.map((step) => (
               <li key={step}>{step}</li>
@@ -213,6 +232,37 @@ export default function ListGate({ mode = 'ad', minutes, pages, used = false }) 
           </button>
         </div>
       )}
+      <Modal
+        open={prompt && state === 'idle'}
+        onClose={() => setPrompt(false)}
+        title={M.gate.confirmTitle}
+        describedBy="gate-confirm-body"
+        initialFocusRef={confirmRef}
+        footer={
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setPrompt(false)}
+              className="h-11 rounded-md bg-page px-4 text-body font-semibold text-brand hover:bg-line-soft"
+            >
+              {M.gate.confirmCancel}
+            </button>
+            <button
+              ref={confirmRef}
+              type="button"
+              onClick={accept}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-cta px-4 text-body font-semibold text-white hover:bg-cta-hover active:bg-chrome-2"
+            >
+              <IconPlay size={14} />
+              {M.gate.confirmOk}
+            </button>
+          </div>
+        }
+      >
+        <p id="gate-confirm-body" className="text-sm leading-6 text-ink-2 sm:text-body">
+          {M.gate.confirmBody(minutes)}
+        </p>
+      </Modal>
       {armed && <AdOverlayHost />}
     </div>
   );

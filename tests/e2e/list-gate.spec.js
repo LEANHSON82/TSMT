@@ -3,7 +3,15 @@ import { expect, test } from './fixtures';
 import { acceptCookies, getListPass } from './helpers';
 
 const PAGE = '/doanh-nghiep-moi-thanh-lap';
-const BUTTON = 'Xem quảng cáo để mở danh sách';
+const BUTTON = 'Xem quảng cáo ngắn để mở danh sách'; // tiêu đề khung trên màn hình cổng
+const DIALOG = 'Xem video ngắn để mở danh sách?';
+
+/** Vào trang là hộp thoại mời xem tự mở; bấm «Xem». */
+async function acceptPrompt(page) {
+  const dialog = page.getByRole('dialog', { name: DIALOG });
+  await dialog.waitFor();
+  await dialog.getByRole('button', { name: 'Xem', exact: true }).click();
+}
 
 test('chưa có vé: HTML chỉ có màn hình cổng, không có dữ liệu DN, không cache, noindex', async ({
   request,
@@ -44,7 +52,7 @@ test('xem hết quảng cáo → mở đúng trang đang xem (giữ ?page=)', as
   await acceptCookies(page);
   await page.goto(`${PAGE}?page=2`);
   await expect(page.locator('article')).toHaveCount(0);
-  await page.getByRole('button', { name: BUTTON }).click();
+  await acceptPrompt(page);
   await expect(page.getByTestId('mock-video')).toBeVisible();
   await expect(page.locator('article').first()).toBeVisible({ timeout: 15_000 });
   await expect(page).toHaveURL(/\?page=2$/);
@@ -54,7 +62,7 @@ test('xem hết quảng cáo → mở đúng trang đang xem (giữ ?page=)', as
 test('đóng quảng cáo sớm → nhắc xem hết, nút «Xem lại»', async ({ page }) => {
   await acceptCookies(page);
   await page.goto(`${PAGE}?ad=closed`);
-  await page.getByRole('button', { name: BUTTON }).click();
+  await acceptPrompt(page);
   await expect(page.getByText('Bạn cần xem hết quảng cáo để mở danh sách.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Xem lại' })).toBeVisible();
   await expect(page.locator('article')).toHaveCount(0);
@@ -139,4 +147,19 @@ test('trang lớn hơn 25 → màn hình «chỉ xem được 25 trang đầu»,
     expect(isList(html), path).toBe(false);
     expect(res.headers()['x-robots-tag'], path).toBe('noindex');
   }
+});
+
+test('«Để sau» đóng hộp thoại, còn khung «Xem quảng cáo» trên bảng mờ (dòng giả, không có DN thật)', async ({
+  page,
+}) => {
+  await acceptCookies(page);
+  await page.goto(PAGE);
+  const dialog = page.getByRole('dialog', { name: DIALOG });
+  await dialog.getByRole('button', { name: 'Để sau' }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Xem quảng cáo', exact: true })).toBeVisible();
+  await expect(page.locator('[data-gate-backdrop]')).toHaveAttribute('aria-hidden', 'true');
+  await expect(page.locator('article')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Xem quảng cáo', exact: true }).click();
+  await expect(page.getByTestId('mock-video')).toBeVisible();
 });

@@ -6,6 +6,7 @@
 //   cham  — quá nhiều lượt: thử lại sau ?phut= phút (HTTP 429)
 // Không có dữ liệu DN nào trong HTML; noindex.
 import Link from 'next/link';
+import GateBackdrop from '@/components/GateBackdrop';
 import ListGate from '@/components/ListGate';
 import PageHero, { PAGE_H1 } from '@/components/PageHero';
 import { LinkList } from '@/components/States';
@@ -14,7 +15,12 @@ import { M } from '@/lib/messages';
 import { firstParam } from '@/lib/url';
 
 const MINUTES = Math.round(PASS_TTL_S / 60);
-const AD_TITLES = { '/doanh-nghiep-moi-thanh-lap': M.list.newCompanies.title };
+const AD_PAGES = {
+  '/doanh-nghiep-moi-thanh-lap': {
+    title: M.list.newCompanies.title,
+    lead: M.list.newCompanies.lead(''),
+  },
+};
 
 export const metadata = {
   title: M.gate.metaTitle,
@@ -28,10 +34,20 @@ export default async function ListGatePage({ searchParams }) {
   const used = firstParam(sp.het) === '1';
 
   let title;
+  let lead;
   let body;
+  // Khung mở danh sách nằm giữa một bảng mờ toàn dòng giả (trông như trang danh sách, không có dữ liệu thật).
+  const overBackdrop = (card) => (
+    <div className="relative">
+      <GateBackdrop />
+      <div className="absolute inset-x-0 top-6 flex justify-center px-3 sm:top-16">{card}</div>
+    </div>
+  );
   if (loai === 'human') {
     title = M.gate.humanTitle;
-    body = <ListGate mode="human" minutes={MINUTES} pages={HUMAN_PASS_PAGES} used={used} />;
+    body = overBackdrop(
+      <ListGate mode="human" minutes={MINUTES} pages={HUMAN_PASS_PAGES} used={used} />,
+    );
   } else if (loai === 'sau') {
     title = M.gate.deepTitle(MAX_LIST_PAGE);
     body = (
@@ -58,17 +74,24 @@ export default async function ListGatePage({ searchParams }) {
       </div>
     );
   } else {
-    title = AD_TITLES[path] || M.gate.metaTitle;
-    body = <ListGate mode="ad" minutes={MINUTES} pages={AD_PASS_PAGES} used={used} />;
+    title = AD_PAGES[path]?.title || M.gate.metaTitle;
+    lead = AD_PAGES[path]?.lead;
+    body = overBackdrop(<ListGate mode="ad" minutes={MINUTES} pages={AD_PASS_PAGES} used={used} />);
   }
 
   return (
     <main className="pb-12 md:pb-16">
       <PageHero breadcrumb={[{ name: title }]}>
         <h1 className={PAGE_H1}>{title}</h1>
+        {lead && (
+          <p className="mt-2 max-w-[760px] text-sm text-pretty text-ink-2 md:text-[15px]">{lead}</p>
+        )}
       </PageHero>
       <div className="site-wrap">
-        <div className="mt-5 max-w-[852px] md:mt-8">{body}</div>
+        {/* Màn hình chữ («dùng bộ lọc», «tạm dừng») hẹp vừa đọc; khung mở danh sách rộng bằng bảng. */}
+        <div className={`mt-5 md:mt-8 ${['sau', 'cham'].includes(loai) ? 'max-w-[852px]' : ''}`}>
+          {body}
+        </div>
       </div>
     </main>
   );

@@ -5,7 +5,7 @@ import Pagination from './Pagination';
 import { EmptyState, LinkList } from './States';
 import { M } from '@/lib/messages';
 import { formatNumber } from '@/lib/format';
-import { isGatedPath } from '@/lib/list-gate';
+import { MAX_LIST_PAGE } from '@/lib/list-gate';
 
 /**
  * Bố cục chung cho kết quả tìm kiếm và trang danh sách tỉnh / ngành / DN mới (spec mục 3.2, 3.5), hệ A:
@@ -37,7 +37,9 @@ export default function ListPageShell({
 }) {
   const size = data.page_size || 20;
   const total = data.total || 0;
-  const totalPages = Math.max(1, Math.ceil(total / size));
+  // Chống crawl (lib/list-gate.js): chỉ lật tới trang MAX_LIST_PAGE; sâu hơn phải lọc / tìm.
+  const allPages = Math.max(1, Math.ceil(total / size));
+  const totalPages = Math.min(allPages, MAX_LIST_PAGE);
   const count = data.items?.length || 0;
   const from = (Math.max(1, data.page || 1) - 1) * size + 1;
   // Gợi ý khi rỗng: chỉ nhắc «bỏ bộ lọc» khi đang có bộ lọc bật; trang không bộ lọc (tỉnh) hoặc chưa lọc gì thì
@@ -119,8 +121,12 @@ export default function ListPageShell({
                 totalPages={totalPages}
                 basePath={basePath}
                 params={params}
-                prefetch={isGatedPath(basePath) ? false : undefined}
+                // Không tải trước trang sau: mỗi lần tải trước bị tính là một lượt xem (đếm theo IP, lib/list-gate.js).
+                prefetch={false}
               />
+              {allPages > MAX_LIST_PAGE && (
+                <p className="mt-3 text-meta text-muted">{M.list.depthNote(MAX_LIST_PAGE)}</p>
+              )}
             </>
           ) : (
             <EmptyState title={emptyTitle} hints={hints}>

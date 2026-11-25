@@ -16,6 +16,8 @@ const appEnv = {
   NEXT_PUBLIC_TRACK_LOG: '1',
   // Mọi test cùng một IP (localhost): nới giới hạn số vé mở danh sách mỗi giờ (lib/list-gate.js).
   LIST_GATE_PER_IP: '100000',
+  // Mỗi test gửi X-E2E-IP riêng (tests/e2e/fixtures.js) → đếm lượt xem danh sách theo IP không cộng dồn giữa các test.
+  E2E_TRUST_TEST_IP: '1',
   ...(API_MODE
     ? { NEXT_PUBLIC_API_BASE: `http://localhost:${API_PORT}`, NEXT_PUBLIC_MOCK_SCENARIOS: '1' }
     : { NEXT_PUBLIC_API_BASE: '' }),

@@ -11,7 +11,18 @@ import { NextResponse } from 'next/server';
 import { parseMstSlug } from './lib/mst.js';
 import { toSlug } from './lib/slug.js';
 import { NEW_WINDOW_DAYS, daysAgoVN } from './lib/filters.js';
-import { PASS_COOKIE, isGatedPath, spendPassPage, verifyPass } from './lib/list-gate.js';
+import {
+  MAX_LIST_PAGE,
+  PASS_KINDS,
+  THROTTLE_HARD,
+  THROTTLE_SOFT,
+  clientIp,
+  countListView,
+  isGatedPath,
+  isListPath,
+  spendPassPage,
+  verifyPass,
+} from './lib/list-gate.js';
 
 export const config = {
   runtime: 'nodejs',
@@ -27,6 +38,8 @@ export const config = {
     '/tinh/:slug',
     '/nganh/:codeSlug',
     '/doanh-nghiep-moi-thanh-lap',
+    // Kết quả tìm: chỉ để đếm lượt xem theo IP / giới hạn độ sâu (lib/list-gate.js).
+    '/tim-kiem',
     // Route nội bộ (q/…): truy cập thẳng thì 301 về URL công khai.
     '/tinh/:slug/q/:page',
     '/nganh/:codeSlug/q/:tinh/:page',
@@ -163,24 +176,54 @@ async function province(request, slug) {
   return NextResponse.next();
 }
 
-/**
- * Trang bị chặn (lib/list-gate.js): có vé hợp lệ và còn lượt → cho qua; không → rewrite sang màn hình cổng /mo-khoa
- * (URL giữ nguyên, HTML không có dữ liệu DN). Không cache ở proxy/CDN: cùng URL trả nội dung khác nhau theo cookie.
- */
-function gate(request) {
-  const pass = verifyPass(request.cookies.get(PASS_COOKIE)?.value);
-  const used = pass ? spendPassPage(pass) : false;
-  if (used) {
-    const res = NextResponse.next();
-    res.headers.set('Cache-Control', 'private, no-store');
-    return res;
-  }
+/** Màn hình /mo-khoa thay cho danh sách (URL giữ nguyên). loai: ad | human | sau | cham (xem app/mo-khoa). */
+function gateScreen(request, loai, extra = {}, status) {
   const url = new URL('/mo-khoa', request.url);
   url.searchParams.set('p', request.nextUrl.pathname);
-  if (pass) url.searchParams.set('het', '1'); // vé còn hạn nhưng đã xem hết số trang
-  const res = NextResponse.rewrite(url);
+  url.searchParams.set('loai', loai);
+  for (const [k, v] of Object.entries(extra)) url.searchParams.set(k, String(v));
+  const res = NextResponse.rewrite(url, status ? { status } : undefined);
+  // Cùng URL trả nội dung khác nhau theo cookie / IP → không cho proxy, CDN cache.
   res.headers.set('Cache-Control', 'private, no-store');
   res.headers.set('X-Robots-Tag', 'noindex');
+  return res;
+}
+
+/** Vé loại kind trong cookie còn hạn và còn lượt → true (đã trừ một lượt). */
+function spend(request, kind) {
+  const pass = verifyPass(request.cookies.get(PASS_KINDS[kind].cookie)?.value, kind);
+  if (!pass) return { ok: false, had: false };
+  return { ok: spendPassPage(pass), had: true };
+}
+
+/**
+ * Chống crawl trang danh sách (lib/list-gate.js). null = cho qua.
+ *   trang > MAX_LIST_PAGE → màn hình «dùng bộ lọc» · IP quá THROTTLE_HARD lượt / 10 phút → 429 «thử lại sau»
+ *   IP quá THROTTLE_SOFT lượt → cần vé «đã xác minh» (Turnstile). Trang DN mới dùng vé quảng cáo (adGate).
+ */
+function listGuard(request) {
+  if (pageParam(request) > MAX_LIST_PAGE) return gateScreen(request, 'sau');
+  const { count, retryAfter } = countListView(clientIp(request.headers));
+  if (count > THROTTLE_HARD) {
+    const res = gateScreen(request, 'cham', { phut: Math.ceil(retryAfter / 60) }, 429);
+    res.headers.set('Retry-After', String(retryAfter));
+    return res;
+  }
+  // Trang DN mới: cần vé quảng cáo — kiểm sau khi chuẩn hoá URL (301 / 404 trước), xem newCompanies().
+  if (isGatedPath(request.nextUrl.pathname)) return null;
+  if (count > THROTTLE_SOFT) {
+    const r = spend(request, 'human');
+    return r.ok ? null : gateScreen(request, 'human', r.had ? { het: 1 } : {});
+  }
+  return null;
+}
+
+/** Trang sau cổng quảng cáo: có vé quảng cáo còn lượt → cho qua (không cache ở proxy); không → màn hình cổng. */
+function adGate(request) {
+  const r = spend(request, 'ad');
+  if (!r.ok) return gateScreen(request, 'ad', r.had ? { het: 1 } : {});
+  const res = NextResponse.next();
+  res.headers.set('Cache-Control', 'private, no-store');
   return res;
 }
 
@@ -197,7 +240,7 @@ async function newCompanies(request) {
     )
   )
     return notFound(request);
-  return isGatedPath(request.nextUrl.pathname) ? gate(request) : NextResponse.next();
+  return adGate(request);
 }
 
 async function industry(request, codeSlug) {
@@ -260,6 +303,11 @@ export async function middleware(request) {
     return NextResponse.redirect(url, 301);
   }
 
+  if (isListPath(path)) {
+    const blocked = listGuard(request);
+    if (blocked) return blocked;
+  }
+  if (parts.length === 1 && parts[0] === 'tim-kiem') return NextResponse.next();
   if (parts.length === 2 && parts[0] === 'tinh') return province(request, parts[1]);
   if (parts.length === 2 && parts[0] === 'nganh') return industry(request, parts[1]);
   if (parts.length === 1 && parts[0] === 'doanh-nghiep-moi-thanh-lap') return newCompanies(request);

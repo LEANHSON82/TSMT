@@ -17,15 +17,19 @@ const AdOverlayHost = dynamic(() => import('./AdOverlayHost'), { ssr: false });
 const MAX_AUTO_RETRIES = 2;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/** Xin vé; ném lỗi có status (0 = lỗi mạng). */
-async function requestPass(adResult, onInteractive) {
+/** Xin vé ('ad' kèm kết quả quảng cáo, 'human' chỉ cần Turnstile); ném lỗi có status (0 = lỗi mạng). */
+async function requestPass(mode, adResult, onInteractive) {
   const token = await getTurnstileToken({ onInteractive });
   let res;
   try {
     res = await fetch('/api/list-pass', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ad_result: adResult, turnstile_token: token }),
+      body: JSON.stringify(
+        mode === 'human'
+          ? { mode, turnstile_token: token }
+          : { ad_result: adResult, turnstile_token: token },
+      ),
       credentials: 'same-origin',
     });
   } catch {
@@ -43,7 +47,9 @@ async function requestPass(adResult, onInteractive) {
  * state: idle · ad (đang chạy quảng cáo) · verifying (đang xin vé) · closed (đóng sớm) · blocked (chặn quảng cáo)
  *        · rate_limited (IP xin quá nhiều vé) · error (lỗi sau khi đã xem xong → «Thử lại» chỉ xin lại vé)
  */
-export default function ListGate({ minutes, pages, used = false }) {
+/** mode: 'ad' (cổng quảng cáo trang DN mới) | 'human' (xem quá nhiều trang → chỉ xác minh Turnstile). */
+export default function ListGate({ mode = 'ad', minutes, pages, used = false }) {
+  const human = mode === 'human';
   const [state, setState] = useState('idle');
   const [waitMin, setWaitMin] = useState(0);
   const [needTick, setNeedTick] = useState(false); // Cloudflare đang chờ người dùng tick ô xác minh
@@ -52,16 +58,16 @@ export default function ListGate({ minutes, pages, used = false }) {
   const busyRef = useRef(false);
 
   useEffect(() => {
-    track('list_gate_view', { path: window.location.pathname });
-  }, []);
+    track('list_gate_view', { path: window.location.pathname, mode });
+  }, [mode]);
 
   const unlock = useCallback(async () => {
     setState('verifying');
     setNeedTick(false);
     for (let retries = 0; ; retries += 1) {
       try {
-        await requestPass(adResultRef.current, () => setNeedTick(true));
-        track('list_unlock_success', { ad_type: adResultRef.current?.type });
+        await requestPass(mode, adResultRef.current, () => setNeedTick(true));
+        track('list_unlock_success', { mode, ad_type: adResultRef.current?.type });
         // Tải lại đúng URL (giữ ?page= / ?tinh=): request mới mang cookie vé, middleware trả danh sách.
         window.location.reload();
         return;
@@ -82,7 +88,7 @@ export default function ListGate({ minutes, pages, used = false }) {
         return;
       }
     }
-  }, []);
+  }, [mode]);
 
   const runAd = useCallback(async () => {
     if (busyRef.current) return;
@@ -125,34 +131,45 @@ export default function ListGate({ minutes, pages, used = false }) {
   }, [unlock]);
 
   const start = () => {
-    track('list_unlock_click', { path: window.location.pathname });
-    runAd();
+    track('list_unlock_click', { path: window.location.pathname, mode });
+    if (human) unlock();
+    else runAd();
   };
-  const retry = () => (adResultRef.current ? unlock() : runAd());
+  const retry = () => (human || adResultRef.current ? unlock() : runAd());
 
   const busy = state === 'ad' || state === 'verifying';
   const label =
     state === 'ad'
       ? M.gate.loading
       : state === 'verifying'
-        ? M.gate.verifying
+        ? human
+          ? M.gate.humanVerifying
+          : M.gate.verifying
         : state === 'closed'
           ? M.gate.watchAgain
           : state === 'error'
             ? M.gate.retry
-            : M.gate.button;
+            : human
+              ? M.gate.humanButton
+              : M.gate.button;
   const message = {
     closed: M.gate.closedEarly,
     blocked: M.gate.adBlocked,
     rate_limited: M.gate.rateLimited(waitMin),
-    error: M.gate.error,
+    error: human ? M.gate.humanError : M.gate.error,
     verifying: needTick ? M.gate.tick : undefined,
   }[state];
 
   return (
     <div className="panel flex flex-col items-start gap-4 p-5 md:p-7">
       <p className="max-w-[640px] text-body text-pretty text-ink-2">
-        {used ? M.gate.used(pages) : M.gate.lead}
+        {human
+          ? used
+            ? M.gate.humanUsed(pages)
+            : M.gate.humanLead
+          : used
+            ? M.gate.used(pages)
+            : M.gate.lead}
       </p>
       {state !== 'blocked' && (
         <button
@@ -168,7 +185,7 @@ export default function ListGate({ minutes, pages, used = false }) {
               aria-hidden="true"
               className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current/30 border-t-current"
             />
-          ) : (
+          ) : human ? null : (
             <IconPlay size={18} />
           )}
           {label}
@@ -178,7 +195,7 @@ export default function ListGate({ minutes, pages, used = false }) {
         aria-live="polite"
         className={`text-meta ${needTick && state === 'verifying' ? 'font-semibold text-ink' : message ? 'text-danger' : 'text-muted'}`}
       >
-        {message || M.gate.note(minutes, pages)}
+        {message || (human ? M.gate.humanNote(minutes, pages) : M.gate.note(minutes, pages))}
       </p>
       {state === 'blocked' && (
         <div className="text-meta text-ink-2">

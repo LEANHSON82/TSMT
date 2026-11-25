@@ -25,7 +25,7 @@ const box =
 const live = `${box} border-line-strong bg-white text-brand hover:border-brand hover:text-brand`;
 const off = `${box} border-line text-muted`;
 
-// prefetch={false}: trang bị chặn bằng cổng quảng cáo (lib/list-gate.js) — mỗi lần tải trước sẽ tiêu một lượt xem của vé.
+// prefetch={false}: trang danh sách đếm lượt xem theo IP (lib/list-gate.js) — mỗi lần tải trước bị tính một lượt.
 export default function Pagination({ page, totalPages, basePath, params = {}, prefetch }) {
   if (totalPages <= 1) return null;
   const href = (p) => buildHref(basePath, { ...params, page: p });

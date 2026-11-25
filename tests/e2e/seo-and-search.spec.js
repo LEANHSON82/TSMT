@@ -43,8 +43,9 @@ test('/{mst}, slug sai, ngành sai slug → 301 về URL chuẩn (giữ tham s�
     '/abc',
     '/tinh/khong-co',
     '/nganh/9999-abc',
-    '/tinh/ha-noi?page=999',
-    '/doanh-nghiep-moi-thanh-lap?page=500',
+    // Vượt số trang (trong giới hạn 25 trang); trang > 25 là màn hình «dùng bộ lọc» (tests/e2e/list-gate.spec.js).
+    '/tinh/ha-noi?page=20',
+    '/doanh-nghiep-moi-thanh-lap?page=20',
   ]) {
     const res = await request.get(path);
     expect(res.status(), path).toBe(404);

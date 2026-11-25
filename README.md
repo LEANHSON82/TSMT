@@ -164,25 +164,30 @@ number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
 - Gợi ý < 150 ms trên ~1 triệu DN, có bỏ dấu tiếng Việt và chịu gõ sai → nên dùng Meilisearch / Typesense,
   hoặc Postgres `unaccent` + `pg_trgm`.
 
-## Cổng quảng cáo trước danh sách DN mới (chống crawl)
+## Chống crawl trang danh sách
 
-Theo yêu cầu chủ dự án (25/11/2026): trang `/doanh-nghiep-moi-thanh-lap` (mọi `?page=` / `?tinh=`) chỉ hiện danh sách
-sau khi xem một quảng cáo và qua Cloudflare Turnstile.
+Theo yêu cầu chủ dự án (25/11/2026). Ba lớp, kiểm ở `middleware.js`, cấu hình trong `lib/list-gate.js`:
 
-- `middleware.js` kiểm cookie vé `list_pass` (ký HMAC, `lib/list-gate.js`). Không có vé → rewrite sang màn hình cổng
-  `app/mo-khoa` (URL giữ nguyên, HTML không có dữ liệu DN, `X-Robots-Tag: noindex`, `Cache-Control: private, no-store`).
-- Màn hình cổng (`components/ListGate.jsx`): video có thưởng → không có thì quảng cáo dự phòng 5 giây → token Turnstile →
-  `POST /api/list-pass` → tải lại đúng URL. Đóng sớm → «Xem lại»; chặn quảng cáo → hướng dẫn tắt; lỗi sau khi đã xem
-  xong → «Thử lại» không bắt xem lại.
-- Giới hạn: vé hạn **30 phút**, mỗi vé **40 trang**, mỗi IP **12 vé/giờ** (đổi trong `lib/list-gate.js`). Bộ đếm nằm
-  trong bộ nhớ máy chủ (một instance Railway); chạy nhiều instance thì chuyển sang Redis hoặc để API Go làm.
-- Trang này bỏ khỏi sitemap, `Disallow` trong robots.txt, `noindex`. Muốn chặn thêm trang tỉnh / ngành: thêm đường dẫn vào
-  `GATED_PATHS`.
-- **Cần đặt trên Railway:** `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` (thiếu secret thì máy chủ nhận mọi
-  token — captcha chưa có tác dụng), `LIST_GATE_SECRET` (`openssl rand -hex 32`; thiếu thì vé mất hiệu lực mỗi lần deploy).
-- Hạn chế còn lại: kết quả quảng cáo không xác minh được ở máy chủ (như luồng SĐT, spec 4.3 — việc của BE); dữ liệu DN mới
-  vẫn lấy được qua trang tỉnh / ngành / `/tim-kiem` (lọc «Thành lập trong»). Lớp chặn bot mạnh nhất là đưa domain qua
-  Cloudflare (Bot Fight Mode, giới hạn tần suất).
+| Lớp              | Áp cho                                                    | Hành vi                                                                                                            |
+| ---------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Cổng quảng cáo   | `/doanh-nghiep-moi-thanh-lap` (mọi `?page=` / `?tinh=`)   | Phải xem một quảng cáo + qua Turnstile mới thấy danh sách. Vé 30 phút, 40 trang                                    |
+| Đếm lượt theo IP | Mọi danh sách: DN mới, `/tinh/*`, `/nganh/*`, `/tim-kiem` | Quá **20** trang / 10 phút → xác minh Turnstile (vé 30 phút, 60 trang). Quá **150** → 429 «Tạm dừng xem danh sách» |
+| Giới hạn độ sâu  | Mọi danh sách                                             | Chỉ lật tới trang **25**; sâu hơn → màn hình «dùng bộ lọc»                                                         |
+
+- Bị chặn thì `middleware.js` rewrite sang `app/mo-khoa` (URL giữ nguyên, HTML không có dữ liệu DN, `noindex`,
+  `Cache-Control: private, no-store`). Màn hình cổng: `components/ListGate.jsx` → `POST /api/list-pass` cấp vé (cookie
+  HttpOnly ký HMAC). Đã xem xong quảng cáo thì lỗi phía mình không bắt xem lại.
+- Mỗi IP xin tối đa 12 vé/giờ. Link phân trang không tải trước (mỗi lần tải trước bị tính một lượt).
+- IP lấy từ `X-Real-IP` (proxy Railway), không có thì phần tử cuối `X-Forwarded-For`. Đưa domain qua Cloudflare thì đặt
+  `TRUST_CF_IP=1` để dùng `CF-Connecting-IP`. Không biết IP thì không đếm (tránh chặn nhầm mọi người).
+- Bộ đếm nằm trong bộ nhớ máy chủ (một instance Railway); chạy nhiều instance thì chuyển sang Redis hoặc để API Go làm.
+- Trang DN mới bỏ khỏi sitemap, `Disallow` trong robots.txt, `noindex`.
+- **Biến môi trường trên Railway:** `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` (thiếu secret thì máy chủ nhận
+  mọi token), `LIST_GATE_SECRET` (`openssl rand -hex 32`). Đổi ngưỡng không cần sửa code: `LIST_THROTTLE_SOFT`,
+  `LIST_THROTTLE_HARD`, `LIST_GATE_PER_IP`.
+- Hạn chế: kết quả quảng cáo không xác minh được ở máy chủ (như luồng SĐT, spec 4.3 — việc của BE); trang chi tiết DN và
+  sitemap vẫn mở cho Google (spec bắt buộc). Lớp mạnh nhất nên thêm: đưa domain qua Cloudflare (Bot Fight Mode, giới hạn
+  tần suất).
 
 ## Đã làm theo spec
 
@@ -261,7 +266,8 @@ Các lệch trước đây (308 thay 301, trang danh sách không ISR, `?page=99
 5. **Trang DN mới thành lập sau cổng quảng cáo** (spec mục 2: ISR, được lập chỉ mục; 5.3: không chặn cả trang): theo yêu
    cầu chủ dự án để chống crawl. Trang bị `noindex`, bỏ khỏi sitemap, chặn trong robots.txt; không còn ISR dùng chung
    cho mọi người (mỗi lượt xem đi qua kiểm vé).
-6. **Quy trình:** spec yêu cầu pull request < 400 dòng kèm ảnh chụp; mockup này đang là các commit trên `main`.
+6. **Giới hạn 25 trang mỗi danh sách, đếm lượt xem theo IP** (spec chỉ nói phân trang số): chống crawl theo yêu cầu chủ dự án.
+7. **Quy trình:** spec yêu cầu pull request < 400 dòng kèm ảnh chụp; mockup này đang là các commit trên `main`.
 
 ## Câu hỏi mở cho owner (spec mục 9.4, cộng thêm)
 

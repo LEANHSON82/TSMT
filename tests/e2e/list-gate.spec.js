@@ -71,3 +71,72 @@ test('robots.txt chặn trang sau cổng; sitemap không còn trang này', async
     expect(body, url.pathname).not.toContain(`${PAGE}<`);
   }
 });
+
+// ---- Đếm lượt xem theo IP + giới hạn độ sâu: mọi trang danh sách (mỗi test một IP riêng, xem fixtures.js) ----
+
+const isList = (html) => html.includes('<article');
+
+test('xem quá 20 trang danh sách trong 10 phút → phải xác minh; xác minh xong xem tiếp', async ({
+  request,
+}) => {
+  const pages = [
+    '/tinh/ha-noi',
+    '/tinh/ha-noi?page=2',
+    '/nganh/4330-hoan-thien-cong-trinh-xay-dung',
+  ];
+  for (let i = 0; i < 20; i++) {
+    const res = await request.get(pages[i % pages.length]);
+    expect(isList(await res.text()), `lượt ${i + 1}`).toBe(true);
+  }
+  const blocked = await request.get('/tinh/ha-noi');
+  expect(blocked.status()).toBe(200);
+  expect(blocked.headers()['cache-control']).toContain('private');
+  const html = await blocked.text();
+  expect(isList(html)).toBe(false);
+  expect(html).toContain('Xác minh để xem tiếp');
+  // Kết quả tìm cũng bị đếm.
+  expect(isList(await (await request.get('/tim-kiem?q=cong')).text())).toBe(false);
+
+  const pass = await request.post('/api/list-pass', {
+    data: { mode: 'human', turnstile_token: 'e2e' },
+  });
+  expect(pass.status()).toBe(204);
+  expect(isList(await (await request.get('/tinh/ha-noi')).text())).toBe(true);
+  // Vé «đã xác minh» không mở được cổng quảng cáo trang DN mới.
+  expect(await (await request.get(PAGE)).text()).toContain(BUTTON);
+});
+
+test('trình duyệt: bấm «Xác minh để xem tiếp» → thấy lại danh sách', async ({ page, request }) => {
+  await acceptCookies(page);
+  for (let i = 0; i < 20; i++) await request.get('/tinh/ha-noi');
+  await page.goto('/tinh/ha-noi');
+  await expect(page.locator('article')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Xác minh để xem tiếp' }).click();
+  await expect(page.locator('article').first()).toBeVisible({ timeout: 15_000 });
+  await expect(page).toHaveURL(/\/tinh\/ha-noi$/);
+});
+
+test('quá 150 trang trong 10 phút → 429 «Tạm dừng xem danh sách», có vé cũng vậy', async ({
+  request,
+}) => {
+  await request.post('/api/list-pass', { data: { mode: 'human', turnstile_token: 'e2e' } });
+  let res;
+  for (let i = 0; i < 151; i++) res = await request.get('/tinh/ha-noi');
+  expect(res.status()).toBe(429);
+  expect(Number(res.headers()['retry-after'])).toBeGreaterThan(0);
+  const html = await res.text();
+  expect(html).toContain('Tạm dừng xem danh sách');
+  expect(isList(html)).toBe(false);
+});
+
+test('trang lớn hơn 25 → màn hình «chỉ xem được 25 trang đầu», không có dữ liệu', async ({
+  request,
+}) => {
+  for (const path of ['/tinh/ha-noi?page=26', `${PAGE}?page=30`, '/tim-kiem?q=cong&page=99']) {
+    const res = await request.get(path);
+    const html = await res.text();
+    expect(html, path).toContain('Chỉ xem được 25 trang đầu');
+    expect(isList(html), path).toBe(false);
+    expect(res.headers()['x-robots-tag'], path).toBe('noindex');
+  }
+});

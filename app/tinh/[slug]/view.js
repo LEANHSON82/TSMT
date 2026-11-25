@@ -65,7 +65,6 @@ export async function ProvinceList({ params, searchParams }) {
       basePath={`/tinh/${province.slug}`}
       params={{}}
       slotPrefix="province"
-      showProvince={false}
     />
   );
 }

@@ -251,18 +251,17 @@ const RELATED_SHOWN = 5;
 
 /**
  * Một DN trong khối «cùng ngành tại tỉnh», mọi thông tin trên MỘT hàng ngang, không ghi nhãn (tiết kiệm chỗ):
- *   ≥ 1024px: các cột tên · MST · người đại diện · phường/xã · ngày hoạt động · tình trạng.
+ *   ≥ 1024px: các cột tên · MST · người đại diện · tỉnh/thành · ngày hoạt động · tình trạng.
  *   < 1024px: tên một dòng, rồi các giá trị nối nhau bằng «·». Cả hàng bấm được (lớp phủ của link tên). Đủ trường
  *   thẻ DN (spec 3.3).
  */
 function RelatedRow({ r }) {
-  const area = areaAddress(r.address, r.province?.name, { withProvince: false });
   // Dấu «·» trước mỗi giá trị (chỉ dạng nối dòng < 1024px).
   const dot = "max-lg:before:mr-2 max-lg:before:text-line-strong max-lg:before:content-['·']";
   return (
     <li className="relative border-b border-line-soft px-4 py-2.5 last:border-b-0 hover:bg-thead md:px-5">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm leading-6 text-ink-2 lg:grid lg:grid-cols-[minmax(0,1fr)_120px_minmax(0,140px)_minmax(0,170px)_88px_124px] lg:gap-x-4">
-        <h3 className="w-full min-w-0 text-[15px] font-semibold text-pretty lg:line-clamp-2 lg:w-auto lg:leading-6">
+        <h3 className="w-full min-w-0 text-base font-semibold text-pretty lg:line-clamp-2 lg:w-auto lg:text-[15px] lg:leading-6">
           <Link
             href={companyPath(r)}
             prefetch={false}
@@ -278,9 +277,9 @@ function RelatedRow({ r }) {
             {r.representative}
           </span>
         )}
-        {area && (
+        {r.province?.name && (
           <span className={`min-w-0 lg:truncate ${dot}`} title={r.address}>
-            {area}
+            {r.province.name}
           </span>
         )}
         <span className={`tabular-nums ${dot}`}>{formatDate(r.founded_date) || '—'}</span>

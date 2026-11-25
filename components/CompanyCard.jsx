@@ -26,7 +26,7 @@ import Highlight from './Highlight';
 // variant: 'row' (CompanyList: bảng ≥ 1024px, thẻ dưới đó) | 'card' (luôn dạng thẻ).
 // highlight: từ khoá tìm kiếm để tô sáng trong tên DN, MST, người đại diện.
 // showNew: nhãn «MỚI» cho DN thành lập trong 7 ngày (tắt ở khối/trang «DN mới thành lập»).
-// showProvince=false: trang theo tỉnh — địa chỉ chỉ ghi phường/xã (tỉnh đã có ở tiêu đề trang).
+// showProvince=false: chỉ ghi phường/xã thay cho tỉnh/thành (hiện không trang nào dùng — mọi danh sách ghi tỉnh/thành).
 const NEW_DAYS = 7;
 function isNew(foundedDate) {
   const t = Date.parse(foundedDate || '');
@@ -117,8 +117,8 @@ export default function CompanyCard({
             )}
           </dd>
         </div>
-        {/* Địa chỉ rút gọn một dòng (spec 3.3): chỉ tỉnh/thành (đủ để lọc nhanh, cần thì bấm xem chi tiết). Trang theo
-            tỉnh (tỉnh đã ở tiêu đề): ghi phường/xã. Địa chỉ đầy đủ ở tooltip. */}
+        {/* Địa chỉ rút gọn một dòng (spec 3.3): chỉ tỉnh/thành ở MỌI danh sách (kể cả trang theo tỉnh), cần thì bấm xem
+            chi tiết. Địa chỉ đầy đủ ở tooltip. */}
         <div className={field('lg:col-start-4')}>
           <dt className={label}>{showProvince ? M.company.provinceShort : M.company.wardShort}</dt>
           <dd className={`${value} text-ink-2`} title={table ? c.address : undefined}>

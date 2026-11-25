@@ -140,13 +140,43 @@ export default async function CompanyPage({ params }) {
             )}
           </dl>
         )}
-        {/* Tình trạng ngay dưới tên DN — việc chính khi kiểm tra đối tác. */}
-        {c.status && (
-          <p className="mt-2.5">
-            <span className="sr-only">{M.company.status}: </span>
-            <StatusBadge status={c.status} />
-          </p>
-        )}
+        {/* Dòng tóm tắt ngay dưới tên DN (nhìn một lần là biết): tình trạng · ngày hoạt động · tỉnh · cập nhật. */}
+        <p className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-ink-2 md:text-[15px]">
+          {c.status && (
+            <span>
+              <span className="sr-only">{M.company.status}: </span>
+              <StatusBadge status={c.status} />
+            </span>
+          )}
+          {c.founded_date && (
+            <>
+              <span aria-hidden="true" className="text-line-strong">
+                ·
+              </span>
+              <span className="tabular-nums">
+                {M.company.foundedShort} {formatDate(c.founded_date)}
+              </span>
+            </>
+          )}
+          {c.province?.name && (
+            <>
+              <span aria-hidden="true" className="text-line-strong">
+                ·
+              </span>
+              <span>{c.province.name}</span>
+            </>
+          )}
+          {c.updated_at && (
+            <>
+              <span aria-hidden="true" className="text-line-strong">
+                ·
+              </span>
+              <span className="text-muted tabular-nums">
+                {M.company.updatedShort} {formatDate(c.updated_at)}
+              </span>
+            </>
+          )}
+        </p>
       </PageHero>
 
       <div className="site-wrap">

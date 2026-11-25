@@ -35,41 +35,41 @@
      link, hành động, trang đang chọn · Background #F3F6FA · Surface #FFFFFF · Text #1E293B · Success #16A34A (nhãn
      «Đang hoạt động»: chữ xanh lá đậm #15803D trên nền xanh lá nhạt để đạt AA). Không còn mảng nền tối: header trắng.
      brand = link / hành động (xanh); title = tiêu đề, tên DN (navy); cta = nút chính (xanh, chữ trắng 5,2:1). */
-  --color-chrome: #142d4e;
+  --color-chrome: #111827;
   --color-chrome-2: #0d1f38;
   --color-silver: #cbd5e1;
-  --color-silver-2: #eef2f7;
-  --color-brand: #2563eb;
-  --color-brand-hover: #1d4ed8;
-  --color-brand-50: #eff6ff;
-  --color-title: #142d4e;
-  --color-title-50: #eef2f7;
-  --color-navy: #142d4e;
-  --color-cta: #2563eb;
-  --color-cta-hover: #1d4ed8;
-  --color-cta-50: #eff6ff;
-  --color-accent: #2563eb;
+  --color-silver-2: #f3f4f6;
+  --color-brand: #1f48c8;
+  --color-brand-hover: #183ba6;
+  --color-brand-50: #eef2fc;
+  --color-title: #111827;
+  --color-title-50: #f3f4f6;
+  --color-navy: #111827;
+  --color-cta: #1f48c8;
+  --color-cta-hover: #183ba6;
+  --color-cta-50: #eef2fc;
+  --color-accent: #1f48c8;
   --color-accent-on-dark: #60a5fa;
   /* Logo footer: «T» navy, «MST» xanh. */
-  --color-logo-t: #142d4e;
+  --color-logo-t: #111827;
   /* Hàng tiêu đề cột của danh sách DN: xanh xám nhạt, đậm hơn nền trang #F3F6FA để không hoà vào nền. */
-  --color-thead: #e3eaf5;
+  --color-thead: #f9fafb;
   /* Nền tô sáng từ khoá trong kết quả. */
-  --color-mark: #dbeafe;
+  --color-mark: #e3eafb;
 
-  --color-page: #f3f6fa;
-  --color-surface: #f3f6fa;
+  --color-page: #f6f7f9;
+  --color-surface: #f6f7f9;
   --color-card: #ffffff;
-  --color-ink: #1e293b;
-  --color-ink-2: #475569;
-  --color-muted: #5b6a80;
-  --color-line: #e2e8f0;
-  --color-line-strong: #cbd5e1;
-  --color-line-soft: #eef2f7;
-  --color-field: #7c8ba1;
+  --color-ink: #1f2937;
+  --color-ink-2: #4b5563;
+  --color-muted: #6b7280;
+  --color-line: #e5e7eb;
+  --color-line-strong: #d1d5db;
+  --color-line-soft: #eef0f2;
+  --color-field: #9ca3af;
   /* Chữ gợi ý trong ô nhập (placeholder): 4,8:1 trên trắng. */
-  --color-placeholder: #64748b;
-  --color-focus: #2563eb;
+  --color-placeholder: #6b7280;
+  --color-focus: #1f48c8;
 
   --color-ok: #15803d;
   --color-ok-bg: #f0fdf4;
@@ -82,16 +82,16 @@
   --color-warn: #475569;
   --color-warn-bg: #eef2f7;
   /* Nhãn «MỚI»: nền xanh nhạt chữ xanh đậm (6,2:1). */
-  --color-new: #1d4ed8;
-  --color-new-bg: #eff6ff;
+  --color-new: #1f48c8;
+  --color-new-bg: #eef2fc;
 
-  --color-ad: #e9eef5;
+  --color-ad: #eef0f3;
 
   --container-site: 1160px;
   --width-rail: 300px;
   --spacing-rail-gap: 20px;
 
-  --radius-card: 10px;
+  --radius-card: 12px;
 }
 
 @layer base {
@@ -903,4 +903,106 @@ a.browse-tile:hover .browse-count {
 .browse-tile.is-empty {
   color: var(--color-muted);
   background: transparent;
+}
+
+/* ===== Gọn gàng (bản thử 25/11/2026, nhánh gon-gang) — giữ bố cục hiện tại, chỉnh cho sạch và dễ nhìn hơn =====
+   - Nền trang một màu xám trung tính rất nhạt (không ánh xanh, không dải gradient) → không còn mép giữa các vùng.
+   - Tiêu đề (H1, H2, tiêu đề khối) dùng Be Vietnam Pro Bold: thứ bậc rõ bằng chữ, không cần thêm màu.
+   - Màu nhấn chỉ cho thứ bấm được (link, nút); số liệu và mã ngành để màu chữ. */
+:root {
+  --font-head:
+    var(--font-head-vi), var(--font-head-latin-ext), var(--font-head-latin), var(--font-sans);
+}
+.hero-tint,
+.list-hero {
+  background: transparent;
+  border-bottom: 0;
+}
+.list-hero .search-box,
+.list-hero select {
+  box-shadow: none;
+}
+h1,
+h2,
+.block-title {
+  font-family: var(--font-head);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+/* Tên DN trong thẻ / bảng danh sách vẫn là chữ thường (Inter) — 20 dòng chữ đậm kiểu tiêu đề sẽ nặng mắt. */
+article h2,
+article h3,
+[role='dialog'] h2 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* ===== Làm lại (bản thử 25/11/2026, nhánh lam-lai): sạch, dễ nhìn, dễ tra =====
+   Nền xám rất nhạt phẳng, nội dung nằm trong khung trắng bo 12px viền mảnh (không bóng), chữ gần đen, một màu xanh
+   cobalt cho thứ bấm được. Tiêu đề Be Vietnam Pro. Thông tin gom theo nhóm thay vì nhiều ô rời. */
+.search-box--lg {
+  border: 1px solid var(--color-line-strong);
+  border-radius: 12px;
+}
+.search-box--lg:hover {
+  border-color: var(--color-field);
+}
+.search-box--nav {
+  border-radius: 10px;
+}
+.search-box--lg:focus-within,
+.search-box--nav:focus-within {
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px rgba(31, 72, 200, 0.15);
+}
+.block-title,
+.block-title.text-center {
+  text-align: left;
+  margin-bottom: 12px;
+  font-size: 20px;
+  line-height: 28px;
+}
+@media (min-width: 768px) {
+  .block-title {
+    font-size: 22px;
+    line-height: 30px;
+  }
+}
+/* Tỉnh/thành, ngành nghề: các dòng link trong MỘT khung trắng (tên trái, số DN phải), rê chuột nền xám nhạt. */
+.browse-grid,
+.browse-grid.is-dense {
+  gap: 2px 16px;
+}
+.browse-tile,
+.browse-tile.is-row {
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  color: var(--color-ink);
+}
+@media (min-width: 640px) {
+  .browse-tile {
+    min-height: 42px;
+    padding: 8px 10px;
+  }
+}
+a.browse-tile:hover {
+  background: var(--color-silver-2);
+  color: var(--color-brand);
+  box-shadow: none;
+}
+.browse-tile .browse-name {
+  font-weight: 500;
+}
+.browse-tile .browse-count {
+  font-weight: 500;
+  color: var(--color-muted);
 }

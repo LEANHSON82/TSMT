@@ -8,30 +8,15 @@ export default function StatusBadge({ status, plain = false, className = '' }) {
   const code = status?.code || 'active';
   const label = status?.label || STATUS_LABELS[code] || code;
   const active = code === 'active';
+  // Chấm tròn + chữ màu (không khung, không viền): xanh lá = đang hoạt động, xám = ngừng / đóng MST. Chữ luôn kèm
+  // theo nên không chỉ dựa vào màu (WCAG 1.4.1).
   return (
     <span
-      className={`inline-flex items-center gap-1 font-semibold whitespace-nowrap ${
-        plain
-          ? `text-[13px] leading-5 ${active ? 'text-ok' : 'text-off'}`
-          : `rounded-full border px-2 py-px text-xs leading-5 md:px-2.5 md:text-[13px] ${active ? 'border-ok-line bg-ok-bg text-ok' : 'border-off-line bg-off-bg text-off'}`
-      } ${className}`}
+      className={`inline-flex items-center gap-1.5 font-semibold whitespace-nowrap ${
+        plain ? 'text-sm leading-5' : 'text-sm leading-5 md:text-[15px]'
+      } ${active ? 'text-ok' : 'text-off'} ${className}`}
     >
-      <svg
-        width="13"
-        height="13"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        focusable="false"
-        className="flex-none"
-      >
-        <circle cx="12" cy="12" r="9" />
-        {active ? <path d="m8 12 3 3 5-6" /> : <path d="M5.6 18.4 18.4 5.6" />}
-      </svg>
+      <span aria-hidden="true" className="h-2 w-2 flex-none rounded-full bg-current" />
       {label}
     </span>
   );

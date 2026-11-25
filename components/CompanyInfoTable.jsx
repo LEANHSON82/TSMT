@@ -54,26 +54,37 @@ const IconArrow = () => (
   </svg>
 );
 
-// Hành động của một ô (Sao chép, Xem bản đồ, Đại diện của N DN): chữ xanh đậm 14px + icon, ở chân ô. Vùng bấm 44px
-// bằng py-3 + margin âm -my-3 → không làm ô cao thêm.
+// Hành động trong dòng (Sao chép, Xem bản đồ…): chữ nhỏ xám, xanh khi rê. Vùng bấm 44px bằng py-3 + margin âm.
 const ACT =
-  'group inline-flex items-center gap-1.5 py-3 -my-3 text-sm leading-5 font-semibold text-brand no-underline hover:text-brand-hover';
+  'group inline-flex items-center gap-1.5 py-3 -my-3 text-sm leading-5 font-medium text-ink-2 no-underline hover:text-brand';
 const COPY_FIX = '-my-3! py-3 leading-5';
 
-// Thông tin DN (spec mục 3.4 — đúng thứ tự trường; mỗi trường icon + nhãn + giá trị; trường trống thì ẩn). Kiểu
-// BizLookup: mỗi trường một ô trắng viền mảnh — nhãn chữ hoa nhỏ xám (kèm icon) ở trên, giá trị ở dưới, hành động ở
-// chân ô. Mọi trường cùng một dạng ô. 2 cột từ 768px (đọc trái → phải, rồi xuống), 1 cột trên điện thoại. Các ô cùng
-// hàng cao bằng nhau; hành động dồn xuống chân ô nên thẳng hàng. Tình trạng hiện một lần, dưới tên DN ở đầu trang.
-function Row({ icon: Icon, label, children, action }) {
+// Một dòng trong khung: nhãn nhỏ xám ở trên, giá trị ở dưới, hành động dạt phải cùng dòng giá trị. Các dòng ngăn nhau
+// bằng vạch mảnh. Mỗi trường vẫn có icon + nhãn + giá trị (spec 3.4), trường trống thì ẩn.
+function Row({ icon: Icon, label, children, action, wide = false }) {
   return (
-    <div className="flex min-w-0 flex-col rounded-lg border border-line bg-white px-4 py-3.5 md:px-5 md:py-4">
-      <dt className="flex items-center gap-1.5 text-xs leading-5 font-medium tracking-[0.04em] text-muted uppercase">
-        <Icon className="h-3.5 w-3.5 flex-none text-field" />
+    <div className="min-w-0 border-b border-line-soft px-5 py-3.5 last:border-b-0 md:px-6">
+      <dt className="flex items-center gap-1.5 text-[13px] leading-5 text-muted">
+        <Icon className="h-3.5 w-3.5 flex-none" />
         <span>{label}</span>
       </dt>
-      <dd className="mt-1 min-w-0 text-[15px] leading-6 break-words text-ink">{children}</dd>
-      {action && <dd className="mt-auto pt-2.5">{action}</dd>}
+      <dd className="mt-1 flex min-w-0 flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-[15px] leading-6 break-words text-ink">
+        <span className={wide ? 'w-full min-w-0' : 'min-w-0'}>{children}</span>
+        {action && <span className="flex-none">{action}</span>}
+      </dd>
     </div>
+  );
+}
+
+// Khung có tiêu đề nhỏ: gom các trường theo việc người dùng cần (liên hệ / đăng ký) thay vì 9 ô rời.
+function Group({ title, children }) {
+  return (
+    <section className="min-w-0 rounded-card border border-line bg-white">
+      <h3 className="border-b border-line-soft px-5 py-3 text-sm font-semibold text-ink md:px-6">
+        {title}
+      </h3>
+      <dl>{children}</dl>
+    </section>
   );
 }
 
@@ -81,128 +92,132 @@ export default function CompanyInfoTable({ company: c, parent }) {
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address || '')}`;
   const repHref = `/tim-kiem?q=${encodeURIComponent(c.representative || '')}`;
   return (
-    <dl className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-4">
-      <Row
-        icon={IconHash}
-        label={M.company.mst}
-        action={
-          <CopyButton text={c.mst} label={M.company.copyMst} variant="text" className={COPY_FIX} />
-        }
-      >
-        {/* Không tabular-nums / giãn chữ: số «1» Inter dạng bảng rộng bằng số khác → MST trông như hai cụm.
-            Điện thoại 18px: MST + «Sao chép» vừa một dòng cả ở 360px. */}
-        <span className="text-[20px] leading-7 font-semibold tracking-[0.02em] whitespace-nowrap md:text-[22px]">
-          {c.mst}
-        </span>
-      </Row>
-
-      {c.parent_mst && (
-        <Row icon={IconBuilding} label={M.company.parent}>
-          <Link href={parent ? companyPath(parent) : `/${c.parent_mst}`} className="font-semibold">
-            {parent?.name || c.parent_mst}
-          </Link>
-          <span className="ml-1 text-sm text-muted">
-            · MST <span className="tabular-nums">{c.parent_mst}</span>
-          </span>
-        </Row>
-      )}
-
-      {c.address && (
+    // Hai khung cạnh nhau từ 1024px (trái: định danh + liên hệ — đúng thứ tự trường đầu của spec 3.4; phải: thông tin
+    // đăng ký), một cột trên điện thoại.
+    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2 lg:gap-5">
+      <Group title={M.company.groupContact}>
         <Row
-          icon={IconMapPin}
-          label={M.company.address}
-
-          action={
-            <a href={mapUrl} target="_blank" rel="noopener noreferrer" className={ACT}>
-              <IconMap size={18} className="flex-none" />
-              {M.company.viewMap}
-            </a>
-          }
-        >
-          {c.address}
-        </Row>
-      )}
-
-      {c.representative && (
-        <Row
-          icon={IconUser}
-          label={M.company.representative}
-          action={
-            // Người này (cùng họ tên) đại diện thêm DN khác: link xem tất cả (API trả representative_company_count).
-            c.representative_company_count > 1 ? (
-              <Link
-                href={`${repHref}&theo=dai-dien`}
-                prefetch={false}
-                rel="nofollow"
-                className={ACT}
-              >
-                {M.company.repCompanies(c.representative_company_count)}
-                <IconArrow />
-              </Link>
-            ) : null
-          }
-        >
-          {/* Vùng bấm 44px (spec 7.3) bằng padding + margin âm — dòng không cao thêm. */}
-          <Link
-            href={repHref}
-            prefetch={false}
-            rel="nofollow"
-            className="-my-2.5 inline-block py-2.5 font-semibold text-brand underline decoration-line-strong decoration-1 underline-offset-4 hover:decoration-brand"
-          >
-            {c.representative}
-          </Link>
-        </Row>
-      )}
-
-      <Row icon={IconPhone} label={M.company.phone}>
-        <PhoneReveal
-          mst={c.mst}
-          hasPhone={c.has_phone}
-          phoneHidden={c.phone_hidden}
-          masked={c.phone_masked}
-        />
-      </Row>
-
-      {/* Email: chờ owner chốt có áp luồng quảng cáo giống SĐT hay không (spec mục 9.4). */}
-      {c.email && (
-        <Row
-          icon={IconMail}
-          label={M.company.email}
+          icon={IconHash}
+          label={M.company.mst}
           action={
             <CopyButton
-              text={c.email}
-              label={M.company.copyEmail}
+              text={c.mst}
+              label={M.company.copyMst}
               variant="text"
               className={COPY_FIX}
             />
           }
         >
-          <a href={`mailto:${c.email}`} className="-my-3 inline-block py-3 break-all">
-            {c.email}
-          </a>
+          <span className="text-[18px] leading-7 font-semibold tracking-[0.02em] whitespace-nowrap">
+            {c.mst}
+          </span>
         </Row>
-      )}
-      {c.founded_date && (
-        <Row icon={IconCalendar} label={M.company.foundedDate}>
-          <span className="tabular-nums">{formatDate(c.founded_date)}</span>
+        {c.parent_mst && (
+          <Row icon={IconBuilding} label={M.company.parent}>
+            <Link
+              href={parent ? companyPath(parent) : `/${c.parent_mst}`}
+              className="font-semibold"
+            >
+              {parent?.name || c.parent_mst}
+            </Link>
+            <span className="ml-1 text-sm text-muted">
+              · MST <span className="tabular-nums">{c.parent_mst}</span>
+            </span>
+          </Row>
+        )}
+        {c.address && (
+          <Row
+            icon={IconMapPin}
+            label={M.company.address}
+            action={
+              <a href={mapUrl} target="_blank" rel="noopener noreferrer" className={ACT}>
+                <IconMap size={16} className="flex-none" />
+                {M.company.viewMap}
+              </a>
+            }
+          >
+            {c.address}
+          </Row>
+        )}
+        {c.representative && (
+          <Row
+            icon={IconUser}
+            label={M.company.representative}
+            action={
+              c.representative_company_count > 1 ? (
+                <Link
+                  href={`${repHref}&theo=dai-dien`}
+                  prefetch={false}
+                  rel="nofollow"
+                  className={ACT}
+                >
+                  {M.company.repCompanies(c.representative_company_count)}
+                  <IconArrow />
+                </Link>
+              ) : null
+            }
+          >
+            <Link
+              href={repHref}
+              prefetch={false}
+              rel="nofollow"
+              className="-my-2.5 inline-block py-2.5 font-semibold text-ink no-underline hover:text-brand hover:underline"
+            >
+              {c.representative}
+            </Link>
+          </Row>
+        )}
+        <Row icon={IconPhone} label={M.company.phone} wide>
+          <PhoneReveal
+            mst={c.mst}
+            hasPhone={c.has_phone}
+            phoneHidden={c.phone_hidden}
+            masked={c.phone_masked}
+          />
         </Row>
-      )}
-      {c.tax_office && (
-        <Row icon={IconLandmark} label={M.company.taxOffice}>
-          {c.tax_office}
-        </Row>
-      )}
-      {c.business_type && (
-        <Row icon={IconLayers} label={M.company.businessType}>
-          {c.business_type}
-        </Row>
-      )}
-      {c.capital ? (
-        <Row icon={IconBanknote} label={M.company.capital}>
-          <span className="tabular-nums">{formatMoney(c.capital)}</span>{' '}
-          <span className="text-sm text-muted">({formatMoneyWords(c.capital)})</span>
-        </Row>
-      ) : null}
-    </dl>
+        {c.email && (
+          <Row
+            icon={IconMail}
+            label={M.company.email}
+            action={
+              <CopyButton
+                text={c.email}
+                label={M.company.copyEmail}
+                variant="text"
+                className={COPY_FIX}
+              />
+            }
+          >
+            <a href={`mailto:${c.email}`} className="-my-3 inline-block py-3 break-all">
+              {c.email}
+            </a>
+          </Row>
+        )}
+      </Group>
+
+      <Group title={M.company.groupRegistration}>
+        {c.founded_date && (
+          <Row icon={IconCalendar} label={M.company.foundedDate}>
+            <span className="tabular-nums">{formatDate(c.founded_date)}</span>
+          </Row>
+        )}
+        {c.tax_office && (
+          <Row icon={IconLandmark} label={M.company.taxOffice}>
+            {c.tax_office}
+          </Row>
+        )}
+        {c.business_type && (
+          <Row icon={IconLayers} label={M.company.businessType}>
+            {c.business_type}
+          </Row>
+        )}
+        {c.capital ? (
+          <Row icon={IconBanknote} label={M.company.capital}>
+            <span className="tabular-nums">{formatMoney(c.capital)}</span>{' '}
+            <span className="text-sm text-muted">({formatMoneyWords(c.capital)})</span>
+          </Row>
+        ) : null}
+      </Group>
+    </div>
   );
 }

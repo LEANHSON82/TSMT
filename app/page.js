@@ -73,36 +73,24 @@ export default async function HomePage() {
         {/* Nền xanh xám nhạt chuyển dần (như hero BizLookup) — header trắng phía trên nổi rõ, không hoà vào nền. */}
         <section aria-labelledby="home-title" className="hero-tint">
           <div className="site-wrap">
-            <div className="mx-auto max-w-[820px] pt-6 pb-7 md:pt-12 md:pb-12">
+            <div className="mx-auto max-w-[760px] pt-6 pb-4 md:pt-12 md:pb-6">
               <h1
                 id="home-title"
-                className="text-center text-[26px] leading-8 font-semibold tracking-[-0.01em] text-pretty text-title md:text-[34px] md:leading-[42px]"
+                className="text-center text-[24px] leading-8 text-pretty text-title md:text-[32px] md:leading-10"
               >
                 {/* «thông tin» không bị tách đôi khi tiêu đề xuống dòng trên điện thoại. */}
                 {M.home.title.replace('thông tin', 'thông\u00a0tin')}
               </h1>
-              {/* Dòng số liệu: tổng DN và số tỉnh/thành (đã có sẵn từ danh mục tỉnh, không gọi thêm API). */}
-              {provinces.length > 0 && (
-                // Số liệu là thứ đáng khoe nhất của trang dữ liệu: số to, đậm, màu tiêu đề; nhãn nhỏ xám.
-                <p className="mt-3 flex items-baseline justify-center gap-x-6 text-base text-muted tabular-nums md:gap-x-8 md:text-[17px]">
-                  <span className="whitespace-nowrap">
-                    <span className="mr-1.5 text-[24px] leading-8 font-bold text-title md:text-[28px]">
-                      {formatNumber(totalCompanies)}
-                    </span>
-                    {M.home.statCompanies}
-                  </span>
-                  <span className="whitespace-nowrap">
-                    <span className="mr-1.5 text-[24px] leading-8 font-bold text-title md:text-[28px]">
-                      {provinces.length}
-                    </span>
-                    {M.nav.provinces.toLowerCase()}
-                  </span>
-                </p>
-              )}
               <div data-hero-search className="mt-6 md:mt-8">
                 <SearchBox size="lg" autoFocusDesktop />
               </div>
-              <div className="mt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-1">
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-muted">
+                {provinces.length > 0 && (
+                  <span className="tabular-nums">
+                    {formatNumber(totalCompanies)} {M.home.statCompanies} · {provinces.length}{' '}
+                    {M.nav.provinces.toLowerCase()}
+                  </span>
+                )}
                 <AdvancedSearchLink className="text-sm" />
               </div>
             </div>
@@ -156,7 +144,7 @@ export default async function HomePage() {
             {sorted.length === 0 && <HomeEmpty text={M.home.emptyProvinces} />}
             {sorted.length > 0 && (
               <MobileMore moreLabel={M.home.moreProvinces(sorted.length)}>
-                <ul className="browse-grid is-dense">
+                <ul className="browse-grid is-dense panel p-2 md:p-3">
                   {sorted.map((p, i) => (
                     // Tỉnh nào cũng là link (tỉnh chưa có DN mở trang báo «chưa có doanh nghiệp»), không có ô xám.
                     <li key={p.code} className={`min-w-0 ${i >= 12 ? 'mobile-extra' : ''}`}>
@@ -184,7 +172,7 @@ export default async function HomePage() {
               {M.home.industriesTitle}
             </h2>
             <MobileMore moreLabel={M.home.moreIndustries}>
-              <ul className="browse-grid">
+              <ul className="browse-grid panel p-2 md:p-3">
                 {POPULAR_INDUSTRIES.map((n, i) => (
                   <li key={n.code} className={`min-w-0 ${i >= 8 ? 'mobile-extra' : ''}`}>
                     <Link href={n.href} prefetch={false} className="browse-tile" title={n.name}>

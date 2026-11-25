@@ -197,7 +197,10 @@ export default function ListGate({ mode = 'ad', minutes, pages, used = false }) 
         ? 'text-danger'
         : 'text-muted';
   return (
-    <div className="w-full max-w-[440px] rounded-xl border border-line bg-white p-5 text-center shadow-[0_18px_50px_-12px_rgba(15,23,42,0.28)] sm:p-6">
+    <div
+      // Hộp thoại đang mở thì ẩn khung (điện thoại: hộp thoại trượt từ đáy + khung giữa màn hình = hỏi hai lần).
+      className={`w-full max-w-[440px] rounded-card border border-line bg-white p-5 text-center shadow-[0_18px_50px_-12px_rgba(15,23,42,0.28)] sm:p-6 ${prompt && state === 'idle' ? 'invisible' : ''}`}
+    >
       <h2 className="text-[18px] leading-[26px] font-semibold text-pretty text-title">
         {human ? M.gate.humanTitle : M.gate.cardTitle}
       </h2>

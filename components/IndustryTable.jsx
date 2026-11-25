@@ -47,7 +47,7 @@ export default function IndustryTable({ industries }) {
                 <Link
                   href={`/nganh/${ind.code}-${toSlug(ind.name)}`}
                   aria-label={`${ind.code} – ${ind.name}`}
-                  className="-my-2.5 inline-block min-w-11 py-2.5 no-underline hover:text-brand-hover"
+                  className="-my-2.5 inline-block min-w-11 py-2.5 text-ink no-underline hover:text-brand hover:underline"
                 >
                   {ind.code}
                 </Link>

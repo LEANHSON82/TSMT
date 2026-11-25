@@ -65,8 +65,8 @@ export default async function HomePage() {
           ],
         }}
       />
-      {/* Thứ tự theo yêu cầu: tỉnh/thành → ô quảng cáo → DN mới thành lập. Spec 3.1 liệt kê
-          DN mới (mục 4) trước tỉnh/thành (mục 5); ô quảng cáo vẫn nằm giữa hai khối (mục 6). */}
+      {/* Thứ tự đúng spec 3.1: ô tìm → DN mới thành lập (mục 4) → ô quảng cáo (mục 6) → tỉnh/thành (mục 5) → ngành
+          nghề. */}
       <main className="flex w-full flex-col">
         {/* Hero: nền trắng, tiêu đề + dòng số liệu + ô tìm lớn (viên tròn, nút «Tìm» navy). Từ 1024px ô tìm của header
             ẩn cho tới khi ô tìm này cuộn khuất (data-hero-search). */}
@@ -109,66 +109,11 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Phần dưới hero: cùng khung .site-wrap với header/hero → mép trái mọi khối x=120 ở 1440. Nhịp dọc hệ A:
-            đầu trang 40 (điện thoại 24), giữa các khối 48 (điện thoại 40). Footer tự có mt-12 nên không đệm đáy. */}
-        {/* Tỉnh/thành, ngành nghề: trên nền trang, tiêu đề và chữ trong ô căn giữa (theo yêu cầu). DN mới: tiêu đề căn
-            trái, link «Xem tất cả» cùng hàng dòng tóm tắt. */}
-        <div>
-          <div className="site-wrap flex flex-col gap-10 pt-8 md:gap-12 md:pt-12">
-            <section aria-labelledby="prov-title">
-              <h2 id="prov-title" className="block-title text-center">
-                {M.home.provincesTitle}
-              </h2>
-              {sorted.length === 0 && <HomeEmpty text={M.home.emptyProvinces} />}
-              {sorted.length > 0 && (
-                <MobileMore moreLabel={M.home.moreProvinces(sorted.length)}>
-                  <ul className="browse-grid is-dense">
-                    {sorted.map((p, i) => (
-                      // Tỉnh nào cũng là link (tỉnh chưa có DN mở trang báo «chưa có doanh nghiệp»), không có ô xám.
-                      <li key={p.code} className={`min-w-0 ${i >= 12 ? 'mobile-extra' : ''}`}>
-                        <Link
-                          href={`/tinh/${p.slug}`}
-                          prefetch={false}
-                          className="browse-tile is-row"
-                        >
-                          <span className="browse-name">{p.name}</span>
-                          <span className="browse-count">
-                            {formatNumber(p.company_count || 0)}
-                            <span className="sr-only">{M.home.companiesSr}</span>
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </MobileMore>
-              )}
-            </section>
-
-            {/* Ngành nghề: tên gọn (tên VSIC đầy đủ ở tooltip và trên trang ngành) để mọi ô hiện đủ chữ. */}
-            <section aria-labelledby="ind-title">
-              <h2 id="ind-title" className="block-title text-center">
-                {M.home.industriesTitle}
-              </h2>
-              <MobileMore moreLabel={M.home.moreIndustries}>
-                <ul className="browse-grid">
-                  {POPULAR_INDUSTRIES.map((n, i) => (
-                    <li key={n.code} className={`min-w-0 ${i >= 8 ? 'mobile-extra' : ''}`}>
-                      <Link href={n.href} prefetch={false} className="browse-tile" title={n.name}>
-                        <span className="browse-name">{n.short || n.name}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </MobileMore>
-            </section>
-          </div>
-        </div>
-
-        <div className="site-wrap flex flex-col gap-8 pt-8 pb-12 md:gap-10 md:pt-10 md:pb-16">
-          <AdSlot slotId="home-mid" />
-
-          {/* Khối DN mới (spec 3.1 mục 4: 20 DN mới nhất, thẻ DN mục 3.3 + link xem tất cả), cùng kiểu hai khối duyệt ở
-              trên: tiêu đề giữa, dòng tóm tắt, rồi danh sách liệt kê gọn. */}
+        {/* Phần dưới hero: cùng khung .site-wrap với header/hero → mép trái mọi khối x=120 ở 1440. Nhịp dọc: đầu trang
+            48 (điện thoại 32), giữa các khối 48 (điện thoại 40). */}
+        <div className="site-wrap flex flex-col gap-10 pt-8 pb-12 md:gap-12 md:pt-12 md:pb-16">
+          {/* Khối DN mới (spec 3.1 mục 4: 20 DN mới nhất, thẻ DN mục 3.3 + link xem tất cả; không phân trang): tiêu đề
+              căn trái, link «Xem tất cả» cùng hàng dòng tóm tắt. */}
           <section aria-labelledby="new-title">
             <h2 id="new-title" className="block-title mb-1!">
               {M.home.newTitle}
@@ -209,6 +154,58 @@ export default async function HomePage() {
                 />
               </MobileMore>
             )}
+          </section>
+
+          {/* Ô quảng cáo giữa khối DN mới và khối tỉnh/thành (spec 3.1 mục 6, 5.4). */}
+          <AdSlot slotId="home-mid" />
+
+          {/* Tỉnh/thành, ngành nghề nằm cuối trang (chủ dự án yêu cầu 24/11/2026): trên nền trang, tiêu đề và chữ
+              trong ô căn giữa. */}
+          <section aria-labelledby="prov-title">
+            <h2 id="prov-title" className="block-title text-center">
+              {M.home.provincesTitle}
+            </h2>
+            {sorted.length === 0 && <HomeEmpty text={M.home.emptyProvinces} />}
+            {sorted.length > 0 && (
+              <MobileMore moreLabel={M.home.moreProvinces(sorted.length)}>
+                <ul className="browse-grid is-dense">
+                  {sorted.map((p, i) => (
+                    // Tỉnh nào cũng là link (tỉnh chưa có DN mở trang báo «chưa có doanh nghiệp»), không có ô xám.
+                    <li key={p.code} className={`min-w-0 ${i >= 12 ? 'mobile-extra' : ''}`}>
+                      <Link
+                        href={`/tinh/${p.slug}`}
+                        prefetch={false}
+                        className="browse-tile is-row"
+                      >
+                        <span className="browse-name">{p.name}</span>
+                        <span className="browse-count">
+                          {formatNumber(p.company_count || 0)}
+                          <span className="sr-only">{M.home.companiesSr}</span>
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </MobileMore>
+            )}
+          </section>
+
+          {/* Ngành nghề: tên gọn (tên VSIC đầy đủ ở tooltip và trên trang ngành) để mọi ô hiện đủ chữ. */}
+          <section aria-labelledby="ind-title">
+            <h2 id="ind-title" className="block-title text-center">
+              {M.home.industriesTitle}
+            </h2>
+            <MobileMore moreLabel={M.home.moreIndustries}>
+              <ul className="browse-grid">
+                {POPULAR_INDUSTRIES.map((n, i) => (
+                  <li key={n.code} className={`min-w-0 ${i >= 8 ? 'mobile-extra' : ''}`}>
+                    <Link href={n.href} prefetch={false} className="browse-tile" title={n.name}>
+                      <span className="browse-name">{n.short || n.name}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </MobileMore>
           </section>
         </div>
       </main>

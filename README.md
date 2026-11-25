@@ -171,7 +171,7 @@ number}` (tính sau bộ lọc tỉnh/tình trạng/ngành, trước `field`).
 - **Giao diện «Cổng tra cứu»** (spec không quy định bảng màu; mục 7.2 yêu cầu ảnh/icon SVG): nền trắng, chữ Inter 400/600, khối mở bằng vạch 2px + tiêu đề khối (`components/SectionHeader.jsx`), danh sách dạng bảng kẻ mảnh một hàng tiêu đề cột (điện thoại: thẻ gọn), nhãn tình trạng chữ nhật. Xanh cho link và nút Tìm; cam chỉ cho chữ «T» logo và nút «Xem số điện thoại». Khung chung `.site-wrap` (1200), cột chính + cột phải 300 `.rail-grid` (≥ 1280px). Không dùng hình minh hoạ.
   - Thẻ DN ghi địa chỉ rút gọn: phường/xã, tỉnh/thành (trang theo tỉnh chỉ ghi phường/xã) — `areaAddress` trong `lib/format.js`.
   - Nhãn «Mới» cho DN thành lập trong 7 ngày (tắt ở khối/trang DN mới thành lập).
-  - Trang chủ: khối tỉnh/thành (bảng 34 tỉnh A–Z) đặt trước khối DN mới (2 cột).
+  - Trang chủ: ô tìm → khối DN mới (20 DN, không phân trang) → ô quảng cáo → khối tỉnh/thành (34 tỉnh A–Z) → khối ngành nghề, đúng thứ tự spec 3.1.
 - **Chuyển động** (CSS thuần, không thư viện; chỉ transform/opacity nên CLS 0; tắt hết khi máy bật «giảm chuyển động»):
   - Khối/thẻ nằm dưới màn hình đầu trượt lên khi cuộn tới (`.reveal`, CSS scroll-driven animation — trình duyệt chưa hỗ trợ thì hiện bình thường). Không làm mờ để chữ luôn đủ tương phản.
   - Thẻ DN trong danh sách nhấc nhẹ khi rê chuột; mũi tên «Xem tất cả» trượt; gợi ý tìm kiếm hiện lần lượt.
@@ -236,8 +236,7 @@ Các lệch trước đây (308 thay 301, trang danh sách không ISR, `?page=99
    sẽ được thay bằng bản owner gửi/luật sư duyệt, không phải chữ giao diện. Mọi chữ giao diện khác đã ở
    `lib/messages.js`.
 3. **Header dính đầu trang** (ô tìm luôn trong màn hình) là thêm ngoài spec, không trái spec.
-4. **Thứ tự khối trang chủ:** theo yêu cầu, khối «Tra cứu theo tỉnh/thành» đặt trước khối «Doanh nghiệp mới thành lập» (spec 3.1 liệt kê ngược lại); ô quảng cáo vẫn nằm giữa hai khối.
-5. **Quy trình:** spec yêu cầu pull request < 400 dòng kèm ảnh chụp; mockup này đang là các commit trên `main`.
+4. **Quy trình:** spec yêu cầu pull request < 400 dòng kèm ảnh chụp; mockup này đang là các commit trên `main`.
 
 ## Câu hỏi mở cho owner (spec mục 9.4, cộng thêm)
 

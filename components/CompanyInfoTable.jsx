@@ -81,10 +81,19 @@ export default function CompanyInfoTable({ company: c, parent }) {
           label={M.company.address}
 
           action={
-            <a href={mapUrl} target="_blank" rel="noopener noreferrer" className={ACT}>
-              <IconMap size={18} className="flex-none" />
-              {M.company.viewMap}
-            </a>
+            // Sao chép nhanh địa chỉ (dán vào hoá đơn, hợp đồng) + mở bản đồ.
+            <span className="inline-flex flex-wrap items-center gap-x-4 gap-y-1">
+              <CopyButton
+                text={c.address}
+                label={M.company.copyAddress}
+                variant="text"
+                className={COPY_FIX}
+              />
+              <a href={mapUrl} target="_blank" rel="noopener noreferrer" className={ACT}>
+                <IconMap size={18} className="flex-none" />
+                {M.company.viewMap}
+              </a>
+            </span>
           }
         >
           {c.address}

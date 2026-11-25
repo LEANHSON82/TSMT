@@ -17,4 +17,4 @@ export default function PageHero({ breadcrumb, eyebrow, children, className = ''
 
 /** H1 cùng cỡ ở mọi trang trong. */
 export const PAGE_H1 =
-  'text-[20px] leading-7 font-semibold text-pretty break-words text-title md:text-[26px] md:leading-[34px]';
+  'text-[18px] leading-[26px] font-semibold text-pretty break-words text-title md:text-[24px] md:leading-8';

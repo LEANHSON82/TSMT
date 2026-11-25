@@ -70,7 +70,7 @@ export default function CompanyCard({
       table ? `lg:block lg:row-start-1 ${col}` : ''
     }`;
   const label = `text-sm leading-6 text-muted ${table ? 'lg:sr-only' : ''}`;
-  const value = `min-w-0 text-sm leading-6 text-ink ${table ? 'lg:truncate' : ''}`;
+  const value = `min-w-0 text-sm leading-6 text-ink ${table ? 'lg:truncate lg:text-[13px]' : ''}`;
 
   return (
     <article
@@ -81,8 +81,10 @@ export default function CompanyCard({
       }`}
     >
       <H
-        className={`mb-1 min-w-0 text-[15px] leading-6 font-semibold text-pretty ${
-          table ? 'lg:col-start-1 lg:row-start-1 lg:mb-0 lg:line-clamp-2 lg:text-sm' : ''
+        className={`mb-1 min-w-0 text-sm leading-6 font-semibold text-pretty ${
+          table
+            ? 'lg:col-start-1 lg:row-start-1 lg:mb-0 lg:line-clamp-2 lg:text-[13px] lg:leading-5'
+            : ''
         }`}
       >
         <Link
@@ -102,7 +104,7 @@ export default function CompanyCard({
         <div className={field('lg:col-start-2')}>
           <dt className={label}>{M.company.mst}</dt>
           {/* MST không bao giờ cắt (MST chi nhánh 14 ký tự vừa cột 132px). */}
-          <dd className="relative z-10 min-w-0 text-sm leading-6 font-semibold whitespace-nowrap text-ink tabular-nums">
+          <dd className="relative z-10 min-w-0 text-sm leading-6 font-semibold whitespace-nowrap text-ink tabular-nums lg:text-[13px]">
             <Highlight text={c.mst} query={hl('mst')} />
           </dd>
         </div>
@@ -119,7 +121,7 @@ export default function CompanyCard({
         <div className={field('lg:col-start-4')}>
           <dt className={label}>{M.company.addressShort}</dt>
           <dd
-            className={`min-w-0 text-sm leading-6 text-ink-2 ${table && splitArea ? 'lg:flex' : table ? 'lg:truncate' : ''}`}
+            className={`min-w-0 text-sm leading-6 text-ink-2 ${table ? 'lg:text-[13px]' : ''} ${table && splitArea ? 'lg:flex' : table ? 'lg:truncate' : ''}`}
             title={table ? c.address : undefined}
           >
             {table && splitArea ? (
@@ -142,7 +144,11 @@ export default function CompanyCard({
         <div className={`${field('lg:col-start-6')} ${table ? 'lg:justify-self-end' : ''}`}>
           <dt className={label}>{M.company.status}</dt>
           <dd className="min-w-0">
-            <StatusBadge status={c.status} plain={table} />
+            <StatusBadge
+              status={c.status}
+              plain={table}
+              className={table ? 'lg:text-[13px]' : ''}
+            />
           </dd>
         </div>
       </dl>

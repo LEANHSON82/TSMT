@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
 import AdSlot, { BANNERS_ON } from '@/components/AdSlot';
-import CompanyCard from '@/components/CompanyCard';
 import CompanyInfoTable from '@/components/CompanyInfoTable';
 import IndustryTable from '@/components/IndustryTable';
 import JsonLd from '@/components/JsonLd';
@@ -189,25 +188,6 @@ export default async function CompanyPage({ params }) {
                 <UpdatedLine c={c} first />
               </div>
             )}
-
-            {related.length > 0 && (
-              <section aria-labelledby="rel-title">
-                <SectionHeader
-                  tab={false}
-                  id="rel-title"
-                  title={M.company.related(c.province?.name || '')}
-                  meta={M.company.relatedCount(related.length)}
-                />
-                {/* Thẻ «Nhãn │ Giá trị» (đọc trên → dưới), 2 cột từ 768px để khung rộng không bỏ trống nửa phải. */}
-                <ul className="panel grid grid-cols-1 px-4 md:grid-cols-2 md:gap-x-8 md:px-[22px]">
-                  {related.map((r) => (
-                    <li key={r.mst} className="min-w-0 border-b border-line-soft">
-                      <CompanyCard company={r} variant="card" />
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
           </div>
 
           {BANNERS_ON && (
@@ -216,6 +196,33 @@ export default async function CompanyPage({ params }) {
             </div>
           )}
         </div>
+
+        {/* Rộng hết khung (dưới cột chính + cột quảng cáo) để mỗi DN đủ chỗ trên một hàng. */}
+        {related.length > 0 && (
+          <section aria-labelledby="rel-title" className="mt-6 md:mt-8">
+            <SectionHeader
+              tab={false}
+              id="rel-title"
+              title={M.company.related(c.province?.name || '')}
+            />
+            {/* Mỗi DN một hàng ngang (không nhãn, xem RelatedRow). Chỉ hiện RELATED_SHOWN DN; còn nữa thì nút sang trang tỉnh. */}
+            <ul className="panel">
+              {related.slice(0, RELATED_SHOWN).map((r) => (
+                <RelatedRow key={r.mst} r={r} />
+              ))}
+            </ul>
+            {related.length > RELATED_SHOWN && c.province?.slug && (
+              <p className="mt-3">
+                <Link
+                  href={`/tinh/${c.province.slug}`}
+                  className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-line-strong bg-white px-4 text-sm font-semibold text-brand no-underline hover:border-brand"
+                >
+                  {M.company.relatedMore(c.province.name)} <span aria-hidden="true">→</span>
+                </Link>
+              </p>
+            )}
+          </section>
+        )}
       </div>
     </main>
   );
@@ -237,5 +244,50 @@ function UpdatedLine({ c, first = false }) {
         {M.company.requestUpdate} ›
       </Link>
     </p>
+  );
+}
+
+const RELATED_SHOWN = 5;
+
+/**
+ * Một DN trong khối «cùng ngành tại tỉnh», mọi thông tin trên MỘT hàng ngang, không ghi nhãn (tiết kiệm chỗ):
+ *   ≥ 1024px: các cột tên · MST · người đại diện · phường/xã · ngày hoạt động · tình trạng.
+ *   < 1024px: tên một dòng, rồi các giá trị nối nhau bằng «·». Cả hàng bấm được (lớp phủ của link tên). Đủ trường
+ *   thẻ DN (spec 3.3).
+ */
+function RelatedRow({ r }) {
+  const area = areaAddress(r.address, r.province?.name, { withProvince: false });
+  // Dấu «·» trước mỗi giá trị (chỉ dạng nối dòng < 1024px).
+  const dot = "max-lg:before:mr-2 max-lg:before:text-line-strong max-lg:before:content-['·']";
+  return (
+    <li className="relative border-b border-line-soft px-4 py-2.5 last:border-b-0 hover:bg-thead md:px-5">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm leading-6 text-ink-2 lg:grid lg:grid-cols-[minmax(0,1fr)_100px_minmax(0,170px)_minmax(0,190px)_88px_128px] lg:gap-x-4">
+        <h3 className="w-full min-w-0 text-[15px] font-semibold text-pretty lg:line-clamp-2 lg:w-auto lg:text-sm">
+          <Link
+            href={companyPath(r)}
+            prefetch={false}
+            title={r.name}
+            className="text-title no-underline after:absolute after:inset-0 hover:text-brand"
+          >
+            {r.name}
+          </Link>
+        </h3>
+        <span className="font-semibold text-ink tabular-nums">{r.mst}</span>
+        {r.representative && (
+          <span className={`min-w-0 lg:truncate ${dot}`} title={r.representative}>
+            {r.representative}
+          </span>
+        )}
+        {area && (
+          <span className={`min-w-0 lg:truncate ${dot}`} title={r.address}>
+            {area}
+          </span>
+        )}
+        <span className={`tabular-nums ${dot}`}>{formatDate(r.founded_date) || '—'}</span>
+        <span className={`lg:justify-self-end ${dot}`}>
+          <StatusBadge status={r.status} plain />
+        </span>
+      </div>
+    </li>
   );
 }

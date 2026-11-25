@@ -69,7 +69,7 @@ export default function CompanyCard({
       table ? `lg:block lg:row-start-1 ${col}` : ''
     }`;
   const label = `text-sm leading-6 text-muted ${table ? 'lg:sr-only' : ''}`;
-  const value = `min-w-0 text-sm leading-6 text-ink ${table ? 'lg:truncate lg:text-[13px]' : ''}`;
+  const value = `min-w-0 text-sm leading-6 text-ink ${table ? 'lg:truncate' : ''}`;
 
   return (
     <article
@@ -80,9 +80,9 @@ export default function CompanyCard({
       }`}
     >
       <H
-        className={`mb-1 min-w-0 text-sm leading-6 font-semibold text-pretty ${
+        className={`mb-1 min-w-0 text-base leading-6 font-semibold text-pretty ${
           table
-            ? 'lg:col-start-1 lg:row-start-1 lg:mb-0 lg:line-clamp-2 lg:text-[13px] lg:leading-5'
+            ? 'lg:col-start-1 lg:row-start-1 lg:mb-0 lg:line-clamp-2 lg:text-[15px] lg:leading-6'
             : ''
         }`}
       >
@@ -103,7 +103,7 @@ export default function CompanyCard({
         <div className={field('lg:col-start-2')}>
           <dt className={label}>{M.company.mst}</dt>
           {/* MST không bao giờ cắt (MST chi nhánh 14 ký tự vừa cột 132px). */}
-          <dd className="relative z-10 min-w-0 text-sm leading-6 font-semibold whitespace-nowrap text-ink tabular-nums lg:text-[13px]">
+          <dd className="relative z-10 min-w-0 text-sm leading-6 font-semibold whitespace-nowrap text-ink tabular-nums">
             <Highlight text={c.mst} query={hl('mst')} />
           </dd>
         </div>
@@ -132,11 +132,7 @@ export default function CompanyCard({
         <div className={`${field('lg:col-start-6')} ${table ? 'lg:justify-self-end' : ''}`}>
           <dt className={label}>{M.company.status}</dt>
           <dd className="min-w-0">
-            <StatusBadge
-              status={c.status}
-              plain={table}
-              className={table ? 'lg:text-[13px]' : ''}
-            />
+            <StatusBadge status={c.status} plain={table} />
           </dd>
         </div>
       </dl>

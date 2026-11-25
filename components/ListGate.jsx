@@ -18,9 +18,12 @@ const AdOverlayHost = dynamic(() => import('./AdOverlayHost'), { ssr: false });
 const MAX_AUTO_RETRIES = 2;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/** Xin vé ('ad' kèm kết quả quảng cáo, 'human' chỉ cần Turnstile); ném lỗi có status (0 = lỗi mạng). */
-async function requestPass(mode, adResult, onInteractive) {
-  const token = await getTurnstileToken({ onInteractive });
+/**
+ * Xin vé ('ad' kèm kết quả quảng cáo, 'human' chỉ cần Turnstile); ném lỗi có status (0 = lỗi mạng).
+ * token: token Turnstile lấy sẵn từ trước khi chạy quảng cáo (dùng một lần); không có thì lấy mới.
+ */
+async function requestPass(mode, adResult, onInteractive, token) {
+  if (!token) token = await getTurnstileToken({ onInteractive });
   let res;
   try {
     res = await fetch('/api/list-pass', {
@@ -45,7 +48,8 @@ async function requestPass(mode, adResult, onInteractive) {
 }
 
 /**
- * state: idle · ad (đang chạy quảng cáo) · verifying (đang xin vé) · closed (đóng sớm) · blocked (chặn quảng cáo)
+ * state: idle · checking (kiểm tra Cloudflare TRƯỚC khi chạy quảng cáo) · ad (đang chạy quảng cáo)
+ *        · verifying (đang xin vé) · closed (đóng sớm) · blocked (chặn quảng cáo)
  *        · rate_limited (IP xin quá nhiều vé) · error (lỗi sau khi đã xem xong → «Thử lại» chỉ xin lại vé)
  */
 /** mode: 'ad' (cổng quảng cáo trang DN mới) | 'human' (xem quá nhiều trang → chỉ xác minh Turnstile). */
@@ -56,6 +60,7 @@ export default function ListGate({ mode = 'ad', minutes, pages, used = false }) 
   const [needTick, setNeedTick] = useState(false); // Cloudflare đang chờ người dùng tick ô xác minh
   const [armed, setArmed] = useState(false);
   const adResultRef = useRef(null);
+  const tokenRef = useRef(null); // token Turnstile lấy trước quảng cáo, dùng ngay khi xem xong
   const busyRef = useRef(false);
 
   useEffect(() => {
@@ -67,7 +72,9 @@ export default function ListGate({ mode = 'ad', minutes, pages, used = false }) 
     setNeedTick(false);
     for (let retries = 0; ; retries += 1) {
       try {
-        await requestPass(mode, adResultRef.current, () => setNeedTick(true));
+        const token = tokenRef.current;
+        tokenRef.current = null; // token chỉ dùng được một lần; lần thử lại lấy token mới
+        await requestPass(mode, adResultRef.current, () => setNeedTick(true), token);
         track('list_unlock_success', { mode, ad_type: adResultRef.current?.type });
         // Tải lại đúng URL (giữ ?page= / ?tinh=): request mới mang cookie vé, middleware trả danh sách.
         window.location.reload();
@@ -95,8 +102,17 @@ export default function ListGate({ mode = 'ad', minutes, pages, used = false }) 
     if (busyRef.current) return;
     busyRef.current = true;
     setArmed(true);
-    setState('ad');
     try {
+      // Kiểm tra Cloudflare TRƯỚC video: nếu cần tick ô xác minh thì người dùng tick lúc đầu, xem xong quảng cáo là
+      // danh sách hiện ngay (token còn hạn 5 phút, đủ cho một quảng cáo). Lỗi thì vẫn cho xem quảng cáo, lấy lại
+      // token sau.
+      setState('checking');
+      setNeedTick(false);
+      tokenRef.current = await getTurnstileToken({ onInteractive: () => setNeedTick(true) }).catch(
+        () => null,
+      );
+      setNeedTick(false);
+      setState('ad');
       const onShown = (adType) => track('list_unlock_ad_shown', { ad_type: adType });
       let result;
       try {
@@ -138,9 +154,9 @@ export default function ListGate({ mode = 'ad', minutes, pages, used = false }) 
   };
   const retry = () => (human || adResultRef.current ? unlock() : runAd());
 
-  const busy = state === 'ad' || state === 'verifying';
+  const busy = state === 'ad' || state === 'verifying' || state === 'checking';
   const label =
-    state === 'ad'
+    state === 'ad' || state === 'checking'
       ? M.gate.loading
       : state === 'verifying'
         ? human
@@ -159,6 +175,7 @@ export default function ListGate({ mode = 'ad', minutes, pages, used = false }) 
     rate_limited: M.gate.rateLimited(waitMin),
     error: human ? M.gate.humanError : M.gate.error,
     verifying: needTick ? M.gate.tick : undefined,
+    checking: needTick ? M.gate.tickFirst : undefined,
   }[state];
 
   // Hộp thoại mời xem (chỉ cổng quảng cáo): tự mở khi vào trang — quảng cáo có thưởng phải do người dùng tự chọn xem
@@ -174,7 +191,7 @@ export default function ListGate({ mode = 'ad', minutes, pages, used = false }) 
   };
 
   const tone =
-    needTick && state === 'verifying'
+    needTick && (state === 'verifying' || state === 'checking')
       ? 'font-semibold text-ink'
       : message
         ? 'text-danger'
